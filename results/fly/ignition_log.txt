@@ -1,0 +1,344 @@
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+== fixAL_g2.00: 3 bursts; 4 groups enriched (p<1e-6)
+           group   n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+2583   lLN1_bc|R  16                   8.970       6.035                   16.130             -8.0                0.667
+5577   lLN2P_c|R   5                   3.035       8.374                    4.696              1.0                0.667
+8728  HRN_VP1d|R   7                   2.305       7.114                    4.011              6.0                0.667
+4006   lLN2X12|R   5                   6.334       4.483                    3.367             -2.5                0.667
+-- earliest crossing (crossed in >= 50% of bursts):
+             group     n  cross_ms_median  frac_bursts_crossed  enrichment
+1023          R8|R   652            -30.0                0.667       1.345
+489         Tm21|R   629            -25.0                0.667       1.770
+238         Mi13|L   366            -21.5                0.667       1.220
+23          Mi15|R   485            -17.5                0.667       1.213
+1054     lLN2P_b|R     6            -12.5                0.667       1.083
+2583     lLN1_bc|R    16             -8.0                0.667       6.035
+4006     lLN2X12|R     5             -2.5                0.667       4.483
+49         KCg-m|R  1120             -2.0                0.667       0.718
+9178     lLN2P_a|R     6             -1.5                0.667       0.452
+3572     lLN2P_a|L     7              1.0                1.000       2.454
+5577     lLN2P_c|R     5              1.0                0.667       8.374
+1125     lLN1_bc|L    14              2.0                1.000       1.088
+12720  LHAV4a1_b|R     4              3.0                0.667       4.189
+1393     lLN2X12|L     8              3.0                1.000       0.727
+555           L5|L   791              3.5                0.667       1.710
+== fixAL_g2.50-U0.1tau1000: 27 bursts; 75 groups enriched (p<1e-6)
+              group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+22           R1-6|R  3888                   0.171       1.629                    8.363              1.0                0.333
+8            R1-6|L  4044                   0.178       1.517                    7.451             23.0                0.370
+1125      lLN1_bc|L    14                  40.933       1.630                    7.242             -8.0                0.815
+2583      lLN1_bc|R    16                  21.746       1.916                    6.412             -3.0                0.556
+1599         yDm8|R   181                   0.201       5.570                    3.495            -17.0                0.148
+1393      lLN2X12|L     8                  26.784       1.774                    3.344            -13.0                0.778
+4             Tm1|R   775                   0.325       1.603                    3.066            -14.0                0.222
+41             T3|R   823                   0.172       2.002                    2.874            -16.5                0.741
+2113  PEN_b(PEN2)|L    11                   3.435       4.298                    2.615             -6.0                0.407
+49          KCg-m|R  1120                   0.183       1.628                    2.599             14.0                0.259
+796            T1|R   742                   0.279       1.605                    2.526             18.0                0.074
+443           Tm1|L   780                   0.307       1.511                    2.467              6.0                0.185
+65             L1|R   789                   0.174       1.861                    2.398            -19.0                0.259
+28            T2a|L   907                   0.167       1.772                    2.372              3.0                0.148
+18            Mi9|R   769                   0.206       1.733                    2.351             11.0                0.148
+552          Tm20|L   751                   0.168       1.905                    2.323            -21.0                0.222
+5             T4b|R   748                   0.172       1.884                    2.312              8.0                0.259
+121          pDm8|R   200                   0.183       3.903                    2.231             -2.0                0.148
+109           Tm2|R   767                   0.328       1.438                    2.222            -14.0                0.148
+365           Tm2|L   784                   0.305       1.460                    2.216            -21.0                0.111
+-- earliest crossing (crossed in >= 50% of bursts):
+            group    n  cross_ms_median  frac_bursts_crossed  enrichment
+1032       Pm03|L   97            -17.0                0.556       2.393
+41           T3|R  823            -16.5                0.741       2.002
+1393    lLN2X12|L    8            -13.0                0.778       1.774
+1125    lLN1_bc|L   14             -8.0                0.815       1.630
+2583    lLN1_bc|R   16             -3.0                0.556       1.916
+12809   LHPV4g1|L    5              0.0                0.630       2.405
+3895    lLN2P_c|L    4              0.5                0.519       2.055
+2336        PFR|L   14              2.0                0.778       0.921
+237    HRN_VP1d|L    9              4.0                0.593       1.624
+3572    lLN2P_a|L    7              5.0                0.630       1.479
+2607       PFGs|R   13              6.0                0.741       0.736
+6315       FB4Z|L    8              6.0                0.741       1.016
+2866        PFR|R   16              7.0                0.778       0.664
+1728    hDeltaK|L   16              7.0                0.630       0.668
+5668       PFGs|L   15              8.0                0.667       0.612
+== fixAL_g2.50-h0.15: 35 bursts; 143 groups enriched (p<1e-6)
+          group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+1125  lLN1_bc|L    14                  26.557       2.331                    9.936            -27.0                0.657
+2583  lLN1_bc|R    16                  11.890       3.197                    8.424            -23.5                0.571
+8        R1-6|L  4044                   0.053       2.264                    5.503            -22.0                0.714
+22       R1-6|R  3888                   0.056       2.205                    5.246              5.0                0.543
+1393  lLN2X12|L     8                  17.732       2.503                    4.306            -31.0                0.657
+114     KCg-m|L  1069                   0.134       2.125                    3.252             14.0                0.486
+4006  lLN2X12|R     5                   6.286       4.869                    2.543            -13.0                0.486
+443       Tm1|L   780                   0.102       2.333                    2.155             -0.5                0.457
+109       Tm2|R   767                   0.113       2.016                    1.786              5.0                0.457
+365       Tm2|L   784                   0.098       2.079                    1.690             14.0                0.429
+49      KCg-m|R  1120                   0.072       1.994                    1.624             18.0                0.429
+28        T2a|L   907                   0.052       2.654                    1.620              8.5                0.229
+452       Tm3|L   897                   0.045       2.923                    1.598             25.0                0.086
+41         T3|R   823                   0.055       2.679                    1.576             16.0                0.143
+12         L2|L   900                   0.057       2.474                    1.566             -5.0                0.200
+499        L3|L   703                   0.049       3.156                    1.542            -14.0                0.029
+479        L1|L   802                   0.057       2.626                    1.539              3.0                0.086
+796        T1|R   742                   0.087       2.145                    1.510            -10.0                0.429
+277        L5|R   785                   0.085       2.088                    1.489             -2.0                0.486
+555        L5|L   791                   0.079       2.147                    1.465             21.0                0.314/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+
+-- earliest crossing (crossed in >= 50% of bursts):
+          group     n  cross_ms_median  frac_bursts_crossed  enrichment
+1393  lLN2X12|L     8            -31.0                0.657       2.503
+1125  lLN1_bc|L    14            -27.0                0.657       2.331
+2583  lLN1_bc|R    16            -23.5                0.571       3.197
+8        R1-6|L  4044            -22.0                0.714       2.264
+2607     PFGs|R    13            -18.0                0.543       1.660
+6315     FB4Z|L     8            -14.0                0.543       1.366
+2866      PFR|R    16              3.5                0.514       0.662
+22       R1-6|R  3888              5.0                0.543       2.205
+2336      PFR|L    14              6.0                0.514       1.091
+60       KCab|L   844             14.5                0.514       2.094
+== fixAL_g2.50-h0.6: 10 bursts; 20 groups enriched (p<1e-6)
+                   group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+22                R1-6|R  3888                   0.441       1.363                   12.495              NaN                  0.0
+108             KCab-p|L    67                   0.506      13.756                    9.922            -50.0                  0.1
+2583           lLN1_bc|R    16                  24.967       2.027                    8.310            -34.0                  0.8
+1291            KCab-p|R    61                   0.527      10.631                    7.157            -50.0                  0.1
+1599              yDm8|R   181                   0.561       3.989                    6.369            -21.0                  0.3
+1125           lLN1_bc|L    14                  51.285       1.438                    6.340            -11.5                  0.4
+50                 T2a|R   865                   0.439       1.703                    5.407              NaN                  0.0
+25                 T4a|L   725                   0.442       1.781                    5.086             -8.0                  0.1
+2267              Sm32|L    31                   2.411       3.762                    4.405            -12.5                  0.8
+552               Tm20|L   751                   0.428       1.655                    4.275              NaN                  0.0
+1723              Pm03|R    94                   3.277       1.661                    4.138              8.5                  0.2
+924               Pm08|R    59                   2.870       1.950                    3.314            -14.0                  0.4
+249               yDm8|L   198                   0.482       2.290                    2.591             -3.5                  0.4
+121               pDm8|R   200                   0.456       2.341                    2.578            -19.0                  0.3
+11671            aMe12|R     4                   1.412       7.982                    1.487            -11.0                  0.3
+5082             PAM09|R     5                   0.492       9.380                    1.251            -48.0                  0.1
+2548           WEDPN1A|R     5                   1.651       4.903                    1.035            -17.5                  0.2
+3442   AVLP393,AVLP395|R     3                   2.849       4.799                    1.029            -27.0                  0.1
+11503            mALC6|R     2                   1.955       6.172                    0.922              NaN                  0.0
+2341             aMe12|L     3                   1.690       5.462                    0.899              NaN                  0.0
+-- earliest crossing (crossed in >= 50% of bursts):
+           group    n  cross_ms_median  frac_bursts_crossed  enrichment
+2583   lLN1_bc|R   16            -34.0                  0.8       2.027
+2607      PFGs|R   13            -33.0                  0.9       0.549
+517        Mi4|L  766            -28.0                  0.5       1.361
+4006   lLN2X12|R    5            -24.5                  0.6       1.770
+2106   LHAV4a4|L    9            -23.0                  0.5       0.366
+1728   hDeltaK|L   16            -16.5                  0.6       0.506
+2267      Sm32|L   31            -12.5                  0.8       3.762
+1699      Pm08|L   58             -7.5                  0.8       1.754
+237   HRN_VP1d|L    9              0.0                  0.5       1.955
+2866       PFR|R   16              7.5                  1.0       0.423
+2336       PFR|L   14              9.0                  0.9       0.285
+949       PFL3|R   12             12.0                  0.6       0.270
+6315      FB4Z|L    8             14.0                  0.9       0.468
+5668      PFGs|L   15             15.0                  0.8       0.625
+4986      FC2B|R   14             15.5                  0.6       0.394
+== fixAL_g2.50-seed6: 26 bursts; 62 groups enriched (p<1e-6)
+          group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+8        R1-6|L  4044                   0.172       1.718                   10.013            -18.5                0.308
+22       R1-6|R  3888                   0.172       1.549                    7.379             15.0                0.269
+277        L5|R   785                   0.256       1.987                    4.012            -21.0                0.038
+1125  lLN1_bc|L    14                  42.028       1.316                    3.732            -17.0                0.846
+2583  lLN1_bc|R    16                  12.550       1.812                    3.292              5.0                0.423
+49      KCg-m|R  1120                   0.184       1.690                    2.875             50.0                0.038
+796        T1|R   742                   0.274       1.668                    2.741              8.0                0.154
+4         Tm1|R   775                   0.335       1.516                    2.697            -25.0                0.269
+443       Tm1|L   780                   0.311       1.548                    2.682             11.0                0.269
+365       Tm2|L   784                   0.292       1.560                    2.581            -16.5                0.154
+12         L2|L   900                   0.168       1.822                    2.516            -12.5                0.154
+51       KCab|R   799                   0.178       1.854                    2.463             32.0                0.269
+555        L5|L   791                   0.236       1.632                    2.383             16.0                0.385
+246       Mi9|L   784                   0.199       1.739                    2.337              3.0                0.077
+479        L1|L   802                   0.161       1.861                    2.260            -15.5                0.462
+40        Tm3|R   859                   0.165       1.783                    2.247            -11.0                0.346
+406       T4b|L   752                   0.172       1.844                    2.218             27.0                0.192
+1723     Pm03|R    94                   0.695       2.603                    2.156            -20.0                0.692
+126       T5c|L   775                   0.177       1.765                    2.135             15.0                0.346
+1018    Lawf1|R   151                   0.259       3.562                    2.103            -15.5                0.462
+-- earliest crossing (crossed in >= 50% of bursts):
+            group    n  cross_ms_median  frac_bursts_crossed  enrichment
+1723       Pm03|R   94            -20.0                0.692       2.603
+1125    lLN1_bc|L   14            -17.0                0.846       1.316
+256        Dm3q|L  445            -11.0                0.500       1.974
+1393    lLN2X12|L    8             -1.0                0.692       1.398
+2866        PFR|R   16              6.0                0.654       1.323
+2336        PFR|L   14              7.0                0.615       1.659
+2267       Sm32|L   31              7.5                0.692       1.080
+1244       FB4Z|R    8              8.5                0.538       1.243
+6315       FB4Z|L    8              8.5                0.615       1.041
+2607       PFGs|R   13              9.0                0.577       1.557
+949        PFL3|R   12             10.0                0.500       1.048
+1728    hDeltaK|L   16             10.0                0.500       1.836
+2055  FB5R,FB5U|R    5             10.0                0.500       2.082
+4532  FB5R,FB5U|L    6             10.0                0.500       1.852
+5668       PFGs|L   15             10.0                0.577       1.601/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+
+== fixAL_g2.50-seed7: 23 bursts; 70 groups enriched (p<1e-6)
+          group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+8        R1-6|L  4044                   0.169       1.715                    9.825             11.0                0.522
+22       R1-6|R  3888                   0.173       1.646                    8.717              9.0                0.478
+2583  lLN1_bc|R    16                  15.602       2.193                    6.007            -22.0                0.348
+277        L5|R   785                   0.265       2.232                    5.183             15.0                0.087
+1125  lLN1_bc|L    14                  39.337       1.443                    4.899              2.0                0.783
+109       Tm2|R   767                   0.321       1.866                    4.299             -6.0                0.304
+4         Tm1|R   775                   0.336       1.796                    4.182             25.0                0.174
+796        T1|R   742                   0.274       1.988                    4.063            -15.0                0.130
+443       Tm1|L   780                   0.305       1.713                    3.421            -13.0                0.130
+406       T4b|L   752                   0.170       2.252                    3.263             22.5                0.435
+28        T2a|L   907                   0.166       2.010                    3.081            -25.0                0.391
+50        T2a|R   865                   0.173       1.957                    2.914             26.0                0.043
+650        L2|R   797                   0.171       1.993                    2.751            -20.0                0.478
+640        L3|R   739                   0.168       2.086                    2.739             20.0                0.304
+49      KCg-m|R  1120                   0.186       1.640                    2.699             10.0                0.130
+578       T4c|L   864                   0.166       1.914                    2.658              0.0                0.391
+12         L2|L   900                   0.166       1.810                    2.451             -9.0                0.130
+6         T5b|R   760                   0.171       1.893                    2.358             12.5                0.435
+555        L5|L   791                   0.227       1.642                    2.328             16.0                0.304
+25        T4a|L   725                   0.163       1.955                    2.293            -12.0                0.304
+-- earliest crossing (crossed in >= 50% of bursts):
+              group    n  cross_ms_median  frac_bursts_crossed  enrichment
+60           KCab|L  844            -14.0                0.522       1.324
+1149  PEN_b(PEN2)|R   11             -6.5                0.522       2.602
+611         TmY5a|R  572             -0.5                0.609       1.865
+378       BM_InOm|R  558             -0.5                0.522       1.921
+65             L1|R  789              1.0                0.565       1.754
+1125      lLN1_bc|L   14              2.0                0.783       1.443
+2267         Sm32|L   31              2.0                0.565       0.456
+5668         PFGs|L   15              3.0                0.652       1.593
+1393      lLN2X12|L    8              3.5                0.696       1.183
+442          Dm3p|R  501              5.0                0.565       1.603
+2866          PFR|R   16              5.0                0.826       1.203
+1728      hDeltaK|L   16              6.0                0.522       1.977
+6315         FB4Z|L    8              6.5                0.696       0.758
+2336          PFR|L   14              8.5                0.696       1.293
+1244         FB4Z|R    8              9.0                0.609       0.908
+== fixAL_g2.50: 29 bursts; 119 groups enriched (p<1e-6)
+          group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+1125  lLN1_bc|L    14                  22.523       2.996                   12.659            -44.0                0.897
+2583  lLN1_bc|R    16                  13.497       3.382                   10.371            -29.5                0.552
+22       R1-6|R  3888                   0.165       1.748                    9.652            -17.0                0.310
+114     KCg-m|L  1069                   0.283       2.297                    7.906              3.5                0.621
+8        R1-6|L  4044                   0.176       1.532                    7.606             -1.0                0.310
+1393  lLN2X12|L     8                  15.633       3.019                    5.119            -29.0                0.862
+60       KCab|L   844                   0.225       1.816                    3.131              8.0                0.552
+49      KCg-m|R  1120                   0.172       1.787                    3.068              4.5                0.414
+1034      Lai|R   227                   0.226       3.863                    3.041             -6.0                0.276
+443       Tm1|L   780                   0.296       1.602                    2.799             -8.0                0.103
+109       Tm2|R   767                   0.303       1.576                    2.696              8.5                0.207
+555        L5|L   791                   0.232       1.692                    2.567              8.0                0.310
+4006  lLN2X12|R     5                   8.434       3.889                    2.536            -29.0                0.483
+404        C3|R   773                   0.164       1.949                    2.435            -16.0                0.241
+4         Tm1|R   775                   0.318       1.459                    2.277            -29.0                0.207
+452       Tm3|L   897                   0.158       1.787                    2.263             -6.0                0.310
+5         T4b|R   748                   0.169       1.879                    2.258             -2.0                0.172
+28        T2a|L   907                   0.168       1.720                    2.222             18.0                0.138
+50        T2a|R   865                   0.161       1.760                    2.144            -18.0                0.379
+18        Mi9|R   769                   0.200       1.673                    2.094             31.0                0.241
+-- earliest crossing (crossed in >= 50% of bursts):
+          group     n  cross_ms_median  frac_bursts_crossed  enrichment
+1125  lLN1_bc|L    14            -44.0                0.897       2.996
+2583  lLN1_bc|R    16            -29.5                0.552       3.382
+1393  lLN2X12|L     8            -29.0                0.862       3.019
+1723     Pm03|R    94            -21.0                0.517       2.222
+3572  lLN2P_a|L     7              1.0                0.552       2.789
+2336      PFR|L    14              3.0                0.621       1.302
+2866      PFR|R    16              3.0                0.724       1.497
+114     KCg-m|L  1069              3.5                0.621       2.297
+2457   CB1401|L     5              4.0                0.517       2.555
+2607     PFGs|R    13              5.0                0.586       0.967
+102   DA1_lPN|L     8              5.0                0.586       3.114
+1375  hDeltaK|R    15              5.0                0.517       0.985
+5668     PFGs|L    15              5.0                0.517       0.864
+2106  LHAV4a4|L     9              6.5                0.552       2.176
+60       KCab|L   844              8.0                0.552       1.816
+== nomod_g2.50: 21 bursts; 58 groups enriched (p<1e-6)
+       group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+22    R1-6|R  3888                   0.167       1.819                   10.677             42.5                0.381
+8     R1-6|L  4044                   0.175       1.700                    9.924            -21.0                0.333
+4      Tm1|R   775                   0.323       1.736                    3.713              2.0                0.381
+443    Tm1|L   780                   0.303       1.743                    3.553             17.5                0.190
+109    Tm2|R   767                   0.316       1.690                    3.384              1.0                0.333
+277     L5|R   785                   0.258       1.699                    2.859              5.0                0.095
+18     Mi9|R   769                   0.202       1.899                    2.840             22.5                0.286
+555     L5|L   791                   0.235       1.746                    2.808            -10.0                0.714
+525     C2|L   677                   0.169       2.167                    2.718              9.0                0.333
+452    Tm3|L   897                   0.163       1.907                    2.695             49.0                0.143
+578    T4c|L   864                   0.158       1.953                    2.649            -26.0                0.381
+219     T1|L   655                   0.269       1.733                    2.618            -10.0                0.048
+21     T4d|R   777                   0.172       1.964                    2.618             17.5                0.190
+365    Tm2|L   784                   0.304       1.543                    2.613            -32.0                0.190
+118    T5d|L   740                   0.164       2.041                    2.575            -14.5                0.095
+114  KCg-m|L  1069                   0.178       1.657                    2.531            -10.5                0.667
+134     C2|R   739                   0.163       2.021                    2.502            -16.0                0.429
+796     T1|R   742                   0.275       1.593                    2.446            -15.0                0.048
+12      L2|L   900                   0.180       1.725                    2.382             12.0                0.095
+640     L3|R   739                   0.171       1.923                    2.377              9.0                0.048/home/ochagoro/Work/fly_culture_spontaneous/src/fly/ignition.py:85: RuntimeWarning: All-NaN slice encountered
+  cross_ms_median=np.nanmedian(cross, 0) if len(on) else np.nan,
+
+-- earliest crossing (crossed in >= 50% of bursts):
+          group     n  cross_ms_median  frac_bursts_crossed  enrichment
+81    BM_InOm|L   555            -23.0                0.762       2.318
+73         T2|R   725            -19.0                0.571       1.828
+1723     Pm03|R    94            -19.0                0.524       2.293
+114     KCg-m|L  1069            -10.5                0.667       1.657
+555        L5|L   791            -10.0                0.714       1.746
+50        T2a|R   865             -8.0                0.571       1.741
+479        L1|L   802             -6.0                0.524       1.636
+2866      PFR|R    16              2.0                0.524       0.818
+439       Mi1|L   788              8.0                0.619       1.874
+1032     Pm03|L    97             13.0                0.524       2.534
+150       Tm9|L   767             17.0                0.524       1.303
+2548  WEDPN1A|R     5             21.0                0.524       1.333
+== typevote_g2.00: 15 bursts; 35 groups enriched (p<1e-6)
+              group     n  baseline_hz_per_neuron  enrichment  excess_spikes_per_burst  cross_ms_median  frac_bursts_crossed
+22           R1-6|R  3888                   0.172       1.724                    9.745             10.0                0.333
+8            R1-6|L  4044                   0.181       1.623                    9.164            -34.0                0.333
+2113  PEN_b(PEN2)|L    11                   0.854      21.221                    5.146            -19.0                0.467
+109           Tm2|R   767                   0.311       1.844                    4.090            -16.0                0.200
+4             Tm1|R   775                   0.323       1.800                    4.060              3.5                0.133
+796            T1|R   742                   0.237       2.069                    3.823            -27.0                0.200
+50            T2a|R   865                   0.166       2.178                    3.462            -21.0                0.533
+277            L5|R   785                   0.219       1.937                    3.289             -4.0                0.333
+41             T3|R   823                   0.181       1.989                    3.017             15.0                0.200
+452           Tm3|L   897                   0.165       1.987                    2.980            -25.5                0.133
+126           T5c|L   775                   0.184       1.959                    2.807             -5.0                0.267
+18            Mi9|R   769                   0.182       1.980                    2.804              0.0                0.267
+489          Tm21|R   629                   0.181       2.187                    2.786             -1.0                0.200
+578           T4c|L   864                   0.171       1.893                    2.704             26.5                0.133
+65             L1|R   789                   0.180       1.907                    2.632             -3.0                0.467
+552          Tm20|L   751                   0.169       1.968                    2.525             -9.5                0.267
+21            T4d|R   777                   0.181       1.855                    2.459             26.5                0.267
+650            L2|R   797                   0.165       1.882                    2.374            -15.5                0.400
+6             T5b|R   760                   0.175       1.832                    2.271             38.5                0.133
+128           T5b|L   753                   0.171       1.847                    2.231             27.0                0.400
+-- earliest crossing (crossed in >= 50% of bursts):
+          group    n  cross_ms_median  frac_bursts_crossed  enrichment
+5577  lLN2P_c|R    5            -26.0                0.667       2.550
+50        T2a|R  865            -21.0                0.533       2.178
+40        Tm3|R  859            -16.5                0.533       1.461
+74        Mi4|R  766            -16.0                0.533       1.660
+5292       EL|L    8            -11.5                0.533       4.042
+3587       EL|R    9            -10.0                0.533       3.839
+81    BM_InOm|L  555             -8.5                0.667       1.893
+366      Mi15|L  499             -1.0                0.600       2.029
+525        C2|L  677              3.0                0.533       1.836
+83        Mi1|R  796              7.5                0.533       1.787
+2336      PFR|L   14              8.0                0.533       0.091
+2866      PFR|R   16              9.0                0.600       0.378
+439       Mi1|L  788             11.0                0.533       1.405
+6315     FB4Z|L    8             14.0                0.600       0.641

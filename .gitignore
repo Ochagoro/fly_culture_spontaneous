@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+data/shiu_model/
+data/neuron_annotations.tsv
+data/culture/
+data/fly_imaging/
+results/**/*.npy
+results/**/*.pt
+*.pyc
+data/flywire/
+results/culture/cache/
+video/build/
+*.log

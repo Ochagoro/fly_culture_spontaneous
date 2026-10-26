@@ -1,0 +1,136 @@
+variant,gain,seed,circuit,ratio,rel_central,pct
+fixAL,2.0,0,ER5 (sleep drive),43.918236,1.1670785,0.712
+fixAL,2.0,0,dFB FB6/FB7 (sleep-promoting),24.450277,0.649739,0.058
+fixAL,2.0,0,ExR1 helicon,26.153557,0.6950018,0.644
+fixAL,2.0,0,DN1a/DN1p clock,68.46078,1.8192693,0.768
+fixAL,2.0,0,l-LNv clock (wake),3.4914987e-07,9.278271e-09,0.134
+fixAL,2.0,0,PPL1 DAN (wake),75.554726,2.0077832,0.878
+fixAL,2.0,0,MBON,54.025616,1.4356709,0.894
+fixAL,2.0,0,Kenyon cells,27.509323,0.73102975,0.268
+fixAL,2.0,0,AL projection neurons,87.72952,2.3313148,1.0
+fixAL,2.0,1,ER5 (sleep drive),14.158333,0.46768183,0.538
+fixAL,2.0,1,dFB FB6/FB7 (sleep-promoting),10.649003,0.35176072,0.0
+fixAL,2.0,1,ExR1 helicon,70.79166,2.338409,0.798
+fixAL,2.0,1,DN1a/DN1p clock,25.742426,0.85033065,0.364
+fixAL,2.0,1,l-LNv clock (wake),51.484837,1.7006608,0.722
+fixAL,2.0,1,PPL1 DAN (wake),64.02692,2.1149542,0.952
+fixAL,2.0,1,MBON,43.279167,1.429609,0.912
+fixAL,2.0,1,Kenyon cells,19.122454,0.63165796,0.116
+fixAL,2.0,1,AL projection neurons,42.443256,1.401997,1.0
+fixAL,2.5,0,ER5 (sleep drive),21.864391,0.95722055,0.418
+fixAL,2.5,0,dFB FB6/FB7 (sleep-promoting),13.650474,0.5976162,0.0
+fixAL,2.5,0,ExR1 helicon,31.234848,1.3674581,0.582
+fixAL,2.5,0,DN1a/DN1p clock,18.740908,0.8204748,0.23
+fixAL,2.5,0,l-LNv clock (wake),76.35182,3.342674,0.902
+fixAL,2.5,0,PPL1 DAN (wake),36.306488,1.5894939,0.882
+fixAL,2.5,0,MBON,27.3336,1.1966618,0.746
+fixAL,2.5,0,Kenyon cells,14.700811,0.64359987,0.036
+fixAL,2.5,0,AL projection neurons,36.861183,1.6137785,1.0
+fixAL,2.5,1,ER5 (sleep drive),38.147057,1.7639283,0.728
+fixAL,2.5,1,dFB FB6/FB7 (sleep-promoting),17.084616,0.7899964,0.054
+fixAL,2.5,1,ExR1 helicon,13.078991,0.6047754,0.274
+fixAL,2.5,1,DN1a/DN1p clock,37.551006,1.7363669,0.86
+fixAL,2.5,1,l-LNv clock (wake),57.22056,2.6458912,0.872
+fixAL,2.5,1,PPL1 DAN (wake),33.506172,1.5493329,0.868
+fixAL,2.5,1,MBON,28.102116,1.299448,0.892
+fixAL,2.5,1,Kenyon cells,11.913479,0.5508819,0.012
+fixAL,2.5,1,AL projection neurons,30.115095,1.3925287,1.0
+nomod,2.5,0,ER5 (sleep drive),46.30809,3.1111677,0.83
+nomod,2.5,0,dFB FB6/FB7 (sleep-promoting),19.168957,1.2878492,0.54
+nomod,2.5,0,ExR1 helicon,37.80562,2.5399368,0.768
+nomod,2.5,0,DN1a/DN1p clock,56.941803,3.8255842,0.994
+nomod,2.5,0,l-LNv clock (wake),18.302715,1.2296516,0.494
+nomod,2.5,0,PPL1 DAN (wake),23.616415,1.5866477,0.638
+nomod,2.5,0,MBON,27.904934,1.874768,0.982
+nomod,2.5,0,Kenyon cells,5.1206384,0.34402552,0.0
+nomod,2.5,0,AL projection neurons,12.695962,0.85296685,0.098
+nomod,2.5,1,ER5 (sleep drive),16.509972,1.1518532,0.494
+nomod,2.5,1,dFB FB6/FB7 (sleep-promoting),24.731585,1.7254515,0.948
+nomod,2.5,1,ExR1 helicon,24.451475,1.7059091,0.604
+nomod,2.5,1,DN1a/DN1p clock,41.274925,2.8796327,0.944
+nomod,2.5,1,l-LNv clock (wake),18.937902,1.3212429,0.506
+nomod,2.5,1,PPL1 DAN (wake),22.746077,1.5869284,0.646
+nomod,2.5,1,MBON,25.388237,1.7712643,0.964
+nomod,2.5,1,Kenyon cells,4.722853,0.32949987,0.01
+nomod,2.5,1,AL projection neurons,10.772632,0.7515755,0.058
+typevote,1.0,0,ER5 (sleep drive),80.01169,1.5103354,0.78
+typevote,1.0,0,dFB FB6/FB7 (sleep-promoting),49.039425,0.9256895,0.28
+typevote,1.0,0,ExR1 helicon,207.30289,3.9131396,0.876
+typevote,1.0,0,DN1a/DN1p clock,44.712414,0.84401095,0.444
+typevote,1.0,0,l-LNv clock (wake),3.1095445e-07,5.8697114e-09,0.04
+typevote,1.0,0,PPL1 DAN (wake),144.78305,2.7329879,0.966
+typevote,1.0,0,MBON,217.91582,4.113474,1.0
+typevote,1.0,0,Kenyon cells,22.330006,0.4215109,0.106
+typevote,1.0,0,AL projection neurons,91.24126,1.7223097,1.0
+typevote,1.0,1,ER5 (sleep drive),32.43627,0.55363744,0.656
+typevote,1.0,1,dFB FB6/FB7 (sleep-promoting),28.117563,0.4799237,0.018
+typevote,1.0,1,ExR1 helicon,3.67611e-07,6.274556e-09,0.072
+typevote,1.0,1,DN1a/DN1p clock,1.3504079e-07,2.3049394e-09,0.052
+typevote,1.0,1,l-LNv clock (wake),57.043095,0.9736382,0.688
+typevote,1.0,1,PPL1 DAN (wake),155.83513,2.6598668,0.962
+typevote,1.0,1,MBON,204.09578,3.483602,1.0
+typevote,1.0,1,Kenyon cells,27.373652,0.46722627,0.13
+typevote,1.0,1,AL projection neurons,115.1304,1.9650995,1.0
+typevote,1.25,0,ER5 (sleep drive),22.179308,0.72072273,0.764
+typevote,1.25,0,dFB FB6/FB7 (sleep-promoting),6.529949,0.21219249,0.002
+typevote,1.25,0,ExR1 helicon,3.783528e-07,1.2294679e-08,0.18
+typevote,1.25,0,DN1a/DN1p clock,1.16945436e-07,3.800174e-09,0.098
+typevote,1.25,0,l-LNv clock (wake),2.7965208e-07,9.087372e-09,0.048
+typevote,1.25,0,PPL1 DAN (wake),37.67699,1.2243242,0.56
+typevote,1.25,0,MBON,56.497303,1.8358954,0.948
+typevote,1.25,0,Kenyon cells,11.942904,0.38808796,0.148
+typevote,1.25,0,AL projection neurons,58.32203,1.8951904,1.0
+typevote,1.5,0,ER5 (sleep drive),27.853657,1.136711,0.756
+typevote,1.5,0,dFB FB6/FB7 (sleep-promoting),25.434303,1.037977,0.296
+typevote,1.5,0,ExR1 helicon,3.262856e-07,1.3315754e-08,0.126
+typevote,1.5,0,DN1a/DN1p clock,1.4274998e-07,5.8256435e-09,0.174
+typevote,1.5,0,l-LNv clock (wake),3.6063147e-07,1.4717413e-08,0.128
+typevote,1.5,0,PPL1 DAN (wake),56.53466,2.3071861,0.844
+typevote,1.5,0,MBON,25.76821,1.0516037,0.278
+typevote,1.5,0,Kenyon cells,8.377061,0.34186885,0.058
+typevote,1.5,0,AL projection neurons,30.417124,1.2413265,0.598
+typevote,1.75,1,ER5 (sleep drive),46.40425,2.3624928,0.718
+typevote,1.75,1,dFB FB6/FB7 (sleep-promoting),39.61219,2.0167012,0.952
+typevote,1.75,1,ExR1 helicon,54.524994,2.775929,0.758
+typevote,1.75,1,DN1a/DN1p clock,1.363125e-07,6.939823e-09,0.036
+typevote,1.75,1,l-LNv clock (wake),8.178743e-07,4.1638906e-08,0.33
+typevote,1.75,1,PPL1 DAN (wake),48.2972,2.458865,0.874
+typevote,1.75,1,MBON,42.127483,2.1447577,0.97
+typevote,1.75,1,Kenyon cells,10.863912,0.553094,0.06
+typevote,1.75,1,AL projection neurons,16.919708,0.86140144,0.122
+typevote,2.0,0,ER5 (sleep drive),15.203298,1.1060157,0.508
+typevote,2.0,0,dFB FB6/FB7 (sleep-promoting),24.666283,1.7944326,0.888
+typevote,2.0,0,ExR1 helicon,33.38763,2.428897,0.744
+typevote,2.0,0,DN1a/DN1p clock,13.732008,0.99898165,0.302
+typevote,2.0,0,l-LNv clock (wake),9.223324e-07,6.7098206e-08,0.304
+typevote,2.0,0,PPL1 DAN (wake),33.95478,2.4701562,0.86
+typevote,2.0,0,MBON,21.205097,1.542637,0.716
+typevote,2.0,0,Kenyon cells,2.8477325,0.207168,0.014
+typevote,2.0,0,AL projection neurons,9.422961,0.6855054,0.062
+typevote,2.0,1,ER5 (sleep drive),6.585928,0.530009,0.448
+typevote,2.0,1,dFB FB6/FB7 (sleep-promoting),24.720942,1.989442,0.968
+typevote,2.0,1,ExR1 helicon,12.213902,0.9829258,0.5
+typevote,2.0,1,DN1a/DN1p clock,17.678017,1.4226557,0.502
+typevote,2.0,1,l-LNv clock (wake),2.2839995e-07,1.838071e-08,0.024
+typevote,2.0,1,PPL1 DAN (wake),27.381714,2.2035701,0.872
+typevote,2.0,1,MBON,18.05511,1.4530027,0.618
+typevote,2.0,1,Kenyon cells,4.137429,0.33296368,0.01
+typevote,2.0,1,AL projection neurons,10.953149,0.8814654,0.152
+typevote,2.5,0,ER5 (sleep drive),40.72501,3.118897,0.722
+typevote,2.5,0,dFB FB6/FB7 (sleep-promoting),33.7568,2.5852416,1.0
+typevote,2.5,0,ExR1 helicon,34.466972,2.6396296,0.68
+typevote,2.5,0,DN1a/DN1p clock,48.471306,3.7121418,0.98
+typevote,2.5,0,l-LNv clock (wake),63.925896,4.895721,0.888
+typevote,2.5,0,PPL1 DAN (wake),16.497015,1.2634126,0.266
+typevote,2.5,0,MBON,10.617909,0.81316537,0.116
+typevote,2.5,0,Kenyon cells,1.1170406,0.0855478,0.0
+typevote,2.5,0,AL projection neurons,9.16712,0.7020576,0.17
+typevote,2.5,1,ER5 (sleep drive),28.60287,1.9008843,0.56
+typevote,2.5,1,dFB FB6/FB7 (sleep-promoting),34.646465,2.3025284,1.0
+typevote,2.5,1,ExR1 helicon,19.090908,1.26874,0.348
+typevote,2.5,1,DN1a/DN1p clock,19.652405,1.3060559,0.236
+typevote,2.5,1,l-LNv clock (wake),44.54544,2.9603927,0.772
+typevote,2.5,1,PPL1 DAN (wake),23.47666,1.5602075,0.512
+typevote,2.5,1,MBON,15.7802,1.0487176,0.212
+typevote,2.5,1,Kenyon cells,1.9579895,0.1301237,0.002
+typevote,2.5,1,AL projection neurons,10.300874,0.6845736,0.108

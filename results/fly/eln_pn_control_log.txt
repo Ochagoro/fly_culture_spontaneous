@@ -1,0 +1,45 @@
+fixAL removed eLN->PN synapses: 90491
+  Perron top: {'lLN1_bc|L': 0.097, 'KCg-m|L': 0.057, 'KCab|L': 0.042, 'lLN2X12|L': 0.024, 'lLN1_bc|R': 0.02, 'lLN2X03|L': 0.017, 'lLN2P_a|L': 0.013, 'KCg-m|R': 0.013}
+nomod removed eLN->PN synapses: 90491
+  Perron top: {'lLN1_bc|L': 0.363, 'lLN2X12|L': 0.06, 'lLN2X03|L': 0.039, 'lLN1_bc|R': 0.035, 'lLN2F_a|L': 0.028, 'lLN1_a|L': 0.027, 'lLN2F_b|L': 0.021, 'lLN2P_a|L': 0.02}
+variant  test                           
+fixAL    bursts_per_min_intact               104.082
+         bursts_per_min_lLN1_bc               91.837
+         bursts_per_min_random30             104.082
+         ladder_core_ALLN_g0.8                 0.000
+         ladder_core_ALLN_g1.0                 0.000
+         ladder_core_ALLN_g1.2                87.000
+         ladder_core_ALLN_g1.5                88.000
+         ladder_core_ALLN_g1.75              173.000
+         ladder_core_ALLN_g2.0               207.000
+         ladder_core_g0.8                      0.000
+         ladder_core_g1.0                      0.000
+         ladder_core_g1.2                    259.000
+         ladder_core_g1.5                    373.000
+         ladder_core_g1.75                  2841.000
+         ladder_core_g2.0                   3855.000
+         mean_rate_intact                      0.425
+         mean_rate_lLN1_bc                     0.406
+         mean_rate_random30                    0.423
+         perron_share_AL_cholinergic_LNs       0.206
+         perron_share_KC                       0.138
+nomod    bursts_per_min_intact                38.776
+         bursts_per_min_lLN1_bc               16.327
+         bursts_per_min_random30              36.735
+         ladder_core_ALLN_g0.8                83.000
+         ladder_core_ALLN_g1.0                88.000
+         ladder_core_ALLN_g1.2                86.000
+         ladder_core_ALLN_g1.5               179.000
+         ladder_core_ALLN_g1.75              175.000
+         ladder_core_ALLN_g2.0               180.000
+         ladder_core_g0.8                     91.000
+         ladder_core_g1.0                     97.000
+         ladder_core_g1.2                    239.000
+         ladder_core_g1.5                    368.000
+         ladder_core_g1.75                   655.000
+         ladder_core_g2.0                   1413.000
+         mean_rate_intact                      0.390
+         mean_rate_lLN1_bc                     0.359
+         mean_rate_random30                    0.389
+         perron_share_AL_cholinergic_LNs       0.556
+         perron_share_KC                       0.012

@@ -1,0 +1,6 @@
+h0.15 35 bursts
+h0.6 10 bursts
+U0.1tau1000 27 bursts
+seed6 26 bursts
+seed7 23 bursts
+Tue Oct 27 05:52:54 AM JST 2026

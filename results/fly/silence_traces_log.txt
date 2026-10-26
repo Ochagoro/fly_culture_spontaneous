@@ -1,0 +1,6 @@
+fixAL intact 36 bursts
+fixAL lLN1_bc_silenced 15 bursts
+fixAL random30_silenced 23 bursts
+nomod intact 18 bursts
+nomod lLN1_bc_silenced 8 bursts
+nomod random30_silenced 22 bursts

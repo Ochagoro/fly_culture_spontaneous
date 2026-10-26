@@ -1,0 +1,17 @@
+[project]
+name = "fly-culture-spontaneous"
+version = "0.1.0"
+description = "Spontaneous activity in dissociated neuronal cultures and the Drosophila whole-brain connectome"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.14",
+    "numpy",
+    "scipy",
+    "pandas",
+    "pyarrow",
+    "matplotlib",
+    "h5py",
+    "imageio[ffmpeg]>=2.34",
+    "pillow",
+]
