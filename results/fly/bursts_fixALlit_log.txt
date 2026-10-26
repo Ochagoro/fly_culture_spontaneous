@@ -1,0 +1,16 @@
+{'variant': 'fixALlit', 'gain': 1.0, 'seed': 0, 'n_bursts': 0, 'burst_rate_per_min': 0.0, 'frac_time_in_burst': 0.0, 'mean_rate': 0.2507808048240394}
+{'variant': 'fixALlit', 'gain': 1.0, 'seed': 1, 'n_bursts': 3, 'burst_rate_per_min': 12.0, 'frac_time_in_burst': 0.004066666666666666, 'mean_rate': 0.2533250624523643}
+{'variant': 'fixALlit', 'gain': 1.25, 'seed': 0, 'n_bursts': 3, 'burst_rate_per_min': 12.0, 'frac_time_in_burst': 0.004733333333333333, 'mean_rate': 0.2828006549383651}
+{'variant': 'fixALlit', 'gain': 1.25, 'seed': 1, 'n_bursts': 2, 'burst_rate_per_min': 8.0, 'frac_time_in_burst': 0.0023333333333333335, 'mean_rate': 0.283501756360043}
+{'variant': 'fixALlit', 'gain': 1.5, 'seed': 0, 'n_bursts': 3, 'burst_rate_per_min': 12.0, 'frac_time_in_burst': 0.004533333333333334, 'mean_rate': 0.32223256082343354}
+{'variant': 'fixALlit', 'gain': 1.5, 'seed': 1, 'n_bursts': 1, 'burst_rate_per_min': 4.0, 'frac_time_in_burst': 0.0012666666666666666, 'mean_rate': 0.3243267286501874}
+{'variant': 'fixALlit', 'gain': 1.75, 'seed': 0, 'n_bursts': 3, 'burst_rate_per_min': 12.0, 'frac_time_in_burst': 0.006933333333333333, 'mean_rate': 0.3705941329640289}
+{'variant': 'fixALlit', 'gain': 1.75, 'seed': 1, 'n_bursts': 4, 'burst_rate_per_min': 16.0, 'frac_time_in_burst': 0.012266666666666667, 'mean_rate': 0.37230697470889623}
+{'variant': 'fixALlit', 'gain': 2.0, 'seed': 0, 'n_bursts': 11, 'burst_rate_per_min': 44.0, 'frac_time_in_burst': 0.0154, 'mean_rate': 0.4251728109214098}
+{'variant': 'fixALlit', 'gain': 2.0, 'seed': 1, 'n_bursts': 6, 'burst_rate_per_min': 24.0, 'frac_time_in_burst': 0.012466666666666666, 'mean_rate': 0.4258628524441175}
+{'variant': 'fixALlit', 'gain': 2.5, 'seed': 0, 'n_bursts': 51, 'burst_rate_per_min': 204.0, 'frac_time_in_burst': 0.11553333333333334, 'mean_rate': 0.5443792872135547}
+{'variant': 'fixALlit', 'gain': 2.5, 'seed': 1, 'n_bursts': 44, 'burst_rate_per_min': 176.0, 'frac_time_in_burst': 0.101, 'mean_rate': 0.5386925756821674}
+802747 spikes; 48 bursts at [ 321  357  471  564  658  700  771  925 1010 1064 1173 1240 1410 1503
+ 1630 1688 1787 1879 1920 2036 2070 2247 2302 2361 2443 2503 2642 2713
+ 2771 2903 2997 3062 3164 3400 3527 4037 6404 7204 7768 8044 8085 8142
+ 8488 8577 8865 9538 9721 9788]

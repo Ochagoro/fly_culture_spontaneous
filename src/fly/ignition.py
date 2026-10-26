@@ -95,7 +95,8 @@ def main():
     ann = load_annotations(con)
     codes, names = groups_of(ann)
     sizes = np.bincount(codes, minlength=len(names))
-    for f in sorted(VD.glob("spikes_*.npz")):
+    pat = sys.argv[1] if len(sys.argv) > 1 else "*"
+    for f in sorted(VD.glob(f"spikes_{pat}.npz")):
         df = analyse(f, codes, names, sizes)
         tag = f.stem.replace("spikes_", "")
         df.to_csv(ROOT / "results" / "fly" / f"ignition_{tag}.csv", index=False)

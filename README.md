@@ -14,14 +14,14 @@
 - 分岐比 m ≈ 0.99（暴走の少し手前）。発達とともにバーストが増え、m は 1 から離れる。30 分の記録の中で m は上がらない（疲労型で、SHY 型ではない）
 
 **ハエの脳（FlyWire v783、138,639 ニューロンのスパイキングモデル）**
-- 培養と同じ条件（弱いノイズ＋短期シナプス抑圧）を与えると、行動で較正した脳はバーストしない。シナプスを約 2 倍に強めるとバーストする
-- 興奮性の配線の主モードは、**触角葉のアセチルコリン性局所ニューロン**（中心は片側 15 個の lLN1_bc）と、その相手（投射ニューロン、ケニヨン細胞）にある（伝達物質の 3 通りの仮定すべて）
-- lLN1_bc は脳で最も自発発火の多いニューロンの一つ（全体の上位 0.15%）。バーストの 30〜45 ms 前に発火する（最小補正の仮定）か、常時発火して脳を駆動する（他の仮定）
-- 触角葉のアセチルコリン性局所ニューロン 111 個（脳の 0.08%）を黙らせると、6 条件すべてで自発バーストが 2.3〜9 分の 1 に減る。同数のランダムな細胞では減らない
-- **本物のハエ**（安静時の全脳イメージング、20 匹）でも、触角葉のゆらぎは 74 領域で最も遅い（右 1 位、左 4 位。18/20 匹で他の領域より遅い）
-- 予測: 触角葉のアセチルコリン性局所ニューロンは、ハエの自発活動の「ハブ」である（本物のハエで検証できる）
+- 培養と同じ条件（弱いノイズ＋短期シナプス抑圧）を与えると、行動で較正した脳はバーストの手前〜境目にあり、シナプスを 2〜2.5 倍に強めると頻繁にバーストする
+- 興奮性の配線の上位 2 つのモードは、**左右の触角葉の興奮性ループ**（アセチルコリン性局所ニューロン＋投射ニューロン、キノコ体）の鏡像（伝達物質の 4 通りの仮定すべて）
+- 局所ニューロンの一つのタイプ lLN1_bc（左 14・右 16 個）は、モデルで最もよく自発発火するニューロンの一つ（上位 0.15%）。文献と矛盾しない 3 つの仮定ではこのループが常時発火して脳を駆動し、モデルの興奮性シナプス事象の約半分（49〜56%）を出す。バーストの直前に発火する「引き金」になるのは 1 つの仮定（文献と一部矛盾）だけ
+- アセチルコリン性局所ニューロン 111 個を黙らせると、自発バーストは 0.25〜0.47 倍（8 条件すべて）。シナプス数をそろえた対照（平均 0.60 倍）より強いが、同じループの投射ニューロンなど「最も強く駆動する」細胞を黙らせるとさらに減る（0.03〜0.31 倍）→ 鍵は 1 つの細胞タイプではなく触角葉の興奮性ループ
+- **本物のハエ**（安静時の全脳イメージング、20 匹）でも、触角葉のゆらぎは 74 領域で最も遅い（右 1 位、左 4 位。18/20 匹。信号の明るさを補正しても 17/20 匹）
+- 予測: 触角葉の興奮性ループは、ハエの自発活動の「ハブ」である（本物のハエで検証できる）
 
-否定的・弱い結果（睡眠回路には特に届かない、領域ごとのモデルと実データの対応は弱い、など）と限界も論文に書いています。数値の一次資料は [notes/results_summary.md](notes/results_summary.md)。
+内部査読（サブエージェント）を受けて、主張を控えめにし、4 つ目の伝達物質の仮定と、出力シナプス数・発火率をそろえた対照を追加しました。否定的・弱い結果（睡眠回路には特に届かない、領域ごとのモデルと実データの対応は弱い、培養の「活動から求めた主モード」はハエのモデルでは効かない、など）と限界も論文に書いています。数値の一次資料は [notes/results_summary.md](notes/results_summary.md)。
 
 ## 成果物
 
@@ -42,14 +42,15 @@ data/          公開データ（リポジトリには含めない。下の「�
 src/
   sim.py            GPU 版の全脳 LIF シミュレータ（Shiu ら 2024 の Brian 2 版と一致。前の研究から流用）
   spont.py          自発活動用の拡張（全ニューロンへのノイズ、ゲイン、短期シナプス抑圧、試行ごとの沈黙化）と分岐比の MR 推定量
-  variants.py       伝達物質の符号の仮定（最小補正・細胞タイプ多数決・モノアミンの速い作用なし）
+  variants.py       伝達物質の符号の仮定（最小補正・文献整合の最小補正・細胞タイプ多数決・モノアミンの速い作用なし）
   culture/          培養データの解析（バースト検出、点火点、予測因子、分岐比、発達、ドリフト）
   fly/              ハエのモデルの実験と解析
     bursts.py         ゲインごとの自発バースト（cell type × 半球ごとの活動、仮想 MEA）
     ignition.py       全スパイク記録からの点火解析（開始前の過剰発火、閾値を越える時刻）
     structure.py      配線の主モード（ペロン固有ベクトル、符号つき行列の主モード）
     ladder.py         短期抑圧なしで自力で続く活動が最初に現れる回路
-    silence.py, silence_confirm.py  黙らせる実験（予備・確認）
+    silence.py, silence_confirm.py, silence_matched.py  黙らせる実験（予備・確認・出力シナプス数と発火率をそろえた対照）
+    review_checks.py  査読後の確認（閾値越えの偽陽性率、左右 2 つのモード、本物のハエの S/N 補正）
     eln_pn_control.py 投射ニューロンへの化学シナプスを除いた対照
     functional_eig.py 培養と同じ「活動の主モード」の検定をモデルに適用
     turner_*.py       本物のハエの安静時イメージング（Turner ら 2021）の解析
@@ -91,7 +92,7 @@ uv sync
 cd src/fly && ../../.venv/bin/python regions.py && ../../.venv/bin/python structure.py && ../../.venv/bin/python ladder.py && for v in fixAL typevote nomod; do ../../.venv/bin/python bursts.py $v 1.0 1.25 1.5 1.75 2.0 2.5; done
 ```
 
-その後、`record_video.py`（例: `record_video.py fixAL 2.5`）、`record_robust.py`、`ignition.py`、`functional_eig.py`、`silence.py`、`silence_confirm.py`、`eln_pn_control.py`、`analyze_bursts.py`、`turner_metrics.py`、`turner_homolog.py` を実行し、培養は `src/culture/run_sessions.py` → `summarize.py` → `extra_controls.py` → `c3_eigen.py`、図は `src/figures.py fig1 fig2 fig3 fig4 ed1 ed2 ed3 ed4` です。GPU（CUDA）が必要です。RTX 5070 Ti で全体 約 2 時間です。PDF は `src/topdf.sh 入力.html 出力.pdf`（Google Chrome のヘッドレス印刷）で作ります。
+その後、`bursts.py fixALlit …`、`ladder.py fixALlit`、`record_video.py`（例: `record_video.py fixAL 2.5`）、`record_robust.py`、`ignition.py`、`functional_eig.py`、`silence.py`、`silence_confirm.py`、`silence_matched.py`、`eln_pn_control.py`、`review_checks.py`、`analyze_bursts.py`、`turner_metrics.py`、`turner_homolog.py` を実行し、培養は `src/culture/run_sessions.py` → `summarize.py` → `extra_controls.py` → `c3_eigen.py`、図は `src/figures.py fig1 fig2 fig3 fig4 ed1 ed2 ed3 ed4` です。GPU（CUDA）が必要です。RTX 5070 Ti で全体 約 2 時間です。PDF は `src/topdf.sh 入力.html 出力.pdf`（Google Chrome のヘッドレス印刷）で作ります。
 
 ## 使ったデータとコード
 

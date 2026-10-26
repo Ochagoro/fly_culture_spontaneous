@@ -1,0 +1,152 @@
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/analyze_bursts.py:89: RuntimeWarning: All-NaN slice encountered
+  lat_m = np.nanmedian(np.where(lat >= 0, lat, np.nan), 0)
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/analyze_bursts.py:89: RuntimeWarning: All-NaN slice encountered
+  lat_m = np.nanmedian(np.where(lat >= 0, lat, np.nan), 0)
+/home/ochagoro/Work/fly_culture_spontaneous/src/fly/analyze_bursts.py:89: RuntimeWarning: All-NaN slice encountered
+  lat_m = np.nanmedian(np.where(lat >= 0, lat, np.nan), 0)
+48 runs
+               seed  bursts_per_min  dur_ms  peak_per_ms  frac_spikes_in_bursts  mean_rate_hz
+variant  gain                                                                                
+fixAL    1.00   0.5             0.0     NaN          NaN                  0.000         0.218
+         1.25   0.5             0.0     NaN          NaN                  0.000         0.235
+         1.50   0.5             0.0     NaN          NaN                  0.000         0.262
+         1.75   0.5             4.0   13.00       135.50                  0.002         0.299
+         2.00   0.5            18.0   39.00       150.50                  0.025         0.340
+         2.50   0.5           128.0   22.75       135.25                  0.115         0.441
+fixALlit 1.00   0.5             6.0   17.00       133.00                  0.006         0.252
+         1.25   0.5            10.0   15.25       125.50                  0.009         0.283
+         1.50   0.5             8.0   21.50       123.50                  0.006         0.323
+         1.75   0.5            14.0   41.50       139.25                  0.020         0.371
+         2.00   0.5            34.0   20.00       134.25                  0.024         0.426
+         2.50   0.5           190.0   23.50       130.50                  0.155         0.542
+nomod    1.00   0.5             0.0     NaN          NaN                  0.000         0.238
+         1.25   0.5             0.0     NaN          NaN                  0.000         0.263
+         1.50   0.5             2.0   25.00       121.00                  0.002         0.291
+         1.75   0.5             2.0   16.00       113.00                  0.001         0.326
+         2.00   0.5             4.0   28.50       135.00                  0.004         0.364
+         2.50   0.5            78.0   18.75       124.75                  0.054         0.451
+typevote 1.00   0.5            14.0   25.25       138.00                  0.033         0.257
+         1.25   0.5            14.0   26.50       140.50                  0.017         0.291
+         1.50   0.5            10.0   26.75       132.00                  0.011         0.334
+         1.75   0.5            16.0   19.00       124.00                  0.012         0.383
+         2.00   0.5            60.0   17.50       124.00                  0.036         0.440
+         2.50   0.5           236.0   26.50       132.00                  0.213         0.568
+== fixAL n_bursts 75
+          group     n  pre_excess_total  pre_excess_per_neuron  frac_bursts_preceded  latency_ms
+2583  lLN1_bc|R    16             1.202                  0.075                 0.440         2.0
+1125  lLN1_bc|L    14             1.017                  0.073                 0.667         2.0
+8        R1-6|L  4044             0.745                  0.000                 0.920         2.0
+22       R1-6|R  3888             0.657                  0.000                 0.840         2.0
+114     KCg-m|L  1069             0.419                  0.000                 0.493         6.0
+1393  lLN2X12|L     8             0.402                  0.050                 0.653         2.0
+4006  lLN2X12|R     5             0.274                  0.055                 0.467         4.0
+109       Tm2|R   767             0.226                  0.000                 0.813         2.0
+365       Tm2|L   784             0.221                  0.000                 0.827         2.0
+4         Tm1|R   775             0.220                  0.000                 0.827         4.0
+443       Tm1|L   780             0.217                  0.000                 0.853         2.0
+49      KCg-m|R  1120             0.207                  0.000                 0.907         2.0
+555        L5|L   791             0.206                  0.000                 0.867         2.0
+277        L5|R   785             0.205                  0.000                 0.773         2.0
+796        T1|R   742             0.195                  0.000                 0.800         4.0
+== nomod n_bursts 43
+          group     n  pre_excess_total  pre_excess_per_neuron  frac_bursts_preceded  latency_ms
+8        R1-6|L  4044             0.902                  0.000                 0.977         0.0
+22       R1-6|R  3888             0.759                  0.000                 0.930         2.0
+443       Tm1|L   780             0.324                  0.000                 0.930         2.0
+4         Tm1|R   775             0.290                  0.000                 0.930         2.0
+365       Tm2|L   784             0.282                  0.000                 0.953         4.0
+109       Tm2|R   767             0.270                  0.000                 0.930         2.0
+277        L5|R   785             0.262                  0.000                 0.930         2.0
+796        T1|R   742             0.247                  0.000                 0.953         2.0
+555        L5|L   791             0.241                  0.000                 1.000         2.0
+12         L2|L   900             0.210                  0.000                 0.930         1.0
+2583  lLN1_bc|R    16             0.205                  0.013                 0.488         0.0
+40        Tm3|R   859             0.199                  0.000                 0.930         2.0
+246       Mi9|L   784             0.196                  0.000                 0.884         2.0
+219        T1|L   655             0.192                  0.000                 0.930         0.0
+28        T2a|L   907             0.187                  0.000                 0.953         4.0
+== typevote n_bursts 175
+          group     n  pre_excess_total  pre_excess_per_neuron  frac_bursts_preceded  latency_ms
+8        R1-6|L  4044             0.730                  0.000                 0.909         2.0
+22       R1-6|R  3888             0.716                  0.000                 0.891         2.0
+4         Tm1|R   775             0.221                  0.000                 0.800         2.0
+443       Tm1|L   780             0.220                  0.000                 0.783         2.0
+109       Tm2|R   767             0.210                  0.000                 0.851         2.0
+277        L5|R   785             0.200                  0.000                 0.863         2.0
+555        L5|L   791             0.189                  0.000                 0.806         2.0
+365       Tm2|L   784             0.181                  0.000                 0.754         2.0
+41         T3|R   823             0.178                  0.000                 0.829         2.0
+50        T2a|R   865             0.172                  0.000                 0.869         2.0
+796        T1|R   742             0.171                  0.000                 0.794         2.0
+1125  lLN1_bc|L    14             0.167                  0.012                 0.463         0.0
+12         L2|L   900             0.166                  0.000                 0.789         2.0
+373        T3|L   852             0.163                  0.000                 0.869         4.0
+18        Mi9|R   769             0.154                  0.000                 0.800         2.0
+variant                        fixAL  fixALlit  nomod  typevote
+circuit                                                        
+AL projection neurons          42.44     31.81  29.94     23.67
+DN1a/DN1p clock                25.74      0.00  20.64      0.00
+ER5 (sleep drive)              21.86     27.93   8.25     25.02
+ExR1 helicon                   26.15     19.76   0.00      6.11
+Kenyon cells                   14.70      6.56   6.33      9.62
+MBON                           28.10     22.03  40.43     29.01
+PPL1 DAN (wake)                36.31     29.26  23.18     30.78
+dFB FB6/FB7 (sleep-promoting)  13.65     23.71  21.95     25.34
+l-LNv clock (wake)             51.48      0.00   0.00      0.00
+     variant                model      real  n_regions    rho      p
+0      fixAL  burst_participation        sd         73  0.125  0.293
+1      fixAL  burst_participation      kurt         73 -0.093  0.433
+2      fixAL  burst_participation  r_global         73  0.211  0.073
+3      fixAL  burst_participation     event         73  0.084  0.478
+4      fixAL  burst_participation       ac1         73  0.056  0.641
+5      fixAL             ignition        sd         73  0.016  0.894
+6      fixAL             ignition      kurt         73  0.093  0.433
+7      fixAL             ignition  r_global         73  0.300  0.010
+8      fixAL             ignition     event         73  0.196  0.097
+9      fixAL             ignition       ac1         73  0.224  0.057
+10     nomod  burst_participation        sd         73  0.099  0.404
+11     nomod  burst_participation      kurt         73 -0.131  0.270
+12     nomod  burst_participation  r_global         73  0.198  0.093
+13     nomod  burst_participation     event         73  0.042  0.724
+14     nomod  burst_participation       ac1         73  0.050  0.672
+15     nomod             ignition        sd         73  0.013  0.913
+16     nomod             ignition      kurt         73 -0.228  0.053
+17     nomod             ignition  r_global         73  0.138  0.244
+18     nomod             ignition     event         73 -0.048  0.687
+19     nomod             ignition       ac1         73 -0.087  0.466
+20  typevote  burst_participation        sd         73  0.053  0.654
+21  typevote  burst_participation      kurt         73  0.066  0.579
+22  typevote  burst_participation  r_global         73  0.276  0.018
+23  typevote  burst_participation     event         73  0.146  0.218
+24  typevote  burst_participation       ac1         73  0.186  0.114
+25  typevote             ignition        sd         73  0.023  0.846
+26  typevote             ignition      kurt         73  0.207  0.079
+27  typevote             ignition  r_global         73  0.253  0.031
+28  typevote             ignition     event         73  0.208  0.078
+29  typevote             ignition       ac1         73  0.265  0.024
+               seed  mea_spikes  mea_rate_hz  frac_spikes_outside_bursts      m   tau_ms  m_interburst
+variant  gain                                                                                         
+fixAL    1.00   0.5      3558.5        0.232                       1.000  0.995  755.393         0.995
+         1.25   0.5      3944.0        0.257                       1.000  0.985  262.258         0.986
+         1.50   0.5      4765.0        0.310                       1.000  0.976  162.997         0.977
+         1.75   0.5      5409.0        0.352                       0.997  0.967  119.985         0.971
+         2.00   0.5      6287.0        0.409                       0.974  0.957   91.485         0.962
+         2.50   0.5      7980.5        0.520                       0.885  0.952   82.276         0.958
+fixALlit 1.00   0.5      5089.0        0.331                       0.992  0.967  120.954         0.969
+         1.25   0.5      6142.0        0.400                       0.990  0.967  121.200         0.969
+         1.50   0.5      7494.0        0.488                       0.993  0.973  144.709         0.970
+         1.75   0.5      8913.5        0.580                       0.982  0.978  193.019         0.967
+         2.00   0.5     10521.5        0.685                       0.980  0.992  720.965         0.969
+         2.50   0.5     12715.0        0.828                       0.864  0.993  717.491         0.960
+nomod    1.00   0.5      4554.0        0.296                       1.000  0.972  142.913         0.972
+         1.25   0.5      5488.5        0.357                       1.000  0.971  138.168         0.973
+         1.50   0.5      6603.5        0.430                       0.998  0.972  142.268         0.972
+         1.75   0.5      7884.5        0.513                       0.999  0.980  205.924         0.978
+         2.00   0.5      8807.0        0.573                       0.997  0.982  259.900         0.974
+         2.50   0.5     10674.0        0.695                       0.956  0.989  375.579         0.973
+typevote 1.00   0.5      5079.0        0.331                       0.961  0.968  125.498         0.968
+         1.25   0.5      6465.0        0.421                       0.980  0.967  118.985         0.968
+         1.50   0.5      8199.5        0.534                       0.989  0.981  214.127         0.975
+         1.75   0.5      9695.0        0.631                       0.989  0.977  170.599         0.968
+         2.00   0.5     11094.5        0.722                       0.971  0.969  144.239         0.959
+         2.50   0.5     13439.0        0.875                       0.811  0.992  475.289         0.956

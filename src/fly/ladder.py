@@ -20,7 +20,7 @@ GAINS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5, 1.75, 2.0]
 SEEDS = [1, 2, 3]
 
 
-def main():
+def main(variants=("shiu", "fixAL", "typevote", "nomod")):
     con0 = load_connectome("783")
     ann = load_annotations(con0)
     cls = ann["cell_class"].fillna(ann["super_class"]).fillna("other").to_numpy()
@@ -28,7 +28,7 @@ def main():
     side = ann["side"].fillna("na").to_numpy()
     allidx = np.arange(con0.n)
     rows, members = [], []
-    for v in ["shiu", "fixAL", "typevote", "nomod"]:
+    for v in variants:
         con, _ = make_variant(v, con0, ann)
         combos = [(g, s) for g in GAINS for s in SEEDS]
         out = SpontSim(con).run([g for g, _ in combos], h=0.0, t_run=2500, seed=11,
@@ -45,11 +45,15 @@ def main():
                 for c, n in vc.items():
                     members.append(dict(variant=v, gain=g, seed=s, cell_class=c, n=int(n)))
         print(v, "done", flush=True)
-    pd.DataFrame(rows).to_csv(ROOT / "results" / "fly" / "ladder.csv", index=False)
-    pd.DataFrame(members).to_csv(ROOT / "results" / "fly" / "ladder_classes.csv", index=False)
-    d = pd.DataFrame(rows)
+    out_l, out_c = ROOT / "results" / "fly" / "ladder.csv", ROOT / "results" / "fly" / "ladder_classes.csv"
+    d, m = pd.DataFrame(rows), pd.DataFrame(members)
+    if out_l.exists():  # keep other variants' rows
+        d = pd.concat([pd.read_csv(out_l).query("variant not in @variants"), d])
+        m = pd.concat([pd.read_csv(out_c).query("variant not in @variants"), m])
+    d.to_csv(out_l, index=False)
+    m.to_csv(out_c, index=False)
     print(d.groupby(["variant", "gain"])[["n_core", "n_AL_LN", "n_lLN1_bc", "n_KC", "n_left", "n_right"]].mean().round(1).to_string())
 
 
 if __name__ == "__main__":
-    main()
+    main(tuple(sys.argv[1:]) or ("shiu", "fixAL", "typevote", "nomod"))

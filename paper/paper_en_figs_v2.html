@@ -1,0 +1,54 @@
+
+<h2>References</h2>
+{{REFERENCES}}
+
+<h2>Acknowledgements</h2>
+<p>We thank the authors of the public datasets and of the FlyWire connectome and its whole-brain model for sharing data and code.</p>
+<h2>Author contributions</h2>
+<p>K.T. conceived the study; analyses and writing were carried out with Claude (Anthropic), an AI assistant.</p>
+<h2>Competing interests</h2>
+<p>The author declares no competing interests.</p>
+
+<div class="pagebreak"></div>
+<h2>Figures</h2>
+
+<figure>
+<img src="../figures/fig1.svg" alt="Figure 1">
+<figcaption><b class="fig">Fig. 1 | In cultured cortex, spontaneous bursts ignite at recurring hot spots.</b> <b>a</b>, Spontaneous activity of a rat cortical culture on a MaxOne HD-MEA (culture 23312; 60 s; half of the active electrodes shown, sorted by x position); shading, detected network bursts. <b>b</b>, Ignition points (centroid of the first 20 spikes) of all 1,342 bursts of this session (red) over active electrodes (grey). <b>c</b>, Ignition-probability maps of the same culture on six days (normalized per map; grey, no active electrode). <b>d</b>, Correlation of ignition maps between consecutive sessions of the same culture and between sessions of different cultures; bars, medians. <b>e</b>, Spearman correlation between ignition probability and two predictors per 100-µm location: between-burst firing rate and the leading eigenvector of between-burst functional coupling; lines, sessions (colour, culture; 64 sessions, 7 cultures); bars, medians. <b>f</b>, Branching ratio <i>m</i> (multistep regression, 4-ms bins) of each culture versus days since its first recording.</figcaption>
+</figure>
+
+<figure>
+<img src="../figures/fig2.svg" alt="Figure 2">
+<figcaption><b class="fig">Fig. 2 | Under culture-like conditions the fly whole-brain model bursts.</b> <b>a</b>, Spontaneous bursts per minute versus synaptic gain (1 = behaviourally calibrated model) under four transmitter assumptions (mean of two 15-s runs). <b>b</b>, Whole-brain population rate (top) and spikes of a 'virtual MEA' of 1,024 random neurons (bottom) at gain 2.5 under the original minimal correction; shading, detected bursts. <b>c</b>, Frontal view of all neurons; coloured, neurons of cell-type groups that fired in excess in the 20 ms before burst onset (Poisson <i>P</i> &lt; 10<sup>−6</sup>, used for ranking only), coloured by excess spikes per neuron; the dark clusters are cholinergic AL local neurons. <b>d</b>, Median time at which each group first crossed its noise threshold relative to brain-wide onset (over bursts in which it crossed), for the 12 earliest groups that crossed in at least half of the 29 bursts; red, cholinergic AL local neurons. Panels <b>b</b>–<b>d</b> use the original minimal correction, the only assumption under which these neurons fired preferentially before bursts; under the other three assumptions they fired tonically and bursts started in the visual system (Extended Data Fig. 2).</figcaption>
+</figure>
+
+<figure>
+<img src="../figures/fig3.svg" alt="Figure 3">
+<figcaption><b class="fig">Fig. 3 | Cholinergic antennal-lobe local neurons dominate the leading excitatory mode and are required for frequent spontaneous bursting.</b> <b>a</b>, Weight of the leading eigenvector of the excitatory connectivity by cell class under four transmitter assumptions (MC, minimal correction; LC, literature-consistent correction; CV, cell-type vote; NM, no fast monoamines). <b>b</b>, Number of neurons that sustain activity after the drive stops (no short-term depression) versus synaptic gain; solid, all neurons; dashed, AL local neurons (mean of three seeds). <b>c</b>, Spontaneous firing of lLN1_bc neurons (solid) and the brain-wide median (dotted) versus gain. <b>d</b>, Spontaneous bursts per minute after silencing the outputs of the indicated sets, relative to the intact model at the same gain (20-s runs, three seeds; points, the two gains per assumption and, for controls, each draw; bars, means; colour, assumption). Degree-matched controls are excitatory neurons outside the AL local-neuron class with the same output-synapse counts; high-drive controls are the excitatory neurons with the largest product of output synapses and spontaneous rate. Random and other-AL-local-neuron controls were run under MC, CV and NM. <b>e</b>, Change in brain-wide mean firing rate after silencing lLN1_bc (dark) or degree-matched neurons (light) at the highest gain tested.</figcaption>
+</figure>
+
+<figure>
+<img src="../figures/fig4.svg" alt="Figure 4">
+<figcaption><b class="fig">Fig. 4 | In real flies the antennal lobe shows the slowest spontaneous fluctuations; comparison of predictors and scales.</b> <b>a</b>, Lag-1 autocorrelation versus s.d. of Δ<i>F</i>/<i>F</i> for 74 brain regions in resting-state imaging of 20 flies (median across flies; data from Turner et al.[[turner]]); orange, antennal lobes. <b>b</b>, Antennal lobes relative to the median of other regions in each fly (log<sub>2</sub> ratio) for autocorrelation, fluctuation size and correlation with the global signal; numbers, flies with a positive ratio. <b>c</b>, What predicts ignition: Spearman ρ of between-burst firing rate and of the leading coupling mode with ignition, in cultures (per 100-µm location; activity-based mode; bars, medians and IQRs over 64 sessions) and in the fly model (per cell-type group; activity-based and wiring-based modes; dots, six runs under the minimal correction). <b>d</b>, Branching ratio versus the fraction of spikes outside bursts for culture sessions (dots) and for the fly model's virtual MEA across gains (diamonds; minimal correction). In the model the branching ratio is highest at the calibrated gain and falls as bursts appear, so it does not index distance to runaway there.</figcaption>
+</figure>
+
+<h2>Extended Data</h2>
+<figure>
+<img src="../figures/ed1.svg" alt="Extended Data Figure 1">
+<figcaption><b class="fig">Extended Data Fig. 1 | Development, drift and replication in cultured networks.</b> <b>a</b>, HD-MEA cultures: burst rate, fraction of spikes outside bursts and branching ratio versus days since first recording (lines, cultures). <b>b</b>, The same for the 59-electrode replication set versus days in vitro (grey, recordings; blue, daily medians). <b>c</b>, Within-session change of the between-burst branching ratio (second minus first 15 min) in both datasets. <b>d</b>, Sensitivity of the fraction of spikes outside bursts to halving and doubling the burst threshold.</figcaption>
+</figure>
+<figure>
+<img src="../figures/ed2.svg" alt="Extended Data Figure 2">
+<figcaption><b class="fig">Extended Data Fig. 2 | Transmitter assumptions and where bursts start.</b> <b>a</b>, Size of the self-sustained core versus gain under the published signs and the four assumptions used. <b>b</b>, Composition of the first self-sustained core larger than 20 neurons (mean of three seeds) and the gain at which it appears. <b>c</b>–<b>e</b>, Earliest-crossing groups in bursts under the literature-consistent correction, the cell-type vote and without fast monoamines; in these assumptions the cholinergic AL local neurons fire tonically and do not cross their threshold, and bursts start in the visual system and central complex.</figcaption>
+</figure>
+<figure>
+<img src="../figures/ed3.svg" alt="Extended Data Figure 3">
+<figcaption><b class="fig">Extended Data Fig. 3 | Robustness checks.</b> <b>a</b>, Fraction of bursts (filled) and of random times far from bursts (open) at which lLN1_bc (left, right) and lLN2X12 crossed their noise threshold in the preceding 50 ms, in six runs under the original minimal correction (gain 2.5); asterisks, Fisher <i>P</i> &lt; 0.05. <b>b</b>, Weight of the leading excitatory mode on cholinergic AL local neurons and Kenyon cells after removing all chemical synapses from cholinergic AL local neurons onto projection neurons. <b>c</b>, Bursts in that network with lLN1_bc or 30 random neurons silenced (two 15-s runs). <b>d</b>, Left–right composition of the two leading excitatory modes under each assumption: mode 1 is the left and mode 2 the right olfactory loop.</figcaption>
+</figure>
+<figure>
+<img src="../figures/ed4.svg" alt="Extended Data Figure 4">
+<figcaption><b class="fig">Extended Data Fig. 4 | Weak and negative results.</b> <b>a</b>, Recruitment of sleep and clock circuits by model bursts, as a percentile of random central-brain cell types of the same number (0.5, chance). <b>b</b>, Spearman correlation across 73 regions between model burst participation or pre-onset ignition and real resting-state measures. <b>c</b>, Firing rate, activity-based leading mode and wiring-based leading mode as predictors of ignition across cell-type groups in the fly model. <b>d</b>, Virtual-MEA branching ratio of the model versus gain.</figcaption>
+</figure>
+
+</body>
+</html>

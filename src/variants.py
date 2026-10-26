@@ -15,6 +15,10 @@ typevote  : one transmitter per cell type (confidence-weighted vote of the
             ('known_nt'); histamine is inhibitory.
 nomod     : as typevote, but dopamine/serotonin/octopamine neurons have no fast
             synaptic effect (sign 0), i.e. monoamines act only as modulators.
+fixALlit  : as fixAL, but those of the 40 neurons whose cell type has a
+            literature-known transmitter of acetylcholine (FlyWire 'known_nt',
+            e.g. lLN1_bc; Shang et al. 2007) stay excitatory (added after review:
+            fixAL made 7 of the 30 lLN1_bc inhibitory).
 """
 from __future__ import annotations
 
@@ -27,7 +31,7 @@ SIGN = {"acetylcholine": 1, "gaba": -1, "glutamate": -1, "histamine": -1,
         "dopamine": 1, "serotonin": 1, "octopamine": 1, "tyramine": 1}
 FAST = ["acetylcholine", "gaba", "glutamate", "histamine"]
 MOD = ["dopamine", "serotonin", "octopamine", "tyramine"]
-VARIANTS = ["shiu", "fixAL", "typevote", "nomod"]
+VARIANTS = ["shiu", "fixAL", "fixALlit", "typevote", "nomod"]
 
 
 def load_annotations(con: Connectome) -> pd.DataFrame:
@@ -80,8 +84,14 @@ def make_variant(name: str, con: Connectome | None = None, ann: pd.DataFrame | N
     sign = con.sign.copy()
     if name == "shiu":
         pass
-    elif name == "fixAL":
+    elif name in ("fixAL", "fixALlit"):
         al5ht = ((ann["cell_class"] == "ALLN") & (ann["top_nt"] == "serotonin")).to_numpy()
+        if name == "fixALlit":
+            known = ann["known_nt"].map(_known)
+            kdf = pd.DataFrame({"type": ann["cell_type"], "k": known}).dropna()
+            kvote = kdf.groupby("type")["k"].agg(lambda x: x.value_counts().index[0])
+            lit_ach = (ann["cell_type"].map(kvote) == "acetylcholine").to_numpy()
+            al5ht = al5ht & ~lit_ach
         sign[al5ht] = -1
     elif name in ("typevote", "nomod"):
         nt = transmitter_table(ann)

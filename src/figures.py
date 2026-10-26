@@ -25,8 +25,10 @@ FIG.mkdir(exist_ok=True)
 style.apply()
 
 CULT_COLORS = [BLUE, ORANGE, AQUA, VIOLET, YELLOW, MAGENTA, GREEN]
-VAR_COLORS = {"fixAL": BLUE, "typevote": ORANGE, "nomod": AQUA}
-VAR_LABEL = {"fixAL": "Minimal correction", "typevote": "Cell-type vote", "nomod": "No fast monoamines"}
+VAR_COLORS = {"fixAL": BLUE, "fixALlit": VIOLET, "typevote": ORANGE, "nomod": AQUA}
+VAR_LABEL = {"fixAL": "Minimal correction", "fixALlit": "Literature-consistent", "typevote": "Cell-type vote", "nomod": "No fast monoamines"}
+VAR_SHORT = {"fixAL": "MC", "fixALlit": "LC", "typevote": "CV", "nomod": "NM"}
+V4 = ["fixAL", "fixALlit", "typevote", "nomod"]
 HEAT = mcolors.LinearSegmentedColormap.from_list("heat", ["#ffffff", "#fde0c5", "#f6a46b", "#e2572b", "#a3220f", "#4a0b05"])
 
 
@@ -192,7 +194,7 @@ def fig2():
 
     # a: burst rate vs gain
     ax = fig.add_subplot(gs[0, 0:2])
-    for v in ["fixAL", "typevote", "nomod"]:
+    for v in V4:
         s = bs[bs.variant == v].groupby("gain").bursts_per_min
         ax.plot(s.mean().index, s.mean().values, color=VAR_COLORS[v], marker="o", ms=2.5, lw=1, label=VAR_LABEL[v])
     ax.axvline(1.0, color=MUTED, lw=0.6, ls="--")
@@ -312,16 +314,16 @@ def fig3():
 
     # a: Perron share by class
     ax = fig.add_subplot(gs[0, 0:2])
-    vs = ["fixAL", "typevote", "nomod"]
-    bottom = np.zeros(3)
+    vs = V4
+    bottom = np.zeros(len(vs))
     for lab in CLS_COL:
         vals = []
         for v in vs:
             d = pd.read_parquet(RF / f"structure_neurons_{v}.parquet")
             vals.append(d.perron.to_numpy()[cls == lab].sum() / d.perron.sum())
-        ax.bar(range(3), vals, bottom=bottom, color=CLS_COL[lab], width=0.6, label=lab, lw=0)
+        ax.bar(range(len(vs)), vals, bottom=bottom, color=CLS_COL[lab], width=0.6, label=lab, lw=0)
         bottom += np.array(vals)
-    ax.set_xticks(range(3), ["Minimal\ncorrection", "Cell-type\nvote", "No fast\nmonoamines"], fontsize=5.5)
+    ax.set_xticks(range(len(vs)), [VAR_SHORT[v] for v in vs], fontsize=5.5)
     ax.set_ylabel("Share of Perron-mode weight")
     ax.set_ylim(0, 1)
     ax.legend(fontsize=5, loc="upper left", bbox_to_anchor=(1.0, 1.0))
@@ -330,7 +332,7 @@ def fig3():
     # b: ladder
     ax = fig.add_subplot(gs[0, 3:6])
     lad = pd.read_csv(RF / "ladder.csv")
-    for v in vs:
+    for v in [v for v in vs if v in set(lad.variant)]:
         s = lad[lad.variant == v].groupby("gain")[["n_core", "n_AL_LN", "n_KC"]].mean()
         ax.plot(s.index, s.n_core + 1, color=VAR_COLORS[v], lw=1, marker="o", ms=2, label=VAR_LABEL[v] + " (all)")
         ax.plot(s.index, s.n_AL_LN + 1, color=VAR_COLORS[v], lw=0.8, ls="--", marker="s", ms=1.8,
@@ -345,7 +347,7 @@ def fig3():
     # c: spontaneous rates
     ax = fig.add_subplot(gs[1, 0:2])
     er = pd.read_csv(RF / "eln_rates.csv")
-    for v in vs:
+    for v in [v for v in vs if v in set(er.variant)]:
         s = er[er.variant == v]
         ax.plot(s.gain, s.lLN1_bc, color=VAR_COLORS[v], marker="o", ms=2, lw=1)
         ax.plot(s.gain, s.brain_median, color=VAR_COLORS[v], lw=0.6, ls=":")
@@ -356,48 +358,57 @@ def fig3():
     ax.text(1.0, 0.27, "Brain median", fontsize=5.5, color=INK2)
     panel_label(ax, "c", x=-0.35)
 
-    # d: silencing (confirmation)
+    # d: silencing with matched controls
     ax = fig.add_subplot(gs[1, 2:5])
+    mt = pd.read_csv(RF / "silencing_matched.csv")
+    mt["set"] = mt.silenced.str.replace(r"_#\d", "", regex=True)
     sc = pd.read_csv(RF / "silencing_confirm.csv")
     sc["set"] = sc.silenced.str.replace(r"_#\d", "", regex=True)
-    intact = sc[sc.set == "intact"].groupby(["variant", "gain"]).bursts_per_min.mean()
-    sc["rel"] = sc.apply(lambda r: r.bursts_per_min / intact.loc[(r.variant, r.gain)], axis=1)
-    sets = [("lLN1_bc", "lLN1_bc (30)"), ("random_30", "Random (30)"), ("AL_cholinergic_LNs", "AL chol. LNs (111)"),
-            ("random_111", "Random (111)"), ("other_ALLN_111", "Other AL LNs (111)")]
-    for k, (key, lab) in enumerate(sets):
-        for j, v in enumerate(vs):
-            s = sc[(sc.set == key) & (sc.variant == v)]
-            if not len(s):
-                continue
-            # per-draw means (controls) or per-seed values (single sets)
-            if key.startswith(("random", "other")):
-                vals = s.groupby(["silenced", "gain"]).rel.mean().to_numpy()
-            else:
-                vals = s.groupby("gain").rel.mean().to_numpy()
-            x = k + (j - 1) * 0.22
-            ax.bar(x, np.mean(vals), width=0.2, color=VAR_COLORS[v], alpha=0.85 if key in ("lLN1_bc", "AL_cholinergic_LNs") else 0.35, lw=0)
-            ax.scatter(np.full(len(vals), x), vals, s=2, color=INK, lw=0, zorder=3)
-    ax.axhline(1, color=INK, lw=0.5)
-    ax.set_xticks(range(len(sets)), [l for _, l in sets], fontsize=5.3, rotation=20, ha="right")
-    ax.set_ylabel("Bursts relative to intact")
-    panel_label(ax, "d", x=-0.2)
+    sc = sc[sc.set.isin(["random_111", "other_ALLN_111"])]
 
-    # e: mean rate after silencing (first sweep, gain 2.5)
+    def rel(df):
+        it = df[df.set == "intact"].groupby(["variant", "gain"]).bursts_per_min.mean()
+        return df.assign(rel=lambda d: d.bursts_per_min / [it.get((a, b), np.nan) for a, b in zip(d.variant, d.gain)])
+    mt = rel(mt)
+    sc = rel(pd.concat([sc, pd.read_csv(RF / "silencing_confirm.csv").assign(
+        set=lambda d: d.silenced.str.replace(r"_#\d", "", regex=True)).query("set == 'intact'")]))
+    sets = [("lLN1_bc", "lLN1_bc", mt), ("degree_matched_30", "Degree-\nmatched", mt), ("high_drive_30", "High-\ndrive", mt),
+            ("AL_cholinergic_LNs", "AL chol.\nLNs", mt), ("degree_matched_111", "Degree-\nmatched", mt),
+            ("high_drive_111", "High-\ndrive", mt), ("random_111", "Random", sc), ("other_ALLN_111", "Other\nAL LNs", sc)]
+    for k, (key, lab, src) in enumerate(sets):
+        vv = [v for v in V4 if len(src[(src.set == key) & (src.variant == v)])]
+        for j, v in enumerate(V4):
+            s_ = src[(src.set == key) & (src.variant == v)]
+            if not len(s_):
+                continue
+            vals = s_.groupby(["silenced", "gain"]).rel.mean().to_numpy()
+            x = k + (j - 1.5) * 0.19
+            strong = key in ("lLN1_bc", "AL_cholinergic_LNs")
+            ax.bar(x, np.mean(vals), width=0.17, color=VAR_COLORS[v], alpha=0.9 if strong else 0.35, lw=0)
+            ax.scatter(np.full(len(vals), x), vals, s=1.5, color=INK, lw=0, zorder=3)
+    ax.axhline(1, color=INK, lw=0.5)
+    ax.axvline(2.5, color=GRID, lw=0.6)
+    ax.text(1, 1.95, "30 neurons", ha="center", fontsize=5.5, color=INK2)
+    ax.text(5, 1.95, "111 neurons", ha="center", fontsize=5.5, color=INK2)
+    ax.set_ylim(0, 2.05)
+    ax.set_xticks(range(len(sets)), [l for _, l, _ in sets], fontsize=5)
+    ax.set_ylabel("Bursts relative to intact")
+    panel_label(ax, "d", x=-0.17)
+
+    # e: brain-wide mean rate change (matched runs, highest gain)
     ax = fig.add_subplot(gs[1, 5])
-    sl = pd.read_csv(RF / "silencing.csv")
-    sl["set"] = sl.silenced.str.replace(r"_#\d", "", regex=True)
-    rows = []
-    for v in vs:
-        g = sl[sl.variant == v].gain.max()
-        s = sl[(sl.variant == v) & (sl.gain == g)].groupby("set").mean_rate.mean()
-        rows.append((v, 100 * (s["lLN1_bc"] / s["intact"] - 1), 100 * (s["random_5177"] / s["intact"] - 1)))
-    for j, (v, a, b) in enumerate(rows):
-        ax.bar(j - 0.18, a, width=0.34, color=VAR_COLORS[v])
-        ax.bar(j + 0.18, b, width=0.34, color=VAR_COLORS[v], alpha=0.35)
+    for j, v in enumerate(V4):
+        s_ = mt[mt.variant == v]
+        if not len(s_):
+            continue
+        g = s_.gain.max()
+        r = s_[s_.gain == g].groupby("set").brain_rate.mean()
+        ax.bar(j - 0.18, 100 * (r["lLN1_bc"] / r["intact"] - 1), width=0.34, color=VAR_COLORS[v])
+        ax.bar(j + 0.18, 100 * (r["degree_matched_30"] / r["intact"] - 1), width=0.34, color=VAR_COLORS[v], alpha=0.35)
     ax.axhline(0, color=INK, lw=0.5)
-    ax.set_xticks(range(3), ["MC", "CV", "NM"], fontsize=5.5)
+    ax.set_xticks(range(4), [VAR_SHORT[v] for v in V4], fontsize=5.5)
     ax.set_ylabel("Change in mean rate (%)")
-    ax.set_title("dark, lLN1_bc (30)\nlight, random (5,177)", fontsize=4.8, color=INK2, loc="left")
+    ax.set_title("dark, lLN1_bc\nlight, degree-matched", fontsize=4.8, color=INK2, loc="left")
     panel_label(ax, "e", x=-0.7)
     save(fig, "fig3")
 
@@ -546,30 +557,34 @@ def _early_list(ax, tag, title):
     ax.axvline(0, color=INK, lw=0.5)
     ax.set_yticks(yy, [f"{g.replace('|', ' ')} ({n})" for g, n in zip(cand.group, cand.n)], fontsize=5)
     ax.set_xlabel("Crossing vs onset (ms)")
-    ax.set_title(title + f" ({int(ig.n_bursts.iloc[0])} bursts)", loc="left", fontsize=6, color=INK2)
+    ax.set_title(title + f" ({int(ig.n_bursts.iloc[0])} bursts)", loc="right", fontsize=6, color=INK2)
 
 
 def ed2():
     lad = pd.read_csv(RF / "ladder.csv")
     lc = pd.read_csv(RF / "ladder_classes.csv")
-    fig = plt.figure(figsize=(DOUBLE, 80 * MM))
-    gs = GridSpec(1, 4, figure=fig, wspace=1.15)
-    ax = fig.add_subplot(gs[0, 0])
-    for v, c in [("shiu", MUTED), ("fixAL", BLUE), ("typevote", ORANGE), ("nomod", AQUA)]:
-        s = lad[lad.variant == v].groupby("gain").n_core.mean()
-        ax.plot(s.index, s.values + 1, color=c, marker="o", ms=2, lw=1, label={"shiu": "Published signs"}.get(v, VAR_LABEL.get(v)))
+    fig = plt.figure(figsize=(DOUBLE, 120 * MM))
+    gs = GridSpec(2, 6, figure=fig, wspace=2.2, hspace=0.6)
+    ax = fig.add_subplot(gs[0, 0:3])
+    for v, c in [("shiu", MUTED)] + [(v, VAR_COLORS[v]) for v in V4]:
+        if v not in set(lad.variant):
+            continue
+        s_ = lad[lad.variant == v].groupby("gain").n_core.mean()
+        ax.plot(s_.index, s_.values + 1, color=c, marker="o", ms=2, lw=1, label={"shiu": "Published signs"}.get(v, VAR_LABEL.get(v)))
     ax.set_yscale("log")
+    ax.axvline(1, color=MUTED, lw=0.5, ls=":")
     ax.set_xlabel("Synaptic gain")
     ax.set_ylabel("Self-sustaining neurons + 1")
     ax.legend(fontsize=5)
-    panel_label(ax, "a", x=-0.4)
-    ax = fig.add_subplot(gs[0, 1])
+    panel_label(ax, "a", x=-0.2)
+    ax = fig.add_subplot(gs[0, 3:6])
     rows = []
-    for v in ["shiu", "fixAL", "typevote", "nomod"]:
-        s = lad[(lad.variant == v) & (lad.n_core > 0)]
-        if not len(s):
+    for v in ["shiu"] + V4:
+        mc = lad[lad.variant == v].groupby("gain").n_core.mean()
+        mc = mc[mc > 20]
+        if not len(mc):
             continue
-        g0 = s.gain.min()
+        g0 = mc.index.min()
         sub = lc[(lc.variant == v) & (lc.gain == g0)].groupby("cell_class").n.sum().sort_values(ascending=False)
         rows.append((v, g0, sub / sub.sum()))
     allc = ["ALLN", "ALPN", "Kenyon_Cell", "LHLN"]
@@ -581,77 +596,80 @@ def ed2():
                    label=["AL LNs", "AL PNs", "Kenyon cells", "LH LNs", "Other"][k] if j == 0 else None)
             bottom += val
         ax.text(j, 1.02, f"g={g0:g}", ha="center", fontsize=5)
-    ax.set_xticks(range(len(rows)), [{"shiu": "Published", "fixAL": "MC", "typevote": "CV", "nomod": "NM"}[r[0]] for r in rows], fontsize=5.5)
-    ax.set_ylabel("Share of first self-sustained core")
+    ax.set_xticks(range(len(rows)), [{"shiu": "Published"}.get(r[0], VAR_SHORT.get(r[0])) for r in rows], fontsize=5.5)
+    ax.set_ylabel("Share of first core (> 20 neurons)")
     ax.legend(fontsize=4.8, loc="upper left", bbox_to_anchor=(1, 1))
-    panel_label(ax, "b", x=-0.4)
-    ax = fig.add_subplot(gs[0, 2])
-    _early_list(ax, "typevote_g2.00", "Cell-type vote, g = 2")
-    panel_label(ax, "c", x=-0.9)
-    ax = fig.add_subplot(gs[0, 3])
-    _early_list(ax, "nomod_g2.50", "No fast monoamines, g = 2.5")
-    panel_label(ax, "d", x=-0.9)
+    panel_label(ax, "b", x=-0.2)
+    for k, (tag, title, lab) in enumerate([("fixALlit_g2.50", "Literature-consistent, g = 2.5", "c"),
+                                          ("typevote_g2.00", "Cell-type vote, g = 2", "d"),
+                                          ("nomod_g2.50", "No fast monoamines, g = 2.5", "e")]):
+        ax = fig.add_subplot(gs[1, 2 * k: 2 * k + 2])
+        if (RF / f"ignition_{tag}.csv").exists():
+            _early_list(ax, tag, title)
+        panel_label(ax, lab, x=-0.55, y=1.1)
     save(fig, "ed2")
 
 
 def ed3():
-    con, ann, codes, names = _fly_meta()
-    eln = _eln_mask(ann)
-    cls = _class_of(ann, eln)
     fig = plt.figure(figsize=(DOUBLE, 62 * MM))
     gs = GridSpec(1, 4, figure=fig, wspace=0.9)
     ax = fig.add_subplot(gs[0, 0])
-    tags = [("fixAL_g2.50", "Base"), ("fixAL_g2.50-h0.15", "Drive ×0.5"), ("fixAL_g2.50-h0.6", "Drive ×2"),
-            ("fixAL_g2.50-U0.1tau1000", "Stronger STD"), ("fixAL_g2.50-seed6", "Seed 2"), ("fixAL_g2.50-seed7", "Seed 3")]
+    nl = pd.read_csv(RF / "crossing_null.csv")
+    nl = nl[nl.file.str.startswith("spikes_fixAL_")]
+    tags = [("spikes_fixAL_g2.50", "Base"), ("spikes_fixAL_g2.50-h0.15", "Drive ×0.5"), ("spikes_fixAL_g2.50-h0.6", "Drive ×2"),
+            ("spikes_fixAL_g2.50-U0.1tau1000", "Stronger STD"), ("spikes_fixAL_g2.50-seed6", "Seed 2"),
+            ("spikes_fixAL_g2.50-seed7", "Seed 3")]
     for k, (t, lab) in enumerate(tags):
-        f = RF / f"ignition_{t}.csv"
-        if not f.exists():
-            continue
-        ig = pd.read_csv(f).set_index("group")
-        for side, c, dx in [("L", BLUE, -0.15), ("R", ORANGE, 0.15)]:
-            g = f"lLN1_bc|{side}"
-            if g in ig.index:
-                ax.scatter(k + dx, ig.loc[g, "cross_ms_median"], s=8 + 20 * ig.loc[g, "frac_bursts_crossed"], color=c, lw=0)
-        ax.text(k, 22, f"{int(ig.n_bursts.iloc[0])}", ha="center", fontsize=5, color=INK2)
-    ax.axhline(0, color=INK, lw=0.5)
+        sub = nl[nl.file == t]
+        for j, (g, c) in enumerate([("lLN1_bc|L", BLUE), ("lLN1_bc|R", ORANGE), ("lLN2X12|L", AQUA)]):
+            r = sub[sub.group == g]
+            if not len(r):
+                continue
+            r = r.iloc[0]
+            x = k + (j - 1) * 0.22
+            ax.plot([x, x], [r.frac_before_random, r.frac_before_burst], color=c, lw=0.8)
+            ax.scatter(x, r.frac_before_burst, s=10, color=c, lw=0, zorder=3, marker="o")
+            ax.scatter(x, r.frac_before_random, s=8, facecolor="white", edgecolor=c, lw=0.6, zorder=3)
+            if r.p_fisher < 0.05:
+                ax.text(x, r.frac_before_burst + 0.03, "*", ha="center", fontsize=6, color=c)
     ax.set_xticks(range(len(tags)), [l for _, l in tags], rotation=35, ha="right", fontsize=5.3)
-    ax.set_ylabel("lLN1_bc crossing vs onset (ms)")
-    ax.set_ylim(-80, 28)
-    ax.text(0.02, 0.03, "blue, left; orange, right\nsize, fraction of bursts\nnumbers, bursts", transform=ax.transAxes, fontsize=4.8, color=INK2)
-    panel_label(ax, "a", x=-0.4)
+    ax.set_ylabel("Threshold crossed in 50 ms before\nburst (filled) or random time (open)")
+    ax.set_ylim(0, 0.85)
+    ax.text(0.02, 0.97, "blue, lLN1_bc L; orange, lLN1_bc R;\naqua, lLN2X12 L; *, Fisher P < 0.05", transform=ax.transAxes,
+            fontsize=4.6, color=INK2, va="top")
+    panel_label(ax, "a", x=-0.42)
     ctl = RF / "eln_pn_control.csv"
+    c = pd.read_csv(ctl)
     ax = fig.add_subplot(gs[0, 1])
-    if ctl.exists():
-        c = pd.read_csv(ctl)
-        for j, v in enumerate(["fixAL", "nomod"]):
-            s = c[c.variant == v].set_index("test").value
-            al, kc = s.get("perron_share_AL_cholinergic_LNs", np.nan), s.get("perron_share_KC", np.nan)
-            ax.bar(j - 0.18, al, width=0.34, color=RED)
-            ax.bar(j + 0.18, kc, width=0.34, color=BLUE)
-        ax.set_xticks([0, 1], ["MC", "NM"])
-        ax.set_ylabel("Perron weight share\n(no eLN→PN synapses)")
-        ax.text(0.02, 0.95, "red, AL cholinergic LNs\nblue, Kenyon cells", transform=ax.transAxes, fontsize=4.8, color=INK2, va="top")
-        panel_label(ax, "b", x=-0.45)
-        ax = fig.add_subplot(gs[0, 2])
-        for j, v in enumerate(["fixAL", "nomod"]):
-            s = c[c.variant == v].groupby("test").value.mean()
-            for k, (nm, col) in enumerate([("intact", INK), ("lLN1_bc", RED), ("random30", MUTED)]):
-                ax.bar(j + (k - 1) * 0.25, s.get(f"bursts_per_min_{nm}", np.nan), width=0.23, color=col,
-                       label=["Intact", "lLN1_bc silenced", "30 random silenced"][k] if j == 0 else None)
-        ax.set_xticks([0, 1], ["MC", "NM"])
-        ax.set_ylabel("Bursts per min (g = 2.5,\nno eLN→PN synapses)")
-        ax.legend(fontsize=4.8)
-        panel_label(ax, "c", x=-0.45)
+    for j, v in enumerate(["fixAL", "nomod"]):
+        s_ = c[c.variant == v].set_index("test").value
+        ax.bar(j - 0.18, s_.get("perron_share_AL_cholinergic_LNs", np.nan), width=0.34, color=RED)
+        ax.bar(j + 0.18, s_.get("perron_share_KC", np.nan), width=0.34, color=BLUE)
+    ax.set_xticks([0, 1], ["MC", "NM"])
+    ax.set_ylabel("Perron weight share\n(no eLN→PN synapses)")
+    ax.text(0.02, 0.95, "red, AL cholinergic LNs\nblue, Kenyon cells", transform=ax.transAxes, fontsize=4.8, color=INK2, va="top")
+    panel_label(ax, "b", x=-0.45)
+    ax = fig.add_subplot(gs[0, 2])
+    for j, v in enumerate(["fixAL", "nomod"]):
+        s_ = c[c.variant == v].groupby("test").value.mean()
+        for k, (nm, col) in enumerate([("intact", INK), ("lLN1_bc", RED), ("random30", MUTED)]):
+            ax.bar(j + (k - 1) * 0.25, s_.get(f"bursts_per_min_{nm}", np.nan), width=0.23, color=col,
+                   label=["Intact", "lLN1_bc silenced", "30 random silenced"][k] if j == 0 else None)
+    ax.set_xticks([0, 1], ["MC", "NM"])
+    ax.set_ylabel("Bursts per min (g = 2.5,\nno eLN→PN synapses)")
+    ax.legend(fontsize=4.8, loc="upper right")
+    panel_label(ax, "c", x=-0.45)
     ax = fig.add_subplot(gs[0, 3])
-    for j, v in enumerate(["fixAL", "typevote", "nomod"]):
-        dd = pd.read_parquet(RF / f"structure_neurons_{v}.parquet")
-        L = dd.perron[dd.group.str.endswith("|L")].sum() / dd.perron.sum()
-        R = dd.perron[dd.group.str.endswith("|R")].sum() / dd.perron.sum()
-        ax.bar(j - 0.18, L, width=0.34, color=BLUE)
-        ax.bar(j + 0.18, R, width=0.34, color=ORANGE)
-    ax.set_xticks(range(3), ["MC", "CV", "NM"])
-    ax.set_ylabel("Perron weight by hemisphere")
-    ax.text(0.98, 0.95, "blue, left\norange, right", transform=ax.transAxes, fontsize=4.8, color=INK2, va="top", ha="right")
+    tm = pd.read_csv(RF / "perron_two_modes.csv")
+    for j, v in enumerate(V4):
+        s_ = tm[tm.variant == v].set_index("mode")
+        for m, dx in [(1, -0.2), (2, 0.2)]:
+            ax.bar(j + dx, s_.loc[m, "left"], width=0.36, color=BLUE)
+            ax.bar(j + dx, s_.loc[m, "right"], bottom=s_.loc[m, "left"], width=0.36, color=ORANGE)
+            ax.text(j + dx, 1.01, str(m), ha="center", fontsize=5)
+    ax.set_xticks(range(4), [VAR_SHORT[v] for v in V4])
+    ax.set_ylim(0, 1.08)
+    ax.set_ylabel("Weight of leading modes 1 and 2\n(blue, left; orange, right)")
     panel_label(ax, "d", x=-0.45)
     save(fig, "ed3")
 
