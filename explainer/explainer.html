@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>脳の火種はどこにある</title>
+<style>
+:root {
+  --key-50: #e8f1fe;
+  --key-100: #d9e6ff;
+  --key-200: #c5d7fb;
+  --key-900: #0017c1;
+  --key-1000: #00118f;
+  --text: #1a1a1a;
+  --gray-50: #f2f2f2;
+  --gray-100: #e6e6e6;
+  --gray-200: #cccccc;
+  --gray-300: #b3b3b3;
+  --gray-536: #767676;
+  --gray-600: #666666;
+  --gray-700: #4d4d4d;
+  --gray-800: #333333;
+  --left: #0017c1;      /* 左半球 = Blue-900 */
+  --left-bg: #e8f1fe;
+  --right: #c74700;     /* 右半球 = Orange-800 */
+  --right-bg: #ffeee2;
+  --exc: #ce0000;       /* アクセル（興奮）= Red-900 */
+  --inh: #006f83;       /* ブレーキ（抑制）= Cyan-900 */
+  --ok: #197a4b;        /* Green-800 */
+  --ok-bg: #e6f5ec;
+  --ng: #a90000;        /* Red-1000 */
+  --ng-bg: #fdeeee;
+  --warn-bg: #fbf5e0;
+  --warn: #806300;
+  --font: 'Noto Sans JP', 'Noto Sans CJK JP', sans-serif;
+}
+
+@page {
+  size: A4;
+  margin: 15mm 17mm 17mm 17mm;
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: 'Noto Sans JP', 'Noto Sans CJK JP', sans-serif;
+    font-size: 9pt;
+    color: #767676;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "palt" 0;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+}
+@media print {
+  main { max-width: none; padding: 0; }
+}
+
+p { margin: 0 0 1em; }
+strong { font-weight: 700; }
+small, .small { font-size: 14px; line-height: 1.6; color: var(--gray-700); }
+
+/* ---------- 表紙ブロック ---------- */
+.doc-label {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--key-900);
+  border: 1px solid var(--key-900);
+  border-radius: 4px;
+  padding: 2px 10px;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.4;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: 0.02em;
+}
+.subtitle {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--gray-700);
+  margin: 0 0 16px;
+}
+.meta {
+  font-size: 14px;
+  color: var(--gray-600);
+  border-top: 1px solid var(--gray-200);
+  padding-top: 8px;
+  margin-bottom: 24px;
+}
+
+/* ---------- 要約 ---------- */
+.summary {
+  background: var(--key-50);
+  border: 1px solid var(--key-200);
+  border-radius: 8px;
+  padding: 16px 22px 4px;
+  margin: 0 0 20px;
+  break-inside: avoid;
+}
+.summary h2 {
+  font-size: 20px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  color: var(--key-1000);
+}
+.summary ol { margin: 0 0 12px; padding-left: 1.6em; }
+.summary li { margin-bottom: 4px; font-size: 15px; line-height: 1.65; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0 0 20px;
+  break-inside: avoid;
+}
+.stat {
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.stat .num {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+.stat .num .unit { font-size: 16px; font-weight: 700; margin-left: 2px; }
+.stat .lab { font-size: 13px; line-height: 1.5; color: var(--gray-700); margin-top: 4px; }
+
+.toc {
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 12px 0;
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.65;
+  columns: 2;
+  column-gap: 24px;
+  break-inside: avoid;
+}
+.toc .toc-title { font-weight: 700; column-span: all; margin-bottom: 4px; }
+.toc ol { margin: 0; padding-left: 1.8em; }
+
+/* ---------- 見出し ---------- */
+section { margin-top: 32px; }
+h2 {
+  font-size: 24px;
+  line-height: 1.45;
+  font-weight: 700;
+  margin: 0 0 16px;
+  padding-top: 12px;
+  border-top: 3px solid var(--key-900);
+  break-after: avoid;
+  break-inside: avoid;
+}
+h2 .secno {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--key-900);
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+h3 {
+  font-size: 19px;
+  line-height: 1.5;
+  font-weight: 700;
+  margin: 28px 0 10px;
+  break-after: avoid;
+}
+h3 + p, h2 + p { break-before: avoid; }
+
+/* ---------- ボックス ---------- */
+.box {
+  border-radius: 8px;
+  padding: 14px 18px 4px;
+  margin: 0 0 20px;
+  break-inside: avoid;
+}
+.box .box-title { font-weight: 700; margin-bottom: 6px; }
+.box.note { background: var(--gray-50); }
+.box.key { background: var(--key-50); border: 1px solid var(--key-200); }
+.box.caution { background: #ffffff; border: 2px solid var(--gray-800); break-inside: auto; }
+.box ul, .box ol { margin: 0 0 10px; padding-left: 1.4em; }
+.box li { margin-bottom: 4px; }
+
+.placeholder {
+  background: var(--warn-bg);
+  border: 2px dashed var(--warn);
+  border-radius: 8px;
+  padding: 14px 18px 4px;
+  margin: 0 0 20px;
+  break-inside: avoid;
+}
+.placeholder .ph-tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--warn);
+  border-radius: 4px;
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+.tbd {
+  font-weight: 700;
+  color: var(--warn);
+  white-space: nowrap;
+}
+
+ul.plain { padding-left: 1.4em; margin: 0 0 1em; }
+ul.plain li { margin-bottom: 6px; }
+
+/* ---------- 図 ---------- */
+figure {
+  margin: 8px 0 24px;
+  break-inside: avoid;
+}
+figure svg, figure img { display: block; width: 100%; height: auto; }
+figure img { border-radius: 6px; }
+figcaption {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gray-700);
+  margin-top: 8px;
+}
+figcaption .fig-no { font-weight: 700; color: var(--text); margin-right: 0.5em; }
+
+.fig-side {
+  display: grid;
+  grid-template-columns: 44% 1fr;
+  gap: 20px;
+  align-items: start;
+  margin: 8px 0 24px;
+  break-inside: avoid;
+}
+.fig-side figure { margin: 0; }
+
+/* ---------- 表 ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+  break-inside: avoid;
+}
+th, td {
+  border-bottom: 1px solid var(--gray-200);
+  padding: 8px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+thead th {
+  background: var(--gray-50);
+  border-bottom: 2px solid var(--gray-800);
+  font-weight: 700;
+  font-size: 14px;
+}
+td.num, th.num { text-align: right; white-space: nowrap; }
+.tbl-wrap { margin: 8px 0 24px; break-inside: avoid; }
+.tbl-cap { font-size: 14px; color: var(--gray-700); margin-top: 6px; line-height: 1.6; }
+.tbl-cap .fig-no { font-weight: 700; color: var(--text); margin-right: 0.5em; }
+.pass { color: var(--ok); font-weight: 700; }
+.fail { color: var(--ng); font-weight: 700; }
+.side-l { color: var(--left); font-weight: 700; }
+.side-r { color: var(--right); font-weight: 700; }
+
+table.grid td.c, table.grid th.c { text-align: center; width: 9%; padding: 6px 2px; }
+table.grid td.c.o { background: var(--ok-bg); color: var(--ok); font-weight: 700; }
+table.grid td.c.x { background: var(--ng-bg); color: var(--ng); font-weight: 700; }
+table.grid td.c { border-left: 2px solid #ffffff; }
+table.grid td.total { text-align: center; font-weight: 700; white-space: nowrap; }
+
+/* ---------- 用語集・FAQ・原稿 ---------- */
+dl.glossary { margin: 0; }
+dl.glossary div {
+  display: grid;
+  grid-template-columns: 11em 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-200);
+  break-inside: avoid;
+}
+dl.glossary dt { font-weight: 700; }
+dl.glossary dd { margin: 0; }
+dl.glossary .yomi { display: block; font-size: 13px; font-weight: 400; color: var(--gray-600); }
+
+.faq { margin: 0 0 18px; break-inside: avoid; }
+.faq .q { font-weight: 700; margin-bottom: 4px; display: flex; gap: 8px; }
+.faq .a { display: flex; gap: 8px; }
+.faq .mark {
+  flex: none;
+  display: inline-block;
+  width: 1.7em; height: 1.7em;
+  line-height: 1.7em;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 2px;
+}
+.faq .q .mark { background: var(--key-900); color: #ffffff; }
+.faq .a .mark { background: var(--gray-100); color: var(--gray-800); }
+.faq .a p { margin: 0; }
+
+.script {
+  border-left: 4px solid var(--key-900);
+  padding: 4px 0 4px 20px;
+  margin: 0 0 16px;
+}
+.script p { margin-bottom: 0.9em; break-inside: avoid; }
+.script .cue { font-size: 13px; font-weight: 700; color: var(--key-900); letter-spacing: 0.05em; display: block; }
+
+.page-break { break-before: page; }
+
+.footer-note {
+  margin-top: 40px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-200);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--gray-600);
+}
+
+.stats4 { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stats4 .stat .num { font-size: 23px; }
+.stats4 .stat .num .unit { font-size: 14px; }
+.nw { white-space: nowrap; }
+ol.plain-ol { padding-left: 1.6em; margin: 0 0 1em; }
+ol.plain-ol li { margin-bottom: 8px; }
+dl.glossary.two { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+dl.glossary.two div { display: block; padding: 6px 0; font-size: 14px; line-height: 1.55; }
+dl.glossary.two dt { display: inline; }
+dl.glossary.two dt::after { content: "："; }
+dl.glossary.two dd { display: inline; }
+dl.glossary.two .yomi { display: inline; font-size: 13px; margin-left: 0.3em; }
+dl.glossary.two .yomi::before { content: "（"; }
+dl.glossary.two .yomi::after { content: "）"; }
+figure img.w80 { width: 80%; margin: 0 auto; }
+figure img.w70 { width: 70%; margin: 0 auto; }
+.fig-side.fig-wide { grid-template-columns: 50% 1fr; }
+figure.fig-cap-side { display: grid; grid-template-columns: 52% 1fr; gap: 18px; align-items: end; }
+figure.fig-cap-side figcaption { margin-top: 0; }
+figure img.w90 { width: 90%; margin: 0 auto; }
+@media print {
+  main { zoom: 0.83; }
+  section { margin-top: 22px; }
+  figure, .fig-side { margin: 6px 0 16px; }
+  h3 { margin: 18px 0 8px; }
+  h2 { margin-bottom: 12px; }
+  .box { margin-bottom: 14px; }
+  .footer-note { margin-top: 14px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<main>
+
+<!-- ======================= 表紙ブロック ======================= -->
+<header>
+  <div class="doc-label">やさしい研究解説　第 1 版</div>
+  <h1>脳の「火種」はどこにある？<br>お皿の上の神経とハエの脳の配線図で、自発活動の中心を探す</h1>
+  <p class="subtitle">神経のネットワークは、何もしなくても、ときどき全体でいっせいに発火する。その火はどこからつき、何に支えられているのか。お皿で育てた神経細胞とハエの脳の配線図を同じ物差しで調べると、においの中継所にある、いつも燃え続けるアクセルのループが浮かび上がった。</p>
+  <div class="meta"><span class="nw">2026 年 10 月 27 日の一日で行った計算研究の解説（論文草稿にもとづく）</span>　｜　<span class="nw">約 20&nbsp;分で読めます</span>　｜　<span class="nw">予備知識は不要です</span></div>
+</header>
+
+<div class="summary">
+  <h2>30&nbsp;秒でわかる要約</h2>
+  <ol>
+    <li>神経細胞のネットワークは、外から何も入れなくても、ときどき全体でいっせいに発火します（<strong>ネットワークバースト</strong>）。お皿で育てたラットの神経細胞で調べると、その火がつく場所（<strong>点火点</strong>）は、日をまたいでも同じ「ホットスポット」に戻ってきました。</li>
+    <li>0.1&nbsp;mm 四方の場所ごとに比べると、点火点は「よく発火する場所」よりも、ネットワークが<strong>いちばん増幅しやすいゆらぎのパターン（主モード）</strong>とよく重なっていました。ただし効果は中くらいで、電極の配置の影響も受けます。</li>
+    <li>ハエの脳の配線図（138,639&nbsp;個のニューロン）から作ったコンピューターの脳では、配線の主モードが<strong>左右の触角葉（においの中継所）のアクセルのループ</strong>（局所ニューロンと投射ニューロン）に集まっていました。文献と矛盾しない仮定では、ここの細胞は<strong>いつも燃え続ける「エンジン」</strong>で、100&nbsp;個あまりの細胞が脳全体のアクセル信号の約半分を出していました。ループの一部（111&nbsp;個）を黙らせると、自発バーストは 4&nbsp;分の 1〜半分に減りました。</li>
+    <li>本物のハエ 20&nbsp;匹の脳の記録でも、触角葉は<strong>脳の中でいちばんゆっくり、大きくゆらぐ場所</strong>でした。これは予測と矛盾しない結果ですが、証明ではありません。本物のハエで確かめるのはこれからです。</li>
+  </ol>
+</div>
+
+<div class="stats stats4">
+  <div class="stat">
+    <div class="num">81<span class="unit">%</span></div>
+    <div class="lab">培養：よく最初に発火する上位 10% の電極が、バーストの 81% で口火を切った（偶然なら 48%）</div>
+  </div>
+  <div class="stat">
+    <div class="num">49〜56<span class="unit">%</span></div>
+    <div class="lab">ハエのモデル：駆動の強い上位 111&nbsp;個（8&nbsp;割前後が触角葉のループ）が出す、脳全体のアクセル信号の割合（文献と矛盾しない仮定）</div>
+  </div>
+  <div class="stat">
+    <div class="num">0.25〜0.47<span class="unit">倍</span></div>
+    <div class="lab">触角葉のアセチルコリン性局所ニューロン 111&nbsp;個を黙らせたあとの自発バースト（4&nbsp;つの仮定すべて）</div>
+  </div>
+  <div class="stat">
+    <div class="num">18 / 20<span class="unit">匹</span></div>
+    <div class="lab">本物のハエ：触角葉がほかの領域よりゆっくりゆらいでいたハエの数</div>
+  </div>
+</div>
+
+<nav class="toc" aria-label="目次">
+  <div class="toc-title">目次</div>
+  <ol>
+    <li>脳は、何もしなくても動いている</li>
+    <li>お皿の上の神経と、電極チップ</li>
+    <li>いっせい発火（バースト）と「点火点」</li>
+    <li>この研究の問いと進め方</li>
+    <li>わかったこと① 培養：火は同じ場所からつく</li>
+    <li>わかったこと② 火元と「主モード」</li>
+    <li>ハエの配線図と、コンピューターの脳</li>
+    <li>わかったこと③ ハエの火種は触角葉に</li>
+    <li>わかったこと④ 黙らせるとバーストが減る</li>
+    <li>わかったこと⑤ 本物のハエの触角葉</li>
+    <li>これは「予測」であって「証明」ではない</li>
+    <li>どんな実験で確かめられるか</li>
+    <li>まだわからないこと・限界</li>
+    <li>用語集</li>
+  </ol>
+</nav>
+
+<!-- ======================= 1 ======================= -->
+<section id="s1">
+  <h2><span class="secno">1</span>脳は、何もしなくても動いている</h2>
+
+  <p>脳は<strong>ニューロン（神経細胞）</strong>という小さな部品でできています。ニューロンは長い「電線」を伸ばしてほかのニューロンとつながり、そのつなぎ目を<strong>シナプス</strong>と呼びます。</p>
+  <p>ニューロンの中には、入ってくる信号で少しずつ電気がたまります。ある量（しきい値）を超えると、一瞬「パチッ」と信号を出して元に戻ります。この「パチッ」が<strong>スパイク</strong>です。日本庭園の<strong>ししおどし</strong>に似ています。竹筒に水がたまり、いっぱいになると「カコン」と倒れて空になり、また水がたまり始めます。1&nbsp;秒間に何回パチッとしたかを <strong>Hz（ヘルツ）</strong>で表します。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 200" role="img" aria-label="左はニューロン A から B へのつながりとシナプス。右は、電気がたまってしきい値を超えるとスパイクが出てリセットされる様子">
+      <style>
+        .t { font-family: 'Noto Sans JP','Noto Sans CJK JP',sans-serif; }
+        text.t:not([fill]) { fill: #1a1a1a; }
+      </style>
+      <!-- left: two neurons -->
+      <g stroke="#0017c1" stroke-width="2" fill="none" stroke-linecap="round">
+        <path d="M40 92 L18 74 M40 100 L12 100 M40 108 L18 126"/>
+        <path d="M80 100 L200 100"/>
+        <path d="M200 100 C212 100 214 76 226 76"/>
+        <path d="M200 100 L226 100"/>
+        <path d="M200 100 C212 100 214 124 226 124"/>
+      </g>
+      <circle cx="60" cy="100" r="20" fill="#e8f1fe" stroke="#0017c1" stroke-width="2"/>
+      <g fill="#0017c1"><circle cx="232" cy="76" r="5"/><circle cx="232" cy="100" r="5"/><circle cx="232" cy="124" r="5"/></g>
+      <g stroke="#4d4d4d" stroke-width="2" fill="none"><path d="M238 76 C252 76 256 96 268 98"/><path d="M238 100 L268 100"/><path d="M238 124 C252 124 256 104 268 102"/></g>
+      <circle cx="286" cy="100" r="18" fill="#f2f2f2" stroke="#4d4d4d" stroke-width="2"/>
+      <text class="t" x="60" y="146" font-size="13" font-weight="700" text-anchor="middle">ニューロン A</text>
+      <text class="t" x="286" y="146" font-size="13" font-weight="700" text-anchor="middle">ニューロン B</text>
+      <path d="M236 44 L232 66" stroke="#0017c1" stroke-width="1.5"/>
+      <text class="t" x="236" y="38" font-size="13" font-weight="700" fill="#0017c1" text-anchor="middle">シナプス（つなぎ目）</text>
+      <text class="t" x="140" y="88" font-size="12" text-anchor="middle" fill="#4d4d4d">電線（軸索）</text>
+      <text class="t" x="170" y="185" font-size="12" text-anchor="middle" fill="#4d4d4d">つなぎ目が多いほど、信号は強く伝わる</text>
+
+      <!-- right: integrate and fire trace -->
+      <line x1="340" y1="18" x2="340" y2="160" stroke="#cccccc" stroke-width="1"/>
+      <path d="M370 60 L640 60" stroke="#ce0000" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text class="t" x="642" y="56" font-size="12" text-anchor="end" fill="#ce0000">しきい値</text>
+      <path d="M370 140 L640 140" stroke="#b3b3b3" stroke-width="1"/>
+      <path d="M370 140 C400 130 420 96 440 62 L440 22 L442 140 C470 132 490 118 505 108 C520 100 528 112 540 104 C560 92 575 74 588 62 L588 22 L590 140 C610 134 625 128 640 124"
+            stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linejoin="round"/>
+      <text class="t" x="440" y="16" font-size="13" font-weight="700" text-anchor="middle">パチッ</text>
+      <text class="t" x="588" y="16" font-size="13" font-weight="700" text-anchor="middle">パチッ</text>
+      <text class="t" x="392" y="100" font-size="12" fill="#4d4d4d" text-anchor="middle">たまる</text>
+      <text class="t" x="476" y="160" font-size="12" fill="#4d4d4d">リセット</text>
+      <text class="t" x="640" y="160" font-size="12" text-anchor="end" fill="#767676">時間 →</text>
+      <text class="t" x="500" y="190" font-size="12" text-anchor="middle" fill="#4d4d4d">ニューロンの中の電気（ししおどしの水の量）</text>
+    </svg>
+    <figcaption><span class="fig-no">図 1</span>ニューロンとスパイク。左：A から B へのつながり。右：入ってくる信号で電気がたまり、しきい値を超えると「パチッ」とスパイクを出して元に戻る。</figcaption>
+  </figure>
+
+  <p>ニューロンには、相手をパチッとさせやすくする<strong>アクセル型（興奮性）</strong>と、させにくくする<strong>ブレーキ型（抑制性）</strong>があります。どちらなのかは、つなぎ目で出す化学物質（<strong>神経伝達物質</strong>）の種類で決まります。たとえばアセチルコリンはアクセル、GABA はブレーキです。</p>
+
+  <h3>「自発活動」とは</h3>
+  <p>驚くことに、脳は外から何の刺激がなくても、静かになりません。ニューロンはあちこちで勝手にパチッとしています。これを<strong>自発活動</strong>と呼びます。コンサートの開演前、客席がなんとなくざわざわしている状態に似ています。誰かが話し、隣が笑い、またどこかで声が上がる。脳はいつも、こうした「ざわめき」の上で動いています。眠っているときの脳波も、自発活動の一種です。</p>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section id="s2">
+  <h2><span class="secno">2</span>お皿の上の神経と、電極チップ</h2>
+
+  <p>自発活動をいちばん単純な形で見られるのが<strong>分散培養</strong>です。ラットの胎児（生まれる前の赤ちゃん）の大脳皮質から神経細胞を取り出し、一つ一つばらばらにしてお皿にまきます。すると細胞たちは、1〜2&nbsp;週間のうちに自分たちで電線を伸ばしてつながり合い、小さなネットワークを作ります。誰も設計していないのに、です。</p>
+  <p>そのお皿の底に電極を並べておけば、細胞のパチッを電気的に聞き取れます。これが <strong>MEA（多電極アレイ）</strong>です。この研究で使った <strong>MaxOne</strong> という高密度 MEA（HD-MEA）は、約 4&nbsp;mm × 2&nbsp;mm の範囲に <strong>26,400&nbsp;個</strong>の電極が 17.5&nbsp;マイクロメートル（髪の毛の太さの数分の 1）間隔で並び、1&nbsp;回の記録ではそのうち約 1,000&nbsp;個を選んで聞きます。床一面にマイクを敷き詰めたホールのようなものです。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 210" role="img" aria-label="ばらばらにした神経細胞をお皿にまくと、1〜2 週間でつながり合い、電極チップの上でその活動を記録できることを示す図">
+      <style>
+        .t { font-family: 'Noto Sans JP','Noto Sans CJK JP',sans-serif; }
+        text.t:not([fill]) { fill: #1a1a1a; }
+      </style>
+      <!-- panel 1: scattered cells -->
+      <text class="t" x="95" y="18" font-size="14" font-weight="700" text-anchor="middle">① ばらばらにしてまく</text>
+      <ellipse cx="95" cy="100" rx="80" ry="58" fill="#f2f2f2" stroke="#4d4d4d" stroke-width="1.5"/>
+      <g fill="#0017c1">
+        <circle cx="60" cy="80" r="5"/><circle cx="92" cy="70" r="5"/><circle cx="130" cy="86" r="5"/><circle cx="72" cy="118" r="5"/>
+        <circle cx="112" cy="122" r="5"/><circle cx="140" cy="112" r="5"/><circle cx="48" cy="104" r="5"/><circle cx="96" cy="98" r="5"/>
+      </g>
+      <text class="t" x="95" y="182" font-size="12" text-anchor="middle" fill="#4d4d4d">ラットの大脳皮質の神経細胞</text>
+      <path d="M186 100 L212 100" stroke="#4d4d4d" stroke-width="2"/><path d="M220 100 L210 94 L210 106 Z" fill="#4d4d4d"/>
+      <text class="t" x="203" y="88" font-size="11" text-anchor="middle" fill="#4d4d4d">1〜2 週間</text>
+
+      <!-- panel 2: connected network -->
+      <text class="t" x="320" y="18" font-size="14" font-weight="700" text-anchor="middle">② 勝手につながり合う</text>
+      <ellipse cx="320" cy="100" rx="80" ry="58" fill="#f2f2f2" stroke="#4d4d4d" stroke-width="1.5"/>
+      <g stroke="#0017c1" stroke-width="1.3" fill="none" opacity="0.8">
+        <path d="M285 80 L317 70 L355 86 L365 112 L337 122 L297 118 L273 104 Z"/>
+        <path d="M285 80 L321 98 L337 122 M317 70 L321 98 L365 112 M273 104 L321 98 L297 118"/>
+      </g>
+      <g fill="#0017c1">
+        <circle cx="285" cy="80" r="5"/><circle cx="317" cy="70" r="5"/><circle cx="355" cy="86" r="5"/><circle cx="297" cy="118" r="5"/>
+        <circle cx="337" cy="122" r="5"/><circle cx="365" cy="112" r="5"/><circle cx="273" cy="104" r="5"/><circle cx="321" cy="98" r="5"/>
+      </g>
+      <text class="t" x="320" y="182" font-size="12" text-anchor="middle" fill="#4d4d4d">小さなネットワークができる</text>
+      <path d="M410 100 L436 100" stroke="#4d4d4d" stroke-width="2"/><path d="M444 100 L434 94 L434 106 Z" fill="#4d4d4d"/>
+
+      <!-- panel 3: electrode grid -->
+      <text class="t" x="552" y="18" font-size="14" font-weight="700" text-anchor="middle">③ 電極チップで聞く</text>
+      <rect x="462" y="40" width="180" height="120" rx="4" fill="#ffffff" stroke="#4d4d4d" stroke-width="1.5"/>
+      <g fill="#cccccc">
+        <rect x="472" y="50" width="8" height="8"/><rect x="496" y="50" width="8" height="8"/><rect x="520" y="50" width="8" height="8"/><rect x="544" y="50" width="8" height="8"/><rect x="568" y="50" width="8" height="8"/><rect x="592" y="50" width="8" height="8"/><rect x="616" y="50" width="8" height="8"/>
+        <rect x="472" y="74" width="8" height="8"/><rect x="496" y="74" width="8" height="8"/><rect x="520" y="74" width="8" height="8"/><rect x="544" y="74" width="8" height="8"/><rect x="568" y="74" width="8" height="8"/><rect x="592" y="74" width="8" height="8"/><rect x="616" y="74" width="8" height="8"/>
+        <rect x="472" y="98" width="8" height="8"/><rect x="496" y="98" width="8" height="8"/><rect x="520" y="98" width="8" height="8"/><rect x="544" y="98" width="8" height="8"/><rect x="568" y="98" width="8" height="8"/><rect x="592" y="98" width="8" height="8"/><rect x="616" y="98" width="8" height="8"/>
+        <rect x="472" y="122" width="8" height="8"/><rect x="496" y="122" width="8" height="8"/><rect x="520" y="122" width="8" height="8"/><rect x="544" y="122" width="8" height="8"/><rect x="568" y="122" width="8" height="8"/><rect x="592" y="122" width="8" height="8"/><rect x="616" y="122" width="8" height="8"/>
+        <rect x="472" y="146" width="8" height="8"/><rect x="496" y="146" width="8" height="8"/><rect x="520" y="146" width="8" height="8"/><rect x="544" y="146" width="8" height="8"/><rect x="568" y="146" width="8" height="8"/><rect x="592" y="146" width="8" height="8"/><rect x="616" y="146" width="8" height="8"/>
+      </g>
+      <g fill="#c74700"><rect x="520" y="74" width="8" height="8"/><rect x="568" y="98" width="8" height="8"/></g>
+      <g fill="#0017c1" opacity="0.85"><circle cx="530" cy="86" r="6"/><circle cx="574" cy="94" r="6"/><circle cx="500" cy="118" r="6"/><circle cx="604" cy="132" r="6"/></g>
+      <text class="t" x="552" y="180" font-size="12" text-anchor="middle" fill="#4d4d4d">四角＝電極（橙＝パチッを拾った）</text>
+      <text class="t" x="552" y="198" font-size="12" text-anchor="middle" fill="#4d4d4d">MaxOne は 26,400 個の電極</text>
+    </svg>
+    <figcaption><span class="fig-no">図 2</span>分散培養と MEA。ばらばらにした神経細胞が自分でネットワークを作り、その下に並んだ電極が近くの細胞のスパイクを拾う（模式図。実際の電極はもっとずっと細かい）。</figcaption>
+  </figure>
+
+  <p>データは、ほかの研究グループ（Nakamuta、Takahashi ら）が MaxOne で記録して公開したもの（DANDI 002020。7&nbsp;つの培養を、ほぼ毎日 30&nbsp;分ずつ記録）を使いました。古典的な別のデータ（Wagenaar ら 2006。電極 59&nbsp;個、30&nbsp;培養）で、再現するかも確かめています。</p>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section id="s3">
+  <h2><span class="secno">3</span>いっせい発火（バースト）と「点火点」</h2>
+
+  <p>培養した神経を眺めていると、ふだんはぱらぱらと発火しているのに、数秒から数分に 1&nbsp;回、<strong>ネットワーク全体がいっせいに発火</strong>します。これを<strong>ネットワークバースト</strong>と呼びます。客席のざわめきが、ある瞬間、スタジアムの<strong>ウェーブ</strong>のように全体に広がる感じです。</p>
+
+  <figure>
+    <img src="img/culture_raster.png" alt="培養神経の 30 秒間の記録。横軸が時間、縦に電極が並び、点がスパイク。数秒おきに縦の帯のように全電極がいっせいに発火している">
+    <figcaption><span class="fig-no">図 3</span>本物の培養の 30&nbsp;秒間（MaxOne の公開データ）。1&nbsp;行が 1&nbsp;つの電極、黒い点がスパイク。青い帯の時間に、ほぼすべての電極がいっせいに発火している。これがネットワークバースト。</figcaption>
+  </figure>
+
+  <p>ウェーブは、誰かが最初に立ち上がらないと始まりません。山火事も、どこか 1&nbsp;か所で火がついて燃え広がります。バーストも同じで、まず小さな 1&nbsp;か所が発火し、そこから周りへ広がっていきます。この最初の場所を、この研究では<strong>点火点</strong>と呼びます。具体的には、各バーストの<strong>最初の 20&nbsp;個のスパイクが出た場所の中心</strong>です。</p>
+
+  <div class="fig-side">
+    <figure>
+      <img src="img/chip_ignition.png" alt="暗い背景の電極チップの地図。左下の 1 か所が明るく光り、点火！と書かれている">
+      <figcaption><span class="fig-no">図 4</span>研究紹介動画の 1&nbsp;コマ。電極チップを上から見た図で、明るい点ほど強く発火している電極。バーストの直前、左下の 1&nbsp;か所だけが光っている。</figcaption>
+    </figure>
+    <div>
+      <p>森のどこで火がつきやすいかがわかれば、山火事の対策が立てられます。同じように、<strong>どこから火がつくのか、何がそこを火元にするのか</strong>がわかれば、脳が自発的に動くしくみや、「暴走」の弱点を知る手がかりになります。</p>
+      <p>培養では、決まった場所から火がつきやすいことが以前から知られていました。でも、<strong>本物の脳の配線の中にも同じような火元があるのか</strong>は、わかっていませんでした。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section id="s4">
+  <h2><span class="secno">4</span>この研究の問いと進め方</h2>
+  <p>問いは 3&nbsp;つです。<strong>自発的なバーストはどこから点火するのか。何がそこを点火点にするのか。ネットワークは暴走からどれくらい離れているのか。</strong>この同じ問いを、同じ物差しで、お皿の上の神経とハエの脳に当てはめました。ラットとハエでは動物も規模も違いますが、比べるのは動物そのものではなく、共通の問いと同じ物差し（点火点・主モード）です。培養は傾向を調べやすい単純な系、ハエは配線図が丸ごとわかっている本物の脳です。進め方は次の 4&nbsp;段階です。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 150" role="img" aria-label="研究の 4 段階：1 培養で点火点とそれを決めるものを調べる、2 ハエの脳モデルに当てはめる、3 候補を黙らせて確かめる、4 本物のハエの記録と照らし合わせる">
+      <style>
+        .t { font-family: 'Noto Sans JP','Noto Sans CJK JP',sans-serif; }
+        text.t:not([fill]) { fill: #1a1a1a; }
+      </style>
+      <g>
+        <rect x="2" y="10" width="148" height="128" rx="8" fill="#e8f1fe" stroke="#0017c1" stroke-width="1.5"/>
+        <rect x="172" y="10" width="148" height="128" rx="8" fill="#ffeee2" stroke="#c74700" stroke-width="1.5"/>
+        <rect x="342" y="10" width="148" height="128" rx="8" fill="#ffeee2" stroke="#c74700" stroke-width="1.5"/>
+        <rect x="512" y="10" width="146" height="128" rx="8" fill="#e6f5ec" stroke="#197a4b" stroke-width="1.5"/>
+      </g>
+      <g fill="#4d4d4d">
+        <path d="M152 74 L168 74 L162 68 M168 74 L162 80" stroke="#4d4d4d" stroke-width="2" fill="none"/>
+        <path d="M322 74 L338 74 L332 68 M338 74 L332 80" stroke="#4d4d4d" stroke-width="2" fill="none"/>
+        <path d="M492 74 L508 74 L502 68 M508 74 L502 80" stroke="#4d4d4d" stroke-width="2" fill="none"/>
+      </g>
+      <text class="t" x="76" y="36" font-size="14" font-weight="700" text-anchor="middle" fill="#0017c1">① 培養</text>
+      <text class="t" x="76" y="62" font-size="12" text-anchor="middle">公開データで</text>
+      <text class="t" x="76" y="80" font-size="12" text-anchor="middle">点火点と、それを</text>
+      <text class="t" x="76" y="98" font-size="12" text-anchor="middle">決めるものを調べる</text>
+      <text class="t" x="76" y="124" font-size="11" text-anchor="middle" fill="#4d4d4d">5・6 章</text>
+
+      <text class="t" x="246" y="36" font-size="14" font-weight="700" text-anchor="middle" fill="#c74700">② ハエの脳モデル</text>
+      <text class="t" x="246" y="62" font-size="12" text-anchor="middle">配線図の脳に</text>
+      <text class="t" x="246" y="80" font-size="12" text-anchor="middle">同じ条件を与え、</text>
+      <text class="t" x="246" y="98" font-size="12" text-anchor="middle">火元と中心を探す</text>
+      <text class="t" x="246" y="124" font-size="11" text-anchor="middle" fill="#4d4d4d">7・8 章</text>
+
+      <text class="t" x="416" y="36" font-size="14" font-weight="700" text-anchor="middle" fill="#c74700">③ 黙らせる実験</text>
+      <text class="t" x="416" y="62" font-size="12" text-anchor="middle">火元の候補を</text>
+      <text class="t" x="416" y="80" font-size="12" text-anchor="middle">モデルの中で止め、</text>
+      <text class="t" x="416" y="98" font-size="12" text-anchor="middle">火が減るか確かめる</text>
+      <text class="t" x="416" y="124" font-size="11" text-anchor="middle" fill="#4d4d4d">9 章</text>
+
+      <text class="t" x="585" y="36" font-size="14" font-weight="700" text-anchor="middle" fill="#197a4b">④ 本物のハエ</text>
+      <text class="t" x="585" y="62" font-size="12" text-anchor="middle">公開された</text>
+      <text class="t" x="585" y="80" font-size="12" text-anchor="middle">脳の記録と</text>
+      <text class="t" x="585" y="98" font-size="12" text-anchor="middle">照らし合わせる</text>
+      <text class="t" x="585" y="124" font-size="11" text-anchor="middle" fill="#4d4d4d">10 章</text>
+    </svg>
+    <figcaption><span class="fig-no">図 5</span>研究の流れ。青はお皿の上の神経（実データ）、オレンジはコンピューターの中のハエの脳、緑は本物のハエ（実データ）。すべて公開データと計算で行い、新しい動物実験はしていない。</figcaption>
+  </figure>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section id="s5">
+  <h2><span class="secno">5　わかったこと①</span>培養：火は、日をまたいで同じ場所からつく</h2>
+
+  <p>7&nbsp;つの培養の 114&nbsp;回の記録（ほとんど活動のない 15&nbsp;回は除外）から、<strong>30,349&nbsp;回</strong>のバーストが見つかりました。バーストは 1&nbsp;分に 1.6&nbsp;回ほど（中央値）起き、1&nbsp;回の長さは約 0.4&nbsp;秒（390&nbsp;ミリ秒）、活動している電極の 94% が参加していました。点火点はバーストが 20&nbsp;回以上ある 70&nbsp;回の記録（28,504&nbsp;回のバースト）で調べました。なお、1&nbsp;つのスパイクが次に平均いくつのスパイクを生むか（<strong>分岐比</strong>。1 を超えると暴走）は 0.992 で、培養は<strong>暴走のほんの少し手前</strong>で動いていました。</p>
+
+  <ul class="plain">
+    <li><strong>火は狭い場所から始まる。</strong>最初の 20&nbsp;スパイクの広がりは、同じバーストからランダムに選んだ 20&nbsp;スパイクの 0.62&nbsp;倍しかありませんでした（70&nbsp;回中 69&nbsp;回で 1&nbsp;倍未満）。</li>
+    <li><strong>口火を切る電極は決まっている。</strong>最初に発火することが多い上位 10% の電極が、全バーストの <strong>81%</strong> で最初のスパイクを出していました。偶然なら 48% のはずです。</li>
+    <li><strong>翌日も同じ場所に戻る。</strong>点火点の地図（どこから何回火がついたか）を、同じ培養の続けての記録どうしで比べると、似かたを表す<strong>相関係数</strong>（−1〜1 の数。1 ならそっくり、0 なら無関係）は <strong>r = 0.43</strong>。別の培養どうしでは −0.06（ほぼ無関係）でした。7&nbsp;つの培養すべてで同じ傾向です。ホットスポットどうしの距離も、同じ培養なら 0.58&nbsp;mm、別の培養なら 1.75&nbsp;mm でした。</li>
+    <li><strong>単に「活動の多い場所」の写しではない。</strong>バースト中の活動の多さを差し引いた地図も、日をまたいで安定していました（r = 0.39 対 0.02）。</li>
+  </ul>
+
+  <figure>
+    <img src="img/culture_maps.png" alt="同じ培養の 9 日目から 20 日目までの点火地図 6 枚。どの日も、左上または左下の同じあたりに濃い赤のホットスポットがある">
+    <figcaption><span class="fig-no">図 6</span>ある 1&nbsp;つの培養の点火地図（最初の記録から数えた日）。色が濃いほど、そこから火がついたバーストが多い（灰色は活動している電極がない場所）。前半は左上、後半は左下のホットスポットが、何日にもわたって繰り返し現れる。</figcaption>
+  </figure>
+
+
+  <p class="small">注意点：同じバーストの中のランダムな 20&nbsp;スパイクの中心と比べると、点火点の集まり具合の差は控えめでした（0.56 対 0.48、7&nbsp;培養中 5）。また、続けての記録どうしは、どの電極を選んで記録したかも似ていました（重なり 0.49 対 0.10）。電極が粗い 59&nbsp;電極のデータでは、点火点の集中は再現できませんでした。</p>
+</section>
+
+<!-- ======================= 6 ======================= -->
+<section id="s6">
+  <h2><span class="secno">6　わかったこと②</span>場所で見ると、火元は「主モード」と重なる</h2>
+
+  <p>では、なぜその場所が火元になるのでしょうか。まず思いつくのは「ふだんからよく発火している場所だから」という説明です。ところが、0.1&nbsp;mm（100&nbsp;マイクロメートル）四方の場所ごとに比べると、バーストとバーストの間の発火の多さは、点火点をほとんど予測しませんでした（相関 ρ = 0.01）。よりよく重なったのは、<strong>ネットワークの「主モード」</strong>でした。</p>
+
+  <h3>主モードとは：ホールのいちばん大きな「響き」</h3>
+  <p>コンサートホールで手をたたくと、いろいろな高さの音が混ざって返ってきますが、ホールの形によって、<strong>特定の高さの音だけがいちばん長く大きく響きます</strong>。どんな音を出しても、最後に残るのはその響きです。</p>
+  <p>神経のネットワークにも、つながり方で決まる「いちばん響きやすいパターン」があります。ある組み合わせの細胞が一緒に高まると、互いに支え合ってそのパターンが大きくなりやすい。これがネットワークの<strong>主モード</strong>（数学では、結合を表す行列の「主固有ベクトル」）です。ざわめきの中の小さなゆらぎはこのパターンに沿って育ちやすく、育ちきった先がバーストだ、というのが<strong>ノイズ集中</strong>という考え方です。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 200" role="img" aria-label="左は、一人でよく発火するが周りと連動しない電極。右は、互いに連動してゆらぐ電極のグループで、主モードが集まる場所。右に相関の棒グラフ：発火率 0.01、主モード 0.25">
+      <style>
+        .t { font-family: 'Noto Sans JP','Noto Sans CJK JP',sans-serif; }
+        text.t:not([fill]) { fill: #1a1a1a; }
+      </style>
+      <rect x="1" y="1" width="208" height="160" rx="8" fill="#ffffff" stroke="#cccccc" stroke-width="1.5"/>
+      <rect x="225" y="1" width="208" height="160" rx="8" fill="#ffffff" stroke="#cccccc" stroke-width="1.5"/>
+      <text class="t" x="105" y="24" font-size="14" font-weight="700" text-anchor="middle">よく発火する場所</text>
+      <text class="t" x="329" y="24" font-size="14" font-weight="700" text-anchor="middle">主モードが集まる場所</text>
+      <g fill="#cccccc"><circle cx="40" cy="60" r="7"/><circle cx="75" cy="110" r="7"/><circle cx="170" cy="60" r="7"/><circle cx="160" cy="120" r="7"/><circle cx="50" cy="128" r="7"/></g>
+      <circle cx="110" cy="80" r="13" fill="#4d4d4d"/>
+      <g stroke="#4d4d4d" stroke-width="2" stroke-linecap="round" fill="none">
+        <path d="M128 66 L138 58 M131 80 L144 80 M128 94 L138 102"/>
+      </g>
+      <text class="t" x="105" y="150" font-size="12" text-anchor="middle" fill="#4d4d4d">一人で騒いでも、周りは乗らない</text>
+      <g fill="#cccccc"><circle cx="255" cy="58" r="7"/><circle cx="410" cy="56" r="7"/><circle cx="405" cy="128" r="7"/></g>
+      <g stroke="#c74700" stroke-width="2" opacity="0.8">
+        <path d="M300 78 L330 66 L352 90 L326 112 L296 104 Z"/>
+        <path d="M300 78 L352 90 M330 66 L326 112 M296 104 L352 90"/>
+      </g>
+      <g fill="#c74700"><circle cx="300" cy="78" r="8"/><circle cx="330" cy="66" r="8"/><circle cx="352" cy="90" r="8"/><circle cx="326" cy="112" r="8"/><circle cx="296" cy="104" r="8"/></g>
+      <text class="t" x="329" y="150" font-size="12" text-anchor="middle" fill="#c74700">互いに響き合い、一緒に高まる</text>
+      <text class="t" x="455" y="24" font-size="13" font-weight="700">点火点との相関（ρ）</text>
+      <line x1="560" y1="40" x2="560" y2="140" stroke="#4d4d4d" stroke-width="1"/>
+      <text class="t" x="552" y="72" font-size="12" text-anchor="end">発火の多さ</text>
+      <rect x="560" y="60" width="3" height="20" fill="#4d4d4d"/>
+      <text class="t" x="568" y="75" font-size="12" font-weight="700">0.01</text>
+      <text class="t" x="552" y="120" font-size="12" text-anchor="end">主モード</text>
+      <rect x="560" y="108" width="62" height="20" fill="#c74700"/>
+      <text class="t" x="626" y="123" font-size="12" font-weight="700">0.25</text>
+      <text class="t" x="455" y="156" font-size="11" fill="#767676">0.1 mm 四方の場所ごと</text>
+      <text class="t" x="455" y="172" font-size="11" fill="#767676">（記録ごとの値の中央値）</text>
+      <text class="t" x="216" y="192" font-size="13" text-anchor="middle">場所で見ると「響き合うグループ」が火元とよく重なる</text>
+    </svg>
+    <figcaption><span class="fig-no">図 7</span>主モードのイメージ。バーストとバーストの間に、電極どうしがどれだけ一緒にゆらぐかを数分間分の記録から計算し、その主モードの重みが大きい場所ほど、点火点になりやすかった。</figcaption>
+  </figure>
+
+  <p>主モードの重みと点火点の相関は <strong>ρ = 0.25</strong>（7&nbsp;培養すべてでプラス）で、記録の <strong>88%（64&nbsp;回中 56&nbsp;回）</strong>で発火の多さより良く当てました。ただし、注意が 2&nbsp;つあります。</p>
+  <ul class="plain">
+    <li><strong>電極の配置の影響。</strong>1&nbsp;回の記録で聞ける電極は 26,400&nbsp;個のうち約 1,000&nbsp;個で、記録に選ばれた電極が近くに多い場所ほど、点火点として数えられやすくなります。この影響を差し引くと、主モードの効果は小さくなりました（0.14。それでも 7&nbsp;培養すべてでプラス）。</li>
+    <li><strong>電極 1&nbsp;個ずつで見ると話が違う。</strong>個々の電極で比べると、よく発火する電極ほど最初のスパイクを出しやすく、主モードは発火の多さに勝てませんでした。</li>
+  </ul>
+  <p>つまり、培養でわかったのは「<strong>場所の単位で見ると、火元は協調したゆらぎが集まる所とよく重なる</strong>」という、中くらいの強さの傾向です。</p>
+
+</section>
+
+<!-- ======================= 7 ======================= -->
+<section id="s7">
+  <h2><span class="secno">7</span>ハエの配線図と、コンピューターの脳</h2>
+
+  <p>次は本物の脳です。主役は、台所の果物に寄ってくる<strong>ショウジョウバエ</strong>。脳はゴマ粒より小さいのに、約 14&nbsp;万個のニューロンが詰まっています。</p>
+  <p>このハエの脳を非常に薄く切って電子顕微鏡で撮影し、すべてのニューロンとつなぎ目を書き出した地図が<strong>コネクトーム（配線図）</strong>です。FlyWire（フライワイヤー）という国際プロジェクトが 2024 年に発表したもの（第 783 版）には、<strong>ニューロン 138,639&nbsp;個、つながり約 1,510&nbsp;万本、シナプス約 5,450&nbsp;万個</strong>が記録されています。地図アプリの道路地図のようなもので、道と交差点はすべて描かれていますが、どこで渋滞が起きるかは、車を走らせてみないとわかりません。</p>
+
+
+  <h3>配線図の上で「車を走らせる」：スパイキングモデル</h3>
+  <p>2024 年、Shiu（シュウ）らは、この配線図をそのまま使ってハエの脳全体をコンピューターの中で動かすモデルを発表しました。すべてのニューロンが図 1 の「ししおどし」のしくみでパチッとし、スパイクはつなぎ目の数に比例した強さで相手に届きます。このように一つ一つのスパイクまで計算するモデルを<strong>スパイキングモデル</strong>と呼びます。調整できる「つまみ」は 1&nbsp;つだけで、ハエの行動（甘いものに口を伸ばす反応など）に合うように合わせてあります。私たちは、これを高速に動く形に作り直して使いました（元のプログラムとニューロン 1&nbsp;個ずつまで一致）。</p>
+
+  <p>このモデルに、培養がバーストするときと<strong>同じ条件</strong>を与えました。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 190" role="img" aria-label="モデルに加えた 4 つの条件：配線図、弱いノイズ、使うと疲れるシナプス、ゲインのつまみ">
+      <style>
+        .t { font-family: 'Noto Sans JP','Noto Sans CJK JP',sans-serif; }
+        text.t:not([fill]) { fill: #1a1a1a; }
+      </style>
+      <rect x="1" y="1" width="154" height="186" rx="8" fill="#ffffff" stroke="#cccccc" stroke-width="1.5"/>
+      <rect x="169" y="1" width="154" height="186" rx="8" fill="#ffffff" stroke="#cccccc" stroke-width="1.5"/>
+      <rect x="337" y="1" width="154" height="186" rx="8" fill="#ffffff" stroke="#cccccc" stroke-width="1.5"/>
+      <rect x="505" y="1" width="154" height="186" rx="8" fill="#e8f1fe" stroke="#0017c1" stroke-width="1.5"/>
+      <text class="t" x="78" y="24" font-size="14" font-weight="700" text-anchor="middle">配線図</text>
+      <text class="t" x="246" y="24" font-size="14" font-weight="700" text-anchor="middle">弱いノイズ</text>
+      <text class="t" x="414" y="24" font-size="14" font-weight="700" text-anchor="middle">疲れるシナプス</text>
+      <text class="t" x="582" y="24" font-size="14" font-weight="700" text-anchor="middle" fill="#0017c1">ゲインのつまみ</text>
+      <!-- connectome icon -->
+      <g stroke="#4d4d4d" stroke-width="1.2" opacity="0.7">
+        <path d="M40 60 L78 46 L116 64 L108 104 L70 114 L36 96 Z M40 60 L70 80 L116 64 M78 46 L70 80 L108 104 M36 96 L70 80 L70 114"/>
+      </g>
+      <g fill="#4d4d4d"><circle cx="40" cy="60" r="5"/><circle cx="78" cy="46" r="5"/><circle cx="116" cy="64" r="5"/><circle cx="108" cy="104" r="5"/><circle cx="70" cy="114" r="5"/><circle cx="36" cy="96" r="5"/><circle cx="70" cy="80" r="5"/></g>
+      <text class="t" x="78" y="146" font-size="12" text-anchor="middle">FlyWire の</text>
+      <text class="t" x="78" y="164" font-size="12" text-anchor="middle">138,639 個そのまま</text>
+      <!-- noise icon -->
+      <g stroke="#1a1a1a" stroke-width="2" stroke-linecap="round">
+        <path d="M196 60 L196 72 M232 96 L232 108 M262 50 L262 62 M290 88 L290 100 M214 112 L214 124 M276 116 L276 128"/>
+      </g>
+      <text class="t" x="246" y="146" font-size="12" text-anchor="middle">どの細胞も、ときどき</text>
+      <text class="t" x="246" y="164" font-size="12" text-anchor="middle">勝手にパチッ（毎秒 0.3 回）</text>
+      <!-- depression icon: bucket -->
+      <path d="M384 52 L392 120 L436 120 L444 52" stroke="#4d4d4d" stroke-width="2" fill="none"/>
+      <path d="M389 96 L439 96 L436 120 L392 120 Z" fill="#9db7f9"/>
+      <path d="M454 70 C470 76 470 100 454 106" stroke="#767676" stroke-width="1.5" fill="none"/>
+      <path d="M454 106 L462 100 M454 106 L463 110" stroke="#767676" stroke-width="1.5"/>
+      <text class="t" x="414" y="146" font-size="12" text-anchor="middle">使うと減り、約 2 秒で</text>
+      <text class="t" x="414" y="164" font-size="12" text-anchor="middle">回復する（くみ置きの水）</text>
+      <!-- knob -->
+      <circle cx="582" cy="84" r="32" fill="#ffffff" stroke="#0017c1" stroke-width="2"/>
+      <path d="M582 84 L604 62" stroke="#0017c1" stroke-width="4" stroke-linecap="round"/>
+      <text class="t" x="546" y="134" font-size="11" text-anchor="middle" fill="#0017c1">1</text>
+      <text class="t" x="622" y="134" font-size="11" text-anchor="middle" fill="#0017c1">2.5</text>
+      <text class="t" x="582" y="146" font-size="12" text-anchor="middle">すべてのシナプスを</text>
+      <text class="t" x="582" y="164" font-size="12" text-anchor="middle">まとめて何倍にするか</text>
+    </svg>
+    <figcaption><span class="fig-no">図 8</span>コンピューターの脳に与えた条件。「疲れるシナプス」は、続けて使うと伝わる力が一時的に弱まる性質（短期シナプス抑圧）で、培養のバーストが自然に終わる理由の一つ。</figcaption>
+  </figure>
+
+  <h3>「ゲイン」は、全部の道の太さを決めるつまみ</h3>
+  <p><strong>ゲイン</strong>は、脳じゅうのすべてのつなぎ目の強さを、まとめて何倍にするかを決めるつまみです。音響機器の<strong>ボリューム</strong>に似ています。ゲイン 1 が、ハエの行動に合わせた元の設定。ゲイン 2 なら、すべての信号が 2&nbsp;倍の強さで伝わります。つまみを上げていき、どこでバーストが始まるか、そのとき火はどこからつくかを調べました。</p>
+
+  <h3>アクセルかブレーキか、4&nbsp;通りの仮定</h3>
+  <p>配線図に書かれた「各ニューロンがどの伝達物質を使うか」は、電子顕微鏡の画像から AI が推定したもので、ところどころ間違っています。公開されたままの判定では、どんなに弱いノイズでも、においの系が暴走したまま止まりませんでした。原因は、においの中継所の 40&nbsp;個の細胞が AI に自信なく「セロトニン」と判定され、モデルでアクセル扱いになっていたことです（前回の研究で特定）。そこで、すべての実験を<strong>4&nbsp;通りの仮定</strong>で行い、どこが同じでどこが違うかを確かめました。</p>
+  <ul class="plain">
+    <li><strong>仮定 A（最初の最小補正）</strong>：その 40&nbsp;個をすべてブレーキに直す。ところが 40&nbsp;個のうち 21&nbsp;個は文献ではアクセル（アセチルコリン）とされる種類で、後で出てくる <strong>lLN1_bc の 7&nbsp;個も誤ってブレーキにしていました</strong>。</li>
+    <li><strong>仮定 B（文献に合わせた最小補正）</strong>：文献と食い違わない残りの 19&nbsp;個だけをブレーキに直す。</li>
+    <li><strong>仮定 C（細胞タイプ多数決）</strong>：同じ種類の細胞は同じ伝達物質を使うと考え、種類ごとに多数決で決める（文献でわかっているものを優先）。公開モデルから 15,901&nbsp;個の符号が変わる。</li>
+    <li><strong>仮定 D（モノアミンの速い作用なし）</strong>：C から、ドーパミン・セロトニンなど、作用がゆっくりで複雑な物質の速いアクセル作用を除く。</li>
+  </ul>
+  <p class="small">文献と矛盾しないのは B・C・D の 3&nbsp;つです。A は最初に使った仮定で、比較のために残しています。</p>
+</section>
+
+<!-- ======================= 8 ======================= -->
+<section id="s8">
+  <h2><span class="secno">8　わかったこと③</span>触角葉には、いつも燃えている「火種」があった</h2>
+
+  <h3>元の設定のハエの脳は、バーストしにくい</h3>
+  <p>ゲイン 1（行動に合わせた元の設定）では、仮定 A と D ではバーストは起きず、B と C でも小さなものがときどき起きるだけでした。つまみを <strong>2〜2.5&nbsp;倍</strong>に上げると、どの仮定でもバーストが頻繁になり、ゲイン 2.5 では 1&nbsp;分に 78〜236&nbsp;回に達しました。つまりハエの脳は、ふだんは頻繁なバーストから<strong>シナプスの強さで約 2&nbsp;倍</strong>離れたところにいる、ということです。</p>
+  <figure class="fig-cap-side">
+    <img src="img/gain_curve.png" alt="ゲインを 1 から 2.5 まで上げたときの自発バーストの回数。4 つの仮定とも、ゲイン 2 から 2.5 で急に増え、2.5 で 78 から 236 回に達する">
+    <figcaption><span class="fig-no">図 9</span>つまみ（ゲイン）を上げると、自発バーストが増える。4&nbsp;本の線は伝達物質の 4&nbsp;つの仮定（15&nbsp;秒の計算 2&nbsp;回の平均）。ハエのバーストは培養より短く（18〜40&nbsp;ミリ秒）、ゲイン 2.5 でもスパイクの 79〜95% はバーストの外で出ていた（培養では 53%）。</figcaption>
+  </figure>
+
+  <h3>目立ったのは、触角葉の「アクセル役の局所ニューロン」</h3>
+  <p>脳全体のすべてのスパイクを記録して調べると、どの仮定でも目立ったのが、<strong>lLN1_bc</strong> という種類の細胞（左 14&nbsp;個、右 16&nbsp;個）です。lLN1_bc は、<strong>触角葉</strong>（触角から来たにおいの情報を最初に処理する中継所。人やネズミの「嗅球」にあたる）の中だけで働く<strong>局所ニューロン</strong>で、文献の記録では、伝達物質は<strong>アセチルコリン（アクセル）</strong>です。</p>
+  <p>ただし、その<strong>役割は仮定によって違いました</strong>。</p>
+
+  <div class="fig-side">
+    <figure>
+      <img src="img/fly_ignition.png" alt="ハエの脳を正面から見た暗い図。左右の触角葉の 2 か所が黄色い丸で囲まれ、そこが明るく光っている">
+      <figcaption><span class="fig-no">図 10</span>研究紹介動画の 1&nbsp;コマ（仮定 A、バースト開始の 40&nbsp;ミリ秒前）。脳を正面から見た図で、明るい点ほど強く発火しているニューロン。丸が左右の触角葉。</figcaption>
+    </figure>
+    <div>
+      <ul class="plain">
+        <li><strong>文献と矛盾しない仮定 B・C・D</strong>：lLN1_bc は<strong>休みなく 1&nbsp;秒に 100〜136&nbsp;回</strong>（ゲイン 2〜2.5）という高い頻度で発火し続け、脳全体を下支えしていました。バーストそのものは、視覚系などの別の場所から始まりました。</li>
+        <li><strong>最初の仮定 A</strong>：lLN1_bc はバーストの直前に発火を高めることが多く、その割合はランダムな時刻の<strong>約 2&nbsp;倍</strong>でした（高めたときは、開始の 44&nbsp;ミリ秒前〈左〉、30&nbsp;ミリ秒前〈右〉）。ただし A は、この細胞の 7&nbsp;個を誤ってブレーキにした仮定です。</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>どの仮定でも共通していたのは、この細胞たちが<strong>脳の中で最も「燃えやすい」部品の一つ</strong>だということです。元の設定（ゲイン 1）でも、138,639&nbsp;個の中で<strong>上位 0.15% 以内</strong>に入るほどよく自発発火していました（脳全体の中央値は 1&nbsp;秒に 0.2&nbsp;回）。さらに、「つなぎ目の数 × 発火の多さ」で細胞の<strong>駆動の強さ</strong>を測ると、文献と矛盾しない仮定では、上位 111&nbsp;個の 77〜82% が触角葉の局所ニューロンと投射ニューロンで、この 111&nbsp;個だけで<strong>脳全体のアクセル信号の 49〜56%</strong> を出していました。たとえるなら、最初に火花を散らす「点火プラグ」というより、<strong>いつも回り続けているエンジン、いつも燃えている火種</strong>です。</p>
+
+  <h3>なぜ触角葉か：配線図の主モードがここにあった</h3>
+  <p>培養で使った「主モード」の考え方を、今度は活動ではなく<strong>配線図そのもの</strong>に当てはめました。アクセル役のつながりだけを取り出し、アクセルを強めたとき最初に育つパターンを計算すると、いちばん強い 2&nbsp;つのパターンは<strong>左右の鏡写し</strong>でした。一つは重みの約 8&nbsp;割が左半分に、もう一つは約 8&nbsp;割が右半分にあり、どちらも<strong>においの回路（触角葉 → キノコ体）のループ</strong>です。重みの約 3&nbsp;割が触角葉の局所ニューロンに集まり（lLN1_bc の 30&nbsp;個だけで 8〜13%）、残りの多くは触角葉から情報を運び出す投射ニューロンと、においの記憶にかかわるキノコ体のケニヨン細胞でした。これはどの仮定でも同じでした。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 200" role="img" aria-label="lLN1_bc 同士と投射ニューロンが互いにアクセルでつながり合うループ。ブレーキの入力は少ない。マイクとスピーカーが向き合うハウリングのたとえ">
+      <style>
+        .t { font-family: 'Noto Sans JP','Noto Sans CJK JP',sans-serif; }
+        text.t:not([fill]) { fill: #1a1a1a; }
+      </style>
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#ce0000"/></marker>
+      </defs>
+      <rect x="1" y="1" width="400" height="196" rx="8" fill="#ffeee2" stroke="#c74700" stroke-width="1.5"/>
+      <text class="t" x="16" y="24" font-size="14" font-weight="700" fill="#c74700">触角葉の中（片側。反対側も鏡写し）</text>
+      <g stroke="#ce0000" stroke-width="2" fill="none" marker-end="url(#ar)" marker-start="url(#ar)">
+        <path d="M108 66 L152 56"/><path d="M166 66 L180 104"/><path d="M168 120 L126 128"/><path d="M106 118 L96 80"/><path d="M114 74 L160 112"/>
+      </g>
+      <g fill="#c74700" stroke="#ffffff" stroke-width="1.5">
+        <circle cx="98" cy="66" r="11"/><circle cx="162" cy="54" r="11"/><circle cx="184" cy="114" r="11"/><circle cx="116" cy="130" r="11"/>
+      </g>
+      <text class="t" x="150" y="166" font-size="12" font-weight="700" text-anchor="middle" fill="#c74700">lLN1_bc など（アクセル役の局所ニューロン）</text>
+      <g stroke="#ce0000" stroke-width="2" fill="none" marker-end="url(#ar)" marker-start="url(#ar)">
+        <path d="M198 108 L290 82"/><path d="M198 118 L290 128"/>
+      </g>
+      <g fill="#ffffff" stroke="#4d4d4d" stroke-width="2"><circle cx="304" cy="78" r="11"/><circle cx="304" cy="130" r="11"/></g>
+      <path d="M318 78 L388 78 M318 130 L388 130" stroke="#4d4d4d" stroke-width="1.5"/>
+      <text class="t" x="304" y="58" font-size="12" text-anchor="middle">投射ニューロン</text>
+      <text class="t" x="352" y="150" font-size="11" text-anchor="middle" fill="#4d4d4d">キノコ体へ →</text>
+      <circle cx="36" cy="62" r="9" fill="#e9f7f9" stroke="#006f83" stroke-width="2"/>
+      <path d="M46 64 L86 66" stroke="#006f83" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text class="t" x="36" y="88" font-size="11" text-anchor="middle" fill="#006f83">ブレーキは</text>
+      <text class="t" x="36" y="102" font-size="11" text-anchor="middle" fill="#006f83">少なめ</text>
+      <text class="t" x="420" y="30" font-size="13" font-weight="700">lLN1_bc（30 個）の配線</text>
+      <text class="t" x="420" y="54" font-size="13">・出力のつなぎ目 約 112,000 個</text>
+      <text class="t" x="432" y="72" font-size="12" fill="#4d4d4d">（1 個あたり約 3,740 個。脳の</text>
+      <text class="t" x="432" y="88" font-size="12" fill="#4d4d4d">　細胞の中央値は 227 個）</text>
+      <text class="t" x="420" y="112" font-size="13">・入力の 74〜92% が</text>
+      <text class="t" x="432" y="130" font-size="13">アクセル役から（仮定による）</text>
+      <text class="t" x="420" y="156" font-size="13">→ 互いに強め合う、ブレーキの</text>
+      <text class="t" x="432" y="176" font-size="13">弱い密なループ（ハウリング）</text>
+    </svg>
+    <figcaption><span class="fig-no">図 11</span>中心の回路の模式図。アクセル役の局所ニューロンどうし、そして投射ニューロンとの間で互いにアクセルをかけ合うループができている。ブレーキの弱いこのループが、脳の中で最も「響きやすい」場所だった。</figcaption>
+  </figure>
+
+  <p>マイクをスピーカーに向けると、小さな音でも「キーン」とハウリングが起きます。lLN1_bc の回路は、マイクとスピーカーが向き合った小部屋のようなものです。実際、疲れるシナプスを外すと、lLN1_bc は元の設定より弱いつながりでも、入力を止めたあと<strong>自力で発火を続ける集団</strong>に加わりました。</p>
+
+  <div class="box key">
+    <div class="box-title">培養とハエの共通点は「定性的」</div>
+    <p>どちらでも、自発的なバーストは<strong>アクセルのつながりが集まる場所</strong>を中心にまとまっていました（ハエの主モードの重みは、アクセルの入力の多さとよく対応します）。ただし、同じ計算方法がそのまま通用したわけではありません。培養で使った「活動から求めた主モード」は、ハエのモデルでは点火をうまく予測できず（ρ = −0.07〜0.16。常に発火し続ける中心複合体の細胞を拾ってしまうため）、配線の主モードも、脳全体を「点火しやすい順」に並べる力は発火の多さと同じくらいでした。またハエの中心は配線でも活動でも目立つため、「つながり」と「活動の多さ」のどちらが効いているのかは切り分けられません。</p>
+  </div>
+</section>
+
+<!-- ======================= 9 ======================= -->
+<section id="s9">
+  <h2><span class="secno">9　わかったこと④</span>黙らせると、自発バーストが減った</h2>
+
+  <p>この細胞たちが本当に中心（<strong>ハブ</strong>）なら、取り除けばバーストは起きにくくなるはずです。そこでモデルの中で、候補の細胞の出力を止める（<strong>黙らせる</strong>）実験を、4&nbsp;つの仮定 × 2&nbsp;つのゲインの 8&nbsp;条件で行いました。「つなぎ目の多い細胞なら、どれを止めても減るのでは？」という疑問に答えるため、<strong>出力のつなぎ目の数をそろえた別のアクセル役の細胞</strong>（ただし、ふだんはあまり発火しない）とも比べました。</p>
+
+  <figure>
+    <img src="img/silencing.png" alt="黙らせたあとの自発バーストの割合。触角葉のアセチルコリン性局所ニューロン 111 個は 0.25 から 0.47、つなぎ目の数をそろえた別のアクセル役は平均 0.6、駆動が最も強いアクセル役 111 個は 0.03 から 0.31、同じ数のランダムな細胞などは 0.74 から 1.74">
+    <figcaption><span class="fig-no">図 12</span>黙らせる実験。1&nbsp;つの点が 1&nbsp;つの条件（4&nbsp;つの仮定 × 2&nbsp;つのゲイン。20&nbsp;秒の計算 3&nbsp;回の平均）、縦の線が平均。灰色の点は、つなぎ目の数をそろえた細胞をくじで 3&nbsp;回選んだ結果。いちばん下の帯は、同じ数のランダムな細胞などを黙らせた予備実験の範囲。</figcaption>
+  </figure>
+
+  <ul class="plain">
+    <li>触角葉のアセチルコリン性局所ニューロン <strong>111&nbsp;個</strong>を黙らせると、8&nbsp;条件すべてで、自発バーストは <strong>0.25〜0.47&nbsp;倍</strong>（4&nbsp;分の 1〜半分）に減りました。つなぎ目の数をそろえた細胞では平均 0.60&nbsp;倍で、111&nbsp;個は 8&nbsp;条件中 7&nbsp;条件でそのどれよりも低く（残り 1&nbsp;条件は同じ）、ランダムな細胞など（予備実験）では 0.74〜1.74&nbsp;倍でした。脳全体の平均の発火も 6〜25% 下がりました（つなぎ目の数をそろえた細胞では 3〜5%）。</li>
+    <li>lLN1_bc の 30&nbsp;個だけを黙らせたときの効果は、0.05〜0.88&nbsp;倍と条件によって大きくばらつきました。</li>
+    <li>一方、局所ニューロン以外で<strong>駆動が最も強いアクセル役 111&nbsp;個</strong>を黙らせると、バーストは <strong>0.03〜0.31&nbsp;倍</strong>と、もっと減りました。文献と矛盾しない仮定では、その大半が<strong>触角葉の投射ニューロン</strong>、つまり局所ニューロンがアクセルをかける相手、同じループの仲間でした。</li>
+  </ul>
+  <p>つまりモデルの自発バーストは、強く駆動する少数のアクセル役の細胞に頼っていて、その多くが<strong>触角葉のアクセルのループ（局所ニューロン＋投射ニューロン）</strong>でした。ハブは 1&nbsp;種類の細胞ではなく、<strong>このループ全体</strong>だと考えられます。</p>
+</section>
+
+<!-- ======================= 10 ======================= -->
+<section id="s10">
+  <h2><span class="secno">10　わかったこと⑤</span>本物のハエでも、触角葉はいちばんゆっくりゆらいでいた</h2>
+
+  <p>最後に、本物のハエと照らし合わせました。使ったのは、Turner らが 2021 年に公開した記録です。ハエの全ニューロンに、活動すると光るタンパク質（GCaMP6s）を入れ、何も刺激しない状態で、20&nbsp;匹の脳を約 28&nbsp;分ずつ顕微鏡で撮影したもので、脳は 74&nbsp;の領域に分けられています。</p>
+  <p>調べたのは、各領域の光が<strong>どれくらいゆっくりゆらぐか</strong>です。大きな船がゆっくり揺れるように、ゆっくりゆらぐ領域では「今の明るさ」が「少し後の明るさ」とよく似ています。この似かたを<strong>自己相関</strong>と呼び、自分で燃え続けやすい回路ほど大きくなると考えられます。</p>
+
+  <figure>
+    <img class="w90" src="img/fly_regions.png" alt="74 の脳領域をゆらぎの遅さの順に並べた棒グラフ。右の触角葉が 1 位、左の触角葉が 4 位でオレンジ色">
+    <figcaption><span class="fig-no">図 13</span>本物のハエ 20&nbsp;匹の安静時の脳（Turner ら 2021 の公開データ）。74&nbsp;領域をゆらぎの遅さの順に並べると、<strong>右の触角葉が 1&nbsp;位、左が 4&nbsp;位</strong>だった（20&nbsp;匹の中央値）。</figcaption>
+  </figure>
+
+  <ul class="plain">
+    <li>触角葉は、ほかの領域よりゆっくりゆらいでいました（自己相関 0.85 対 0.58。<strong>20&nbsp;匹中 18&nbsp;匹</strong>）。</li>
+    <li>ゆらぎの大きさも大きめでした（0.048 対 0.029。20&nbsp;匹中 19&nbsp;匹）。</li>
+    <li>明るい領域ほど信号がきれいで「ゆっくり」に見えやすいため、領域の明るさの違いを補正しても、触角葉は <strong>20&nbsp;匹中 17&nbsp;匹</strong>でほかよりゆっくりでした。</li>
+    <li>脳全体の動きとの連動は、ほかの領域よりわずかに弱めでした（0.50 対 0.52）。</li>
+  </ul>
+  <p>これは「触角葉の中に、自分でゆらぎを生む仕掛けがある」という予測と<strong>矛盾しない</strong>結果です。ただし、触角から入ってくるにおいなどの感覚のゆっくりした変化や、領域の大きさ、受容細胞の末端が多いことなども影響しうるので、証拠にはなりません。また、領域ごとにモデルと本物の数値を細かく比べると、対応は弱いものでした（|ρ| が 0.30 以下）。</p>
+
+</section>
+
+<!-- ======================= 11 ======================= -->
+<section id="s11">
+  <h2><span class="secno">11</span>これは「予測」であって「証明」ではない</h2>
+  <p>この研究は、地図（配線図）とシミュレーションから「この交差点が渋滞の中心になりやすいはずだ」と<strong>予想を立てた</strong>段階です。黙らせる実験は<strong>コンピューターの中だけ</strong>で、モデルはふだんの設定ではほとんどバーストしないので、予測は主に「脳が興奮しやすくなったとき」のものです。本物のハエの記録も、触角葉が「ゆっくりゆらぐ」ことを示しただけで、火がつく瞬間を見たわけではありません。</p>
+  <p>予測を後押しする知識もあります。アセチルコリン性の局所ニューロンは触角葉あたり約 15&nbsp;個と報告され（Shang ら 2007）、互いに、また投射ニューロンとアクセルでつながり合うことが実験で示されています（Huang ら 2010）。哺乳類でも、においを最初に処理する大脳の領域（梨状皮質）は脳の中で最もけいれんを起こしやすい場所で、「においの入口の密なアクセルのループが暴走の弱点になる」点は共通なのかもしれません。</p>
+  <p>この研究の強みは、<strong>配線図の主モード、シミュレーション、黙らせる実験、本物のハエの記録が、仮定を変えても同じ場所、触角葉のアクセルのループを指した</strong>ことです。一方で、その細胞が「火をつける」のか「燃え続けて支える」のかは仮定しだいで、最終的な答えは本物のハエでの実験でしか出せません。</p>
+</section>
+
+<!-- ======================= 12 ======================= -->
+<section id="s12">
+  <h2><span class="secno">12</span>どんな実験で確かめられるか</h2>
+  <ol class="plain-ol">
+    <li><strong>この細胞の自発発火を測る。</strong>lLN1_bc 型の細胞は、脳の中で最もよく自発発火する細胞の一つのはずです（生きたハエでの頻度は、まだ報告が見当たりません）。</li>
+    <li><strong>遺伝学的に黙らせる。</strong>この細胞（または触角葉のアクセルのループ）を働かなくしたハエでは、触角葉・側角・キノコ体の安静時のゆらぎが小さくなるはずです。</li>
+    <li><strong>興奮しやすくして、どこから火がつくかを見る。</strong>ブレーキを薬で外すだけでは暴走は報告されていないので、温度を上げるなどの工夫と組み合わせ、自発的ないっせい発火がまず触角葉に現れ、この細胞が先行するかを確かめます。</li>
+    <li><strong>培養で、明日の火元を当てる。</strong>バーストの合間の数分間の記録から主モードを計算して翌日のホットスポットを予測し、光で神経を刺激する技術（光遺伝学）で予測した場所と対照の場所を刺激して比べます。HD-MEA を使う研究室なら、すぐに試せる実験です。</li>
+  </ol>
+</section>
+
+<!-- ======================= 13 ======================= -->
+<section id="s13">
+  <h2><span class="secno">13</span>まだわからないこと・限界</h2>
+  <div class="box caution">
+    <ul>
+      <li><strong>配線図には「電気的なつながり」がありません。</strong>この細胞から投射ニューロンへのアクセルは、実験では主に細胞どうしが直接電気を通す「ギャップ結合」ですが（Yaksi &amp; Wilson 2010）、配線図には載っていません。モデルの代わりの化学的なつなぎ目 90,491&nbsp;個を全部除いても主モードの中心は保たれましたが、lLN1_bc を黙らせたときの効果は、仮定 D では 2.4&nbsp;分の 1 だったのに、仮定 A では計算ごとのばらつきの範囲にとどまりました。</li>
+      <li><strong>アクセルかブレーキかの判定は、まだ不確かです。</strong>どの仮定でも同じ細胞集団が浮かびましたが、それが「火をつける」のか「燃え続けて支える」のかは仮定で変わりました。</li>
+      <li><strong>モデルの lLN1_bc が、実験で調べられてきた細胞と同じかはわかりません。</strong>アクセル役の局所ニューロンの研究に使われてきた細胞の一部は、実はブレーキ役（GABA）だったという報告もあります（Seki ら 2010）。</li>
+      <li><strong>本物の触角葉は、ブレーキを外しても暴走しなかった。</strong>触角葉の抑制を薬で止めても、においへの反応が強まるだけで、自発的な暴走は報告されていません（Shang ら 2007、Olsen &amp; Wilson 2008）。本物の触角葉は暴走からかなり離れていると考えられ、モデルが元の約 2&nbsp;倍のつまみで初めて頻繁にバーストすることとも合います。生きたハエでは、この細胞は常にブレーキを受けていて、ふだんの自発活動は主に触角の受容細胞から来ています（Kazama &amp; Wilson 2009）。</li>
+      <li><strong>睡眠の回路には、特に届きませんでした。</strong>培養のバーストは「眠り」に似ているとも言われますが、モデルのバーストが眠りを調節する回路（扇状体、R5 環状ニューロン、体内時計の細胞など）に特に多く届くことは、どの仮定でも一貫して見られませんでした。</li>
+      <li><strong>本物のハエの記録は、時間が粗すぎます。</strong>画像は約 0.8&nbsp;秒に 1&nbsp;枚で、モデルの点火（数十ミリ秒）を直接見ることはできません。わかるのは「ゆっくりゆらぐ」ことまでです。</li>
+      <li><strong>モデルは単純で、研究は一日で行ったものです。</strong>神経を調節する物質のゆっくりした作用や細胞ごとの個性は入っていません。学術誌の査読もまだです。</li>
+      <li><strong>培養のデータにも限界があります。</strong>細胞 1&nbsp;個ずつには分けておらず、培養日数の記録もなく、点火の地図は電極の配置の影響を受けています。粗い 59&nbsp;電極のデータでは再現できませんでした。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= 14 ======================= -->
+<section id="s14">
+  <h2><span class="secno">14</span>用語集</h2>
+  <dl class="glossary two">
+    <div><dt>ニューロン<span class="yomi">神経細胞</span></dt><dd>電気の信号をやりとりする、脳の部品。ハエの脳には約 14&nbsp;万個ある。</dd></div>
+    <div><dt>スパイク・Hz<span class="yomi">ヘルツ</span></dt><dd>ニューロンが出す一瞬の電気信号（パチッ）。Hz は 1&nbsp;秒あたりの回数。</dd></div>
+    <div><dt>興奮と抑制<span class="yomi">アクセルとブレーキ</span></dt><dd>相手をパチッとさせやすくするのが興奮、させにくくするのが抑制。伝達物質の種類で決まる。</dd></div>
+    <div><dt>自発活動</dt><dd>外からの刺激がなくても、ニューロンが勝手に発火していること。脳の「ざわめき」。</dd></div>
+    <div><dt>分散培養</dt><dd>動物の神経細胞をばらばらにしてお皿で育てたもの。自分たちでつながってネットワークを作る。</dd></div>
+    <div><dt>MEA・HD-MEA<span class="yomi">多電極アレイ</span></dt><dd>電極が並んだチップ。培養した神経のスパイクを多くの場所で同時に記録できる。MaxOne は 26,400&nbsp;個の電極をもつ高密度型。</dd></div>
+    <div><dt>ネットワークバースト</dt><dd>ネットワーク全体が短い時間にいっせいに発火すること。</dd></div>
+    <div><dt>点火点</dt><dd>バーストが最初に始まる場所。この研究では、最初の 20&nbsp;スパイクの中心。</dd></div>
+    <div><dt>主モード</dt><dd>ネットワークが最も増幅しやすい活動のパターン（つながりを表す行列の主固有ベクトル）。ホールでいちばんよく響く音のようなもの。</dd></div>
+    <div><dt>コネクトーム<span class="yomi">配線図</span></dt><dd>脳のすべてのニューロンとつながりを書き出した地図。FlyWire はハエの脳全体の配線図を作った国際プロジェクト。</dd></div>
+    <div><dt>スパイキングモデル</dt><dd>一つ一つのニューロンのスパイクまで計算する、コンピューターの脳。</dd></div>
+    <div><dt>ゲイン</dt><dd>すべてのシナプスの強さをまとめて何倍にするかのつまみ。1 が行動に合わせた元の設定。</dd></div>
+    <div><dt>触角葉・局所ニューロン・投射ニューロン</dt><dd>触角葉は、においの情報を最初に処理する脳の中継所。局所ニューロンはその中だけで働く細胞（lLN1_bc はアクセル役の一種）。投射ニューロンは、情報を脳の奥へ運び出す細胞。</dd></div>
+    <div><dt>ギャップ結合</dt><dd>化学物質を使わず、細胞どうしが直接電気を通すつながり。今の配線図には載っていない。</dd></div>
+  </dl>
+</section>
+
+<div class="footer-note">
+  <p>もとになった研究：Kazushi Takehana「Where spontaneous bursts ignite in cultured cortex and in the fly connectome points to an excitatory hub in the antennal lobe」（論文草稿、2026 年 10 月 27 日）。データとモデル：DANDI 002020（Nakamuta ら）、Wagenaar ら 2006、FlyWire 第 783 版（Dorkenwald ら 2024、Schlegel ら 2024）、Shiu ら 2024 のハエ全脳モデル、Turner ら 2021。解析と原稿作成には AI アシスタント（Claude）の補助を使っています。図 4・図 10 は研究紹介動画の画面です。</p>
+</div>
+
+</main>
+</body>
+</html>

@@ -71,19 +71,23 @@ def blank():
     return im, ImageDraw.Draw(im)
 
 
-def caption(d, s, size=32):
-    """White caption(s) on a dark band at the bottom of the frame."""
-    if not s:
+def caption(d, s, size=32, note=None, note_size=20):
+    """White caption(s) on a dark band at the bottom of the frame; optional smaller note lines below."""
+    lines = s.split("\n") if s else []
+    notes = note.split("\n") if note else []
+    if not lines and not notes:
         return
-    lines = s.split("\n")
-    lh = int(size * 1.45)
-    bh = 22 + lh * len(lines)
-    wmax = max(text_w(x, size, True) for x in lines)
+    lh, nh = int(size * 1.45), int(note_size * 1.4)
+    bh = 22 + lh * len(lines) + nh * len(notes) + (6 if lines and notes else 0)
+    wmax = max([text_w(x, size, True) for x in lines] + [text_w(x, note_size) for x in notes])
     x0, x1 = W // 2 - wmax / 2 - 30, W // 2 + wmax / 2 + 30
     y1 = H - 14
     d.rounded_rectangle([x0, y1 - bh, x1, y1], 12, fill=BAND)
     for k, ln in enumerate(lines):
         text(d, (W // 2, y1 - bh + 11 + lh * k + lh / 2), ln, size, True, INK, anchor="mm")
+    ny = y1 - bh + 11 + lh * len(lines) + (6 if lines else 0)
+    for k, ln in enumerate(notes):
+        text(d, (W // 2, ny + nh * k + nh / 2), ln, note_size, False, (205, 211, 221), anchor="mm")
 
 
 def cap_at(t, sched):
@@ -588,14 +592,15 @@ def seg_gain():
 
 
 # ================================================= 4c slow motion of a burst
-def seg_slowmo(burst_ms, rel0, rel1, freeze_rel, caps, name, freeze_sec=3.5, ms_per_s=30.0, badge_note=""):
+def seg_slowmo(burst_ms, rel0, rel1, freeze_rel, caps, name, freeze_sec=3.5, ms_per_s=30.0, badge_note="",
+               note=None, tail=0.8):
     f = fly()
     cv = brain_canvas(860, 400)
     X0, Y0 = 30, 104
     rings = lln_rings(cv)
     play1 = (freeze_rel - rel0) / ms_per_s
     play2 = (rel1 - freeze_rel) / ms_per_s
-    sec = play1 + freeze_sec + play2 + 0.8
+    sec = play1 + freeze_sec + play2 + tail
     # mini traces
     pop = f.pop[int(burst_ms + rel0): int(burst_ms + rel1)].astype(float)
     pop = np.convolve(pop, np.ones(3) / 3, mode="same")
@@ -645,7 +650,7 @@ def seg_slowmo(burst_ms, rel0, rel1, freeze_rel, caps, name, freeze_sec=3.5, ms_
             for yy in range(y0, y0 + 110, 8):
                 d.line([x_on, yy, x_on, yy + 4], fill=RED, width=1)
         text(d, (TX0 + 4 + (TX1 - TX0 - 8) * (0 - rel0) / (rel1 - rel0), 536), "開始", 16, True, RED, anchor="mm")
-        caption(d, cap_at(t, caps(play1, freeze_sec)))
+        caption(d, cap_at(t, caps(play1, freeze_sec)), note=note(play1, t) if note else None)
         return im
     return Seg(name, sec, fn, check=None), (play1 + 1.0) / sec
 
@@ -664,7 +669,10 @@ def seg_slow2():
     caps = lambda p1, fz: [(0.0, "別のバーストでも…"),
                            (p1 - 0.6, "やはり触角葉の同じ細胞たちから点火します"),
                            (p1 + fz + 0.2, "")]
-    seg, chk = seg_slowmo(7012, -80, 30, -40, caps, "slowmo2", freeze_sec=2.0)
+    note_txt = ("※伝達物質の仮定の 1 つ（最小補正）での結果。文献と矛盾しない他の 3 つの仮定では、\n"
+                "この細胞は常に発火し続けて脳を駆動し、バーストは視覚系から始まります")
+    note = lambda p1, t: note_txt if t >= p1 - 0.6 else None
+    seg, chk = seg_slowmo(7012, -80, 30, -40, caps, "slowmo2", freeze_sec=2.0, note=note, tail=3.0)
     seg.check = chk
     return seg
 
@@ -737,11 +745,14 @@ def seg_silence():
         tr_ymax = np.percentile(np.concatenate(tr_disp), 99.9)
     t_tr = 8.0 if traces is not None else 0.0
     t_conf = t_tr + 10.0
-    sec = t_conf + 7.0
-    conf_lines = ["確認実験：触角葉のアセチルコリン性局所ニューロン 111 個を",
-                  "黙らせると、3 通りの仮定すべてでバーストは 2.3〜9 分の 1 に",
-                  "（ランダムな 111 個や 30 個では変化なし）。",
-                  "lLN1_bc 30 個だけでも 3 通り中 2 通りで 1.6〜3.2 分の 1"]
+    sec = t_conf + 11.0
+    conf_lines = ["確認実験（4 通りの仮定 × 2 つの強さ × 3 回）：",
+                  "触角葉のアセチルコリン性局所ニューロン 111 個を黙らせると、",
+                  "バーストは 0.25〜0.47 倍に。シナプス数をそろえた",
+                  "別の細胞（平均 0.60 倍）より強く効く。ただし、同じループの",
+                  "投射ニューロンなど『最も強く駆動する』細胞を黙らせると、",
+                  "さらに減る（0.03〜0.31 倍）。",
+                  "→ 鍵は触角葉の興奮性ループ全体"]
     caps = []
     if traces is not None:
         caps += [(0.0, "点火役の 30 個だけを黙らせて（発火できなくして）みます"),
@@ -774,13 +785,13 @@ def seg_silence():
         im, d = blank()
         if t >= t_conf:
             header(d, "ROUND 3", "点火役を黙らせてみる", YELLOW,
-                   "伝達物質の 3 通りの仮定 × 結合の強さ 2 通り × 3 回")
+                   "伝達物質の 4 通りの仮定 × 結合の強さ 2 通り × 3 回")
             d.rounded_rectangle([40, 110, 1240, 590], 14, fill=PANEL)
             a = smoothstep((t - t_conf) / 0.5)
             for j, ln in enumerate(conf_lines):
-                col = YELLOW if j == 0 else INK
+                col = YELLOW if j in (0, len(conf_lines) - 1) else INK
                 c = tuple(int(BG[q] + (col[q] - BG[q]) * a) for q in range(3))
-                text(d, (W // 2, 230 + 78 * j), ln, 34, True, c, anchor="mm")
+                text(d, (W // 2, 160 + 63 * j), ln, 31, True, c, anchor="mm")
         elif traces is not None and t < t_tr:
             header(d, "ROUND 3", "点火役を黙らせてみる", YELLOW, "結合 2.5 倍のモデル。脳全体の発火数（5 ms ごと、約 15 秒間・1 回の例）▼ = バースト")
             draw_traces(d, t)
@@ -811,7 +822,7 @@ def seg_silence():
                 d.line([gx - 10, base_y, gx + 470, base_y], fill=GREY, width=2)
         caption(d, cap_at(t, caps))
         return im
-    return Seg("silence", sec, fn, check=t_tr + 8.5, extra=((6.5,) if traces is not None else ()) + (t_conf + 5.0,))
+    return Seg("silence", sec, fn, check=t_tr + 8.5, extra=((6.5,) if traces is not None else ()) + (t_conf + 6.0,))
 
 
 # ============================================================ 6 real flies
@@ -899,13 +910,13 @@ def seg_summary():
     rings = lln_rings(bc)
     caps = [(0.0, "まとめ"),
             (0.8, "バーストは「いちばんよく発火する場所」ではなく、\nネットワークの最強ループから点火します"),
-            (6.0, "ハエでは、その正体は触角葉の少数の\nアセチルコリン性局所ニューロン（中心は片側 15 個の lLN1_bc）。\n本物のハエで確かめられる『予測』です")]
+            (6.0, "ハエでは、その正体は触角葉の興奮性ループ\n（アセチルコリン性局所ニューロン＋投射ニューロン）。\n本物のハエで確かめられる『予測』です")]
 
     def fn(i, t):
         im, d = blank()
         text(d, (W // 2, 50), "共通のルール", 34, True, YELLOW, anchor="mm")
         for x0, img, col, lab in [(90, chip, BLUE, "培養神経：決まったホットスポット"),
-                                  (720, brain, ORANGE, "ハエの脳：触角葉の\nアセチルコリン性局所ニューロン（モデル）")]:
+                                  (720, brain, ORANGE, "ハエの脳：触角葉の興奮性ループ（モデル）")]:
             d.rounded_rectangle([x0 - 16, 90, x0 + 486, 420], 14, fill=PANEL, outline=col, width=3)
             im.paste(img, (x0, 150))
             ls = lab.split("\n")

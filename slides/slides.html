@@ -1,0 +1,1232 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>自発バーストの点火点</title>
+<!-- Design tokens: デジタル庁デザインシステム (MIT License, © 2023 デジタル庁). See dads/LICENSE. -->
+<link rel="stylesheet" href="dads/tokens.css">
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root {
+    --font: 'Noto Sans JP', 'Noto Sans CJK JP', sans-serif;
+    --ink: var(--color-neutral-solid-gray-900);
+    --ink-2: var(--color-neutral-solid-gray-700);
+    --ink-3: var(--color-neutral-solid-gray-600);
+    --line: var(--color-neutral-solid-gray-200);
+    --line-strong: var(--color-neutral-solid-gray-420);
+    --key: var(--color-primitive-blue-900);
+    --key-bg: var(--color-primitive-blue-50);
+    --surface: var(--color-neutral-solid-gray-50);
+    --hub: var(--color-primitive-red-900);
+    --hub-bg: var(--color-primitive-red-50);
+    --mc: var(--color-primitive-blue-800);
+    --cv: var(--color-primitive-orange-800);
+    --nm: var(--color-primitive-green-700);
+    --mcl: var(--color-primitive-purple-700);
+    --ok: var(--color-primitive-green-800);
+    --warn: var(--color-primitive-yellow-1000);
+    --warn-bg: var(--color-primitive-yellow-50);
+    --warn-line: var(--color-primitive-yellow-700);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body { font-family: var(--font); color: var(--ink); font-weight: 400;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact;
+         counter-reset: main appx; }
+  b, strong, h1, h2, h3, th { font-weight: 700; }
+
+  /* ---------- slide frame ---------- */
+  .slide { position: relative; width: 1280px; height: 720px; overflow: hidden; background: #fff;
+           padding: 44px 64px 0 64px; break-after: page; page-break-after: always; }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  .slide.main { counter-increment: main; }
+  .slide.appx { counter-increment: appx; }
+  .hd { margin-bottom: 22px; }
+  .eyebrow { font-size: 16px; line-height: 1.7; letter-spacing: 0.02em; font-weight: 700; color: var(--key); }
+  .hd h2 { font-size: 32px; line-height: 1.5; letter-spacing: 0.01em; margin-top: 2px; }
+  .ft { position: absolute; left: 64px; right: 64px; bottom: 18px; display: flex; justify-content: space-between;
+        align-items: flex-end; gap: 32px; border-top: 1px solid var(--line); padding-top: 8px;
+        font-size: 14px; line-height: 1.5; letter-spacing: 0.02em; color: var(--ink-3); }
+  .ft .src { max-width: 1040px; }
+  .ft .pg { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .main .ft .pg::after { content: counter(main); }
+  .appx .ft .pg::after { content: "付録 " counter(appx); }
+
+  /* ---------- type scale (DADS Std) ---------- */
+  .t45 { font-size: 45px; line-height: 1.4; letter-spacing: 0.01em; }
+  .t36 { font-size: 36px; line-height: 1.4; letter-spacing: 0.01em; }
+  .t32 { font-size: 32px; line-height: 1.5; letter-spacing: 0.01em; }
+  .t28 { font-size: 28px; line-height: 1.5; letter-spacing: 0.01em; }
+  .t24 { font-size: 24px; line-height: 1.5; letter-spacing: 0.02em; }
+  .t20 { font-size: 20px; line-height: 1.6; letter-spacing: 0.02em; }
+  .t18 { font-size: 18px; line-height: 1.6; letter-spacing: 0.02em; }
+  .t16 { font-size: 16px; line-height: 1.7; letter-spacing: 0.02em; }
+  .b { font-weight: 700; }
+  .muted { color: var(--ink-2); }
+  .c-key { color: var(--key); } .c-hub { color: var(--hub); }
+  .c-mc { color: var(--mc); } .c-cv { color: var(--cv); } .c-nm { color: var(--nm); } .c-mcl { color: var(--mcl); }
+  .num { font-variant-numeric: tabular-nums; }
+  i.v { font-style: italic; }
+
+  /* ---------- layout ---------- */
+  .row { display: flex; gap: 32px; }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+  .grow { flex: 1 1 0; min-width: 0; }
+  .stack-8 > * + * { margin-top: 8px; }
+  .stack-12 > * + * { margin-top: 12px; }
+  .stack-16 > * + * { margin-top: 16px; }
+  .stack-24 > * + * { margin-top: 24px; }
+  figure { margin: 0; }
+  figure img { display: block; }
+  figcaption { font-size: 16px; line-height: 1.6; letter-spacing: 0.02em; color: var(--ink-2); margin-top: 4px; }
+
+  /* ---------- components ---------- */
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; background: #fff; }
+  .card.key { background: var(--key-bg); border-color: var(--key-bg); }
+  .card.gray { background: var(--surface); border-color: var(--surface); }
+  .card.hub { background: var(--hub-bg); border-color: var(--hub-bg); }
+  .card h3 { font-size: 20px; line-height: 1.6; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .note { border-left: 4px solid var(--key); padding: 2px 0 2px 16px; }
+  .note.caveat { border-left-color: var(--warn-line); }
+  ul.list { list-style: none; }
+  ul.list > li { position: relative; padding-left: 20px; }
+  ul.list > li + li { margin-top: 8px; }
+  ul.list > li::before { content: ""; position: absolute; left: 2px; top: 0.72em; width: 8px; height: 8px;
+                         background: var(--ink-2); border-radius: 50%; }
+  ul.tight > li + li { margin-top: 4px; }
+  ol.qs { list-style: none; counter-reset: q; }
+  ol.qs > li { counter-increment: q; position: relative; padding-left: 52px; min-height: 40px; }
+  ol.qs > li + li { margin-top: 16px; }
+  ol.qs > li::before { content: counter(q); position: absolute; left: 0; top: 0; width: 36px; height: 36px;
+                       border-radius: 4px; background: var(--key); color: #fff; font-weight: 700;
+                       font-size: 20px; line-height: 36px; text-align: center; }
+  .kpis { display: flex; gap: 16px; }
+  .kpi { flex: 1 1 0; border-top: 4px solid var(--key); padding-top: 6px; }
+  .kpi .v { font-size: 36px; line-height: 1.3; font-weight: 700; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 20px; font-weight: 700; }
+  .kpi .l { font-size: 16px; line-height: 1.5; letter-spacing: 0.02em; color: var(--ink-2); }
+  .kpi.hub { border-top-color: var(--hub); } .kpi.hub .v { color: var(--hub); }
+  .kpi.gray { border-top-color: var(--line-strong); }
+  .tag { display: inline-block; font-size: 14px; line-height: 1.5; font-weight: 700; letter-spacing: 0.02em;
+         padding: 1px 8px; border-radius: 4px; border: 1px solid currentColor; }
+
+  /* tables */
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  thead th { background: var(--surface); border-bottom: 1px solid var(--line-strong); font-size: 16px;
+             line-height: 1.6; letter-spacing: 0.02em; color: var(--ink); vertical-align: middle; }
+  td.r, th.r { text-align: right; } td.c, th.c { text-align: center; }
+  table.t20 td { font-size: 20px; line-height: 1.5; }
+  table.t18 td { font-size: 18px; line-height: 1.5; }
+  table.t16 td { font-size: 16px; line-height: 1.5; }
+  table.t16 td, table.t16 th { padding: 6px 10px; }
+  table.t18 td, table.t18 th { padding: 7px 12px; }
+  tr.hl td { background: var(--hub-bg); }
+  td.nw, th.nw { white-space: nowrap; }
+
+  /* study design steps */
+  .steps { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr 28px 1fr; align-items: stretch; }
+  .step { border: 1px solid var(--line-strong); border-radius: 8px; padding: 14px 16px; }
+  .step .n { display: inline-block; width: 28px; height: 28px; border-radius: 4px; background: var(--key); color: #fff;
+             font-weight: 700; font-size: 16px; line-height: 28px; text-align: center; margin-bottom: 6px; }
+  .step h3 { font-size: 20px; line-height: 1.5; margin-bottom: 6px; }
+  .step.hubs { border: 2px solid var(--hub); }
+  .step.hubs .n { background: var(--hub); }
+  .chev { display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-size: 24px; }
+
+  /* title */
+  .title-wrap { display: flex; gap: 40px; align-items: center; height: 580px; }
+  .title-wrap h1 { font-size: 45px; line-height: 1.4; letter-spacing: 0.01em; }
+  .rule { width: 64px; height: 4px; background: var(--key); }
+
+  /* appendix */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  dl.gloss { display: grid; grid-template-columns: 200px 1fr; column-gap: 20px; }
+  dl.gloss dt { font-weight: 700; font-size: 16px; line-height: 1.5; padding: 5px 0; border-bottom: 1px solid var(--line); }
+  dl.gloss dd { font-size: 16px; line-height: 1.5; padding: 5px 0; border-bottom: 1px solid var(--line); }
+  ol.refs { padding-left: 28px; }
+  ol.refs li { font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; }
+  ol.refs li + li { margin-top: 2px; }
+  ol.toc { list-style: none; columns: 2; column-gap: 48px; }
+  ol.toc li { font-size: 17px; line-height: 1.5; padding: 4px 0; border-bottom: 1px solid var(--line); break-inside: avoid; display: flex; gap: 12px; }
+  ol.toc li .k { color: var(--key); font-weight: 700; min-width: 64px; font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'Noto Sans Mono CJK JP', monospace; font-size: 0.92em; }
+  .eq { font-size: 20px; line-height: 1.7; }
+  a.xref { color: inherit; text-decoration: none; }
+  .ph { border: 2px dashed var(--warn-line); background: var(--warn-bg); border-radius: 8px; padding: 10px 16px; }
+  .ph-label { color: var(--warn); font-weight: 700; }
+  td.ph-cell { background: var(--warn-bg); outline: 2px dashed var(--warn-line); outline-offset: -3px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<!-- =========================================================== 1 TITLE -->
+<section class="slide main" id="s-title">
+  <div class="title-wrap">
+    <div class="grow stack-24">
+      <p class="eyebrow">計算神経科学・1 日研究の報告</p>
+      <h1>自発的なバーストは<br>どこから点火するか</h1>
+      <p class="b c-key" style="margin-top:12px;font-size:22px;line-height:1.5;letter-spacing:0.01em">培養皮質とハエのコネクトームで点火点を探すと、<br>触角葉の興奮性ハブに行き着く</p>
+      <div class="rule"></div>
+      <p class="t18 muted">培養した大脳皮質ニューロンのバーストは、日をまたいで戻るホットスポットから始まり、その場所は発火率よりも「結合の主モード」と対応した。ハエの全脳配線図のモデルで同じ問いを立てると、触角葉の興奮性ループ（アセチルコリン性局所ニューロンと投射ニューロン）が、配線の主モードであり、モデルの自発活動の主な駆動源として浮かび上がった。</p>
+      <p class="t18"><span class="b">Kazushi Takehana</span><br><span class="muted">2026 年 10 月 27 日</span></p>
+      <p class="t16 muted">論文：<i>Where spontaneous bursts ignite in cultured cortex and in the fly connectome points to an excitatory hub in the antennal lobe</i></p>
+    </div>
+    <figure style="width:470px">
+      <img src="img/title_brain.png" alt="ハエの全脳のニューロンを正面から見た図。触角葉の左右に赤い点（lLN1_bc）が集まる" style="width:470px">
+      <figcaption>ハエの全脳 138,639 個のニューロン（正面）。<span class="c-hub b">赤＝lLN1_bc（30 個：左 14・右 16）</span>、橙＝ほかのアセチルコリン性局所ニューロン</figcaption>
+    </figure>
+  </div>
+  <footer class="ft"><span class="src">データはすべて公開データ：DANDI 002020（Nakamuta ら）、Wagenaar ら 2006、FlyWire v783、Turner ら 2021。モデル：Shiu ら 2024。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 2 QUESTION -->
+<section class="slide main" id="s-question">
+  <header class="hd"><p class="eyebrow">問い</p><h2>入力がなくても、神経回路は一斉に発火する。その火はどこから付くのか</h2></header>
+  <div class="row" style="gap:40px">
+    <div style="width:640px" class="stack-12">
+      <p class="t20"><span class="b">ネットワークバースト</span>＝多くのニューロンが数百 ms のあいだ一斉に発火する現象。培養した神経細胞は、刺激がなくてもこれを繰り返す。</p>
+      <figure>
+        <img src="img/culture_raster.png" alt="培養神経の 60 秒間のスパイク列。数秒おきに全電極が一斉に発火する縦の帯が現れる" style="width:640px">
+        <figcaption>ラット大脳皮質の培養（HD-MEA、60 秒、活動電極の半分を表示）。各点＝1 スパイク、青い帯＝検出したバースト</figcaption>
+      </figure>
+    </div>
+    <div class="grow stack-24">
+      <ol class="qs t20">
+        <li><span class="b">どこから</span>点火するか<br><span class="t18 muted">毎回同じ場所から始まるのか</span></li>
+        <li><span class="b">何が</span>そこを点火点にするか<br><span class="t18 muted">よく発火する場所なのか</span></li>
+        <li>回路は暴走（臨界）から<span class="b">どれだけ離れて</span>いるか</li>
+      </ol>
+      <p class="note t20">同じ 3 つの問いを、同じ物差しで<br><span class="b">培養神経</span>と<span class="b">ハエの全脳</span>に当てる。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">点火点＝1 回のバーストの最初の 20 スパイクの位置の重心。HD-MEA＝高密度微小電極アレイ（MaxOne、26,400 電極）。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 3 DESIGN -->
+<section class="slide main" id="s-design">
+  <header class="hd"><p class="eyebrow">研究の設計</p><h2>培養で点火点を調べ、同じ物差しをハエの配線図と本物のハエに当てる</h2></header>
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <h3>培養神経</h3>
+      <p class="t16">ラット胎仔の大脳皮質の分散培養。HD-MEA でほぼ毎日 30 分記録（7 培養）。再現用に 59 電極の古典データ（30 培養）</p>
+      <p class="t16 b c-key" style="margin-top:8px">→ 点火点と、臨界からの距離</p>
+    </div>
+    <div class="chev">▶</div>
+    <div class="step">
+      <span class="n">2</span>
+      <h3>ハエの全脳モデル</h3>
+      <p class="t16">全脳配線図 FlyWire から作ったスパイキングモデル（Shiu ら 2024）に、培養と同じ条件（ノイズ＋短期抑圧）を与える</p>
+      <p class="t16 b c-key" style="margin-top:8px">→ 点火点とハブの予測</p>
+    </div>
+    <div class="chev">▶</div>
+    <div class="step hubs">
+      <span class="n">3</span>
+      <h3>因果の検証</h3>
+      <p class="t16">予測したハブをモデルの中で黙らせ、出力シナプス数をそろえた対照と比べて、バーストが減るかを見る</p>
+      <p class="t16 b c-hub" style="margin-top:8px">→ 必要性の確認</p>
+    </div>
+    <div class="chev">▶</div>
+    <div class="step">
+      <span class="n">4</span>
+      <h3>本物のハエ</h3>
+      <p class="t16">刺激なしで記録した全脳のカルシウムイメージング（Turner ら 2021、20 匹、74 領域）</p>
+      <p class="t16 b c-key" style="margin-top:8px">→ 予測と矛盾しないか</p>
+    </div>
+  </div>
+  <div class="kpis" style="margin-top:32px">
+    <div class="kpi"><div class="v">30,349</div><div class="l">培養のバースト（回）<br>114 セッション・7 培養</div></div>
+    <div class="kpi"><div class="v">111,329</div><div class="l">再現用データのバースト（回）<br>527 記録中 526・30 培養</div></div>
+    <div class="kpi"><div class="v">138,639</div><div class="l">ハエのモデルのニューロン（個）<br>シナプス 5,450 万個</div></div>
+    <div class="kpi"><div class="v">20</div><div class="l">本物のハエ（匹）<br>各約 28 分</div></div>
+  </div>
+  <footer class="ft"><span class="src">データはすべて公開データ。培養の解析パラメータは、セッションをまたぐ結果を見る前に固定（<a class="xref" href="#a-defs">付録 3</a>）。培養とハエの対応は定性的な比較。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 4 HOTSPOT -->
+<section class="slide main" id="s-hotspot">
+  <header class="hd"><p class="eyebrow">結果 1　培養：点火点</p><h2>点火のホットスポットは、日をまたいで同じ場所に戻ってくる</h2></header>
+  <div class="row" style="gap:36px">
+    <div style="width:600px" class="stack-12">
+      <figure>
+        <img src="img/ign_maps.png" alt="同じ培養の 6 日分の点火マップ。左下と左上の決まった場所が繰り返し濃くなる" style="width:600px">
+        <figcaption>同じ培養（No. 23312）の点火マップ。濃いほど、そこから始まったバーストが多い（灰色＝記録電極なし、3.9 × 2.1 mm）</figcaption>
+      </figure>
+      <ul class="list t18">
+        <li>局所から始まる：最初の 20 スパイクの広がりは、同じバーストのランダムな 20 スパイクの <span class="b">0.62 倍</span>（70 セッション中 69）</li>
+        <li>最初に発火する電極の上位 10% が、バーストの <span class="b">81%</span> の最初のスパイクを出す（期待値 48%）</li>
+      </ul>
+    </div>
+    <div class="grow stack-12">
+      <img src="img/ign_stability.png" alt="点火マップの相関。同じ培養の次の記録日は中央値 0.43、別の培養どうしは −0.06" style="width:330px">
+      <p class="t18">ホットスポット間の距離：<span class="b">0.58 mm</span> 対 1.75 mm。<span class="b">7/7 培養</span>で同じ傾向（<i>P</i> = 9 × 10<sup>−18</sup>）</p>
+      <p class="note caveat t16">注意：連続する記録日は記録電極の配置も似ている（重なり 0.49 対 0.10）。ただし「点火 − 活動密度」の残差マップも安定（<i>r</i> = 0.39 対 0.02）。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">DANDI 002020（HD-MEA）。相関：連続する記録日 63 組・別の培養 1,674 組（横線＝中央値、Mann–Whitney 検定）。全数値は<a class="xref" href="#a-ignition">付録 4</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 5 PREDICTOR -->
+<section class="slide main" id="s-predictor">
+  <header class="hd"><p class="eyebrow">結果 2　培養：何が点火点を決めるか</p><h2>場所の単位では、点火点は発火率より「結合の主モード」と対応する</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:450px">
+      <img src="img/predictors.png" alt="セッションごとの順位相関。発火率は中央値ほぼ 0、結合の主モードは 0.25 前後に上がる" style="width:450px">
+    </figure>
+    <div class="grow stack-12">
+      <div class="card key">
+        <h3>結合の主モードとは</h3>
+        <p class="t18">バースト間の静かな時間に、電極どうしのゆらぎの相関（機能的結合）を求め、その主固有ベクトルをとる。＝<span class="b">協調したゆらぎが最も大きく集まるパターン</span>。</p>
+      </div>
+      <div class="kpis">
+        <div class="kpi gray"><div class="v">≈ 0</div><div class="l">発火率の <i>ρ</i>（100 µm の場所ごと）</div></div>
+        <div class="kpi"><div class="v c-key">0.25</div><div class="l">主モードの <i>ρ</i>（7/7 培養で正）</div></div>
+        <div class="kpi"><div class="v c-key">88<small>%</small></div><div class="l">主モードが勝つセッション（56/64）</div></div>
+      </div>
+      <ul class="list t18">
+        <li>点火は記録電極の配置密度とも対応する（<i>ρ</i> = 0.40）。補正しても主モードは残る（偏相関 0.14、四分位 −0.03〜0.29、7/7 培養）</li>
+        <li><span class="b">電極 1 個ずつ</span>で見ると話は違う：発火率が最初のスパイクの担い手を予測し（<i>ρ</i> = 0.46、7/7 培養）、主モードは発火率に勝たない</li>
+      </ul>
+      <p class="note caveat t16">効果は中程度で、場所の単位に限られる。59 電極の粗い配列では検出できない。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">100 µm の区画ごとに、点火確率と予測量の Spearman 順位相関（64 セッションの中央値、主モード <i>P</i> = 6 × 10<sup>−8</sup>）。図：線＝セッション（青＝主モードが上回る）、太線＝中央値。詳細は<a class="xref" href="#a-predictors">付録 5</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 6 CRITICAL -->
+<section class="slide main" id="s-critical">
+  <header class="hd"><p class="eyebrow">結果 3　培養：暴走からの距離</p><h2>培養は暴走の一歩手前（分岐比 <i>m</i> ≈ 0.99）で動いている</h2></header>
+  <div class="row" style="gap:40px">
+    <div class="grow stack-16">
+      <div class="card gray">
+        <h3>分岐比 <i>m</i></h3>
+        <p class="t18">1 個のスパイクが、次の瞬間に平均いくつのスパイクを生むか。<i>m</i> &lt; 1 なら活動は消えていき、<i>m</i> &gt; 1 なら暴走する。<i>m</i> = 1 が境目（臨界）。</p>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="v">0.992</div><div class="l">HD-MEA（7 培養）<br>四分位 0.985〜0.997</div></div>
+        <div class="kpi"><div class="v">0.986</div><div class="l">59 電極（30 培養）</div></div>
+      </div>
+      <ul class="list t18">
+        <li>バーストを除いても下がらない（0.995、0.991）→ バースト間の活動そのものが数百 ms 残響している</li>
+        <li>発達につれてバーストが増え（7/7、29/30 培養）、<i>m</i> は 1 から離れる（7/7、30/30 培養）</li>
+        <li>30 分の記録の中で <i>m</i> は上がらない。ごくわずかに下がる「疲労型」（<a class="xref" href="#a-drift">付録 8</a>）</li>
+      </ul>
+    </div>
+    <figure style="width:520px">
+      <img src="img/m_days.png" alt="培養ごとの分岐比の推移。ほぼ 1 から始まり、日数とともに 0.95〜0.99 に下がる" style="width:520px">
+      <figcaption>各線＝1 培養（HD-MEA）の、記録ごとの <i>m</i>。破線＝臨界（<i>m</i> = 1）</figcaption>
+    </figure>
+  </div>
+  <footer class="ft"><span class="src">MR 推定量（Wilting &amp; Priesemann 2018。電極で一部しか記録できなくても偏らない）、4 ms ビン。値は中央値。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 7 FLY MODEL -->
+<section class="slide main" id="s-flymodel">
+  <header class="hd"><p class="eyebrow">ハエの全脳モデル</p><h2>ハエの全脳配線図のモデルに、培養と同じ条件を与える</h2></header>
+  <div class="row" style="gap:36px">
+    <div style="width:470px" class="stack-16">
+      <div class="kpis">
+        <div class="kpi"><div class="v">138,639</div><div class="l">ニューロン（個）</div></div>
+        <div class="kpi"><div class="v">5,450<small>万</small></div><div class="l">シナプス（個）</div></div>
+      </div>
+      <p class="t18">Shiu ら（2024）の<span class="b">LIF モデル</span>（漏れ積分発火）。自由パラメータは 1 つで、行動の実験で較正済み。これを<span class="b">ゲイン <i>g</i> = 1</span> とする。</p>
+      <div class="card gray">
+        <h3>培養に合わせて加えたもの</h3>
+        <ul class="list t18 tight">
+          <li><span class="b">弱いノイズ</span>：全ニューロンに自発スパイク 0.3 Hz</li>
+          <li><span class="b">短期シナプス抑圧</span>：使うほど伝わりにくくなる（回復 2 秒）</li>
+          <li><span class="b">ゲイン <i>g</i></span>：全シナプスの強さを <i>g</i> 倍</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grow stack-12">
+      <p class="t18 b">興奮か抑制か（伝達物質の符号）を 4 通りに仮定</p>
+      <table class="t16">
+        <thead><tr><th class="nw">仮定</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td class="nw b c-mc">最小補正（MC）</td><td>公開の符号のまま。ただし低い確信度で「セロトニン」とされた触角葉の局所ニューロン 40 個を抑制性に。<span class="muted">うち 21 個（lLN1_bc 7 個を含む）は文献ではアセチルコリン作動性</span></td></tr>
+          <tr><td class="nw b c-mcl">文献整合の最小補正（LC）</td><td>40 個のうち文献でアセチルコリンと分かっている 21 個は興奮性のまま、残り 19 個だけ抑制性に</td></tr>
+          <tr><td class="nw b c-cv">細胞タイプ多数決（CV）</td><td>細胞タイプごとに 1 つの伝達物質。文献で分かっているものを優先（15,901 個の符号が変わる）</td></tr>
+          <tr><td class="nw b c-nm">モノアミンなし（NM）</td><td>CV から、ドーパミン・セロトニンなどの速いシナプス作用を除く</td></tr>
+        </tbody>
+      </table>
+      <p class="note t16">伝達物質は電子顕微鏡画像からの AI 予測で、一部は誤っている。だから結論は複数の仮定で確かめる。公開の符号のままでは、どんなに弱いノイズでも嗅覚系が暴走して止まらない（<a class="xref" href="#a-signs">付録 10</a>）。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">FlyWire v783（Dorkenwald ら 2024; Schlegel ら 2024）、結合 1,510 万本。GPU 実装は元の Brian 2 版とニューロンごとの発火率が <i>r</i> ≥ 0.999 で一致。抑圧は Tsodyks–Markram 型（<i>U</i> = 0.05）。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 8 GAIN -->
+<section class="slide main" id="s-gain">
+  <header class="hd"><p class="eyebrow">結果 4　ハエのモデル：暴走からの距離</p><h2>較正済みの脳はほぼバーストしない。頻繁なバーストには約 2 倍が要る</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:560px">
+      <img src="img/fly_gain.png" alt="ゲインとバースト頻度。g = 1 では 0〜16 回/分、2 前後から急に増え、2.5 で 78〜236 回/分" style="width:560px">
+    </figure>
+    <div class="grow stack-16">
+      <ul class="list t20">
+        <li><i>g</i> = 1：MC・NM ではバーストなし。LC・CV では小さなバーストがまれに出る（毎分 0〜16 回）</li>
+        <li>頻繁なバースト（毎分 50 回超）が出るのは <span class="b"><i>g</i> = 2.0〜2.5</span></li>
+        <li><i>g</i> = 2.5 で 78〜236 回/分。長さは中央値 18〜40 ms と短い（培養は 390 ms）</li>
+        <li><i>g</i> = 2.5 でもスパイクの 79〜95% はバーストの外（培養の中央値は 53%）</li>
+      </ul>
+      <p class="note t20">較正済みのハエの脳はバーストの始まりの手前〜境目にあり、頻繁なバーストまで<span class="b">シナプスの強さで約 2 倍</span>の距離がある。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">15 秒 × 2 シードの平均。バースト＝脳全体の発火率が背景の 1.5 倍＋30 スパイク/ms を 10 ms 以上超えた区間。このモデルでは分岐比が暴走までの距離を表さないため、「バーストが始まるゲイン」で測る（<a class="xref" href="#a-scale">付録 20</a>）。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 9 HUB -->
+<section class="slide main" id="s-hub">
+  <header class="hd"><p class="eyebrow">結果 5　ハエのモデル：点火点と駆動源</p><h2>触角葉の局所ニューロンは常時発火する駆動源。「先に発火」は MC だけ</h2></header>
+  <div class="row" style="gap:32px">
+    <figure style="width:460px">
+      <img src="img/lln_rates.png" alt="lLN1_bc の自発発火率。MC 以外では g = 1 で 24〜31 Hz、g = 2〜2.5 で 100 Hz 超。脳の中央値は 0.2 Hz" style="width:460px">
+      <figcaption>lLN1_bc（30 個）の自発発火率。破線＝脳の中央値</figcaption>
+    </figure>
+    <figure class="grow">
+      <img src="img/crossing_base.png" alt="MC でのみ、lLN1_bc がバースト開始前に閾値を越える割合がランダムな時刻より高い。左 69% 対 28%、右 38% 対 18%" style="width:420px">
+      <figcaption>MC（<i>g</i> = 2.5、29 バースト）：開始前 50 ms に閾値を越えた割合</figcaption>
+    </figure>
+  </div>
+  <div class="two" style="gap:28px;margin-top:8px">
+    <p class="t16"><span class="b c-hub">LC・CV・NM（文献と矛盾しない仮定）：常時発火</span><br><i>g</i> = 2〜2.5 で 100〜136 Hz（111 個全体で 37〜60 Hz）。<i>g</i> = 1 でも 24〜31 Hz で上位 0.15% 以内。バーストは視覚系と中心複合体から始まる。</p>
+    <p class="t16"><span class="b c-mc">MC だけ：先に発火（中程度）</span><br>左 69% 対 28%（<i>P</i> = 1 × 10<sup>−5</sup>）、右 38% 対 18%（<i>P</i> = 0.01）。6 条件中 5 で有意だが、偶然の 1.7〜2.7 倍にとどまる。</p>
+  </div>
+  <footer class="ft"><span class="src">触角葉＝匂いを最初に処理する場所。lLN1_bc＝触角葉の興奮性（アセチルコリン作動性）局所ニューロン（左 14・右 16 個）。詳細は<a class="xref" href="#a-mc-ignition">付録 12</a>〜<a class="xref" href="#a-tonic">14</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 10 WHY -->
+<section class="slide main" id="s-why">
+  <header class="hd"><p class="eyebrow">なぜ触角葉か</p><h2>興奮性の配線の主モードは、左右の触角葉の興奮性ループ</h2></header>
+  <div class="row" style="gap:36px">
+    <div style="width:640px" class="stack-12">
+      <div class="card key">
+        <p class="t18"><span class="b">ペロン固有ベクトル</span>＝興奮を強めていったとき最初に育つ活動パターン。配線だけから計算できる「主モード」。</p>
+      </div>
+      <img src="img/perron_share.png" alt="ペロン固有ベクトルの重みの割合。4 つの仮定すべてで触角葉の局所ニューロンが 3 割前後、投射ニューロンが 2 割弱を占める" style="width:640px">
+    </div>
+    <div class="grow stack-16">
+      <div class="kpis">
+        <div class="kpi hub"><div class="v">28〜35<small>%</small></div><div class="l">触角葉の局所ニューロンの重み</div></div>
+        <div class="kpi"><div class="v">77〜85<small>%</small></div><div class="l">1 つのモードが片側に集まる割合</div></div>
+      </div>
+      <ul class="list t18">
+        <li>上位 2 つのモードは<span class="b">左右の鏡像</span>（固有値の差 6〜18%）。どちらも局所ニューロン＋投射ニューロン（15〜19%）のループで、ケニヨン細胞 17〜19%</li>
+        <li>lLN1_bc は 1 個あたり出力シナプス約 3,740（脳の中央値 227）、入力の 74〜92% が興奮性 → <span class="b">抑制の少ない密な興奮性ループ</span></li>
+        <li>ペロン重みは興奮性入力の多さと相関（<i>ρ</i> = 0.61〜0.64）。ハブは見つけるが、脳の残りの順位づけは発火率と同程度</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">興奮性ニューロンからのシナプス数の行列の主固有ベクトル（ARPACK）。図は第 1 モード。左右の 2 モードは<a class="xref" href="#a-modes">付録 19</a>、予測力の比較は<a class="xref" href="#a-rule">付録 18</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 11 SILENCE -->
+<section class="slide main" id="s-silence">
+  <header class="hd"><p class="eyebrow">因果の検証（モデルの中で）</p><h2>触角葉の興奮性ループを黙らせると、自発バーストが減る</h2></header>
+  <div class="row" style="gap:32px">
+    <figure style="width:620px">
+      <img src="img/silencing.png" alt="無処置に対するバースト頻度。局所ニューロン 111 個は 0.25〜0.47、出力シナプス数をそろえた対照は平均 0.60、駆動の最も大きい 111 個は 0.03〜0.31、ランダムは 0.74〜1.74" style="width:620px">
+      <figcaption>点＝仮定 × ゲインごとの値（対照は抽選ごと）。色＝<span class="c-mc b">MC</span>・<span class="c-mcl b">LC</span>・<span class="c-cv b">CV</span>・<span class="c-nm b">NM</span></figcaption>
+    </figure>
+    <div class="grow stack-12">
+      <div class="kpis">
+        <div class="kpi hub"><div class="v">0.25〜0.47</div><div class="l">局所ニューロン 111 個を黙らせたときのバースト（4 仮定 × 2 ゲインの 8 条件すべて）</div></div>
+      </div>
+      <ul class="list t16">
+        <li>出力シナプス数をそろえた対照は平均 0.60（0.31〜0.89）。111 個は 8 条件中 7 で全抽選より低い</li>
+        <li>駆動（出力シナプス × 発火率）の最も大きい 111 個はさらに強い（0.03〜0.31）。LC・CV・NM では<span class="b">大半が触角葉の投射ニューロン＝同じループ</span></li>
+        <li>LC・CV・NM では、上位 111 個の駆動源（77〜82% が局所＋投射ニューロン）が脳全体の興奮性シナプス事象の 49〜56% を出す（MC 24%）</li>
+      </ul>
+      <p class="note t16">ハブは 1 つの細胞タイプではなく、<span class="b">触角葉の興奮性ループ</span>。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">出力シナプスを取り除いて「黙らせる」。20 秒 × 3 シード、そろえた対照は 3 回の抽選。ランダム・他の局所ニューロンは先行の確認実験（MC・CV・NM）。全数値は<a class="xref" href="#a-silence-table">付録 15</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 12 REAL FLIES -->
+<section class="slide main" id="s-real">
+  <header class="hd"><p class="eyebrow">本物のハエ</p><h2>本物のハエでも触角葉は最もゆっくりゆらぐ（予測と矛盾しない）</h2></header>
+  <div class="row" style="gap:36px">
+    <figure style="width:600px">
+      <img src="img/turner_rank.png" alt="74 の脳領域を自己相関の高い順に並べた棒グラフ。右の触角葉が 1 位、左が 4 位" style="width:600px">
+      <figcaption>74 領域のラグ 1 の自己相関（20 匹の中央値）＝約 0.8 秒離れた時点どうしの似かた＝ゆらぎの遅さ</figcaption>
+    </figure>
+    <div class="grow stack-12">
+      <p class="t16">Turner ら（2021）：20 匹、全神経細胞にカルシウムセンサー GCaMP6s、刺激なしで約 28 分。</p>
+      <div class="kpis">
+        <div class="kpi hub"><div class="v">0.85<small> 対 0.58</small></div><div class="l">自己相関：触角葉 対 他領域<br>20 匹中 18 匹で高い</div></div>
+      </div>
+      <ul class="list t16">
+        <li>ゆらぎも大きい（Δ<i>F</i>/<i>F</i> の標準偏差 0.048 対 0.029、19/20 匹）</li>
+        <li>明るさ（信号雑音比）の対照：自己相関を平均蛍光量で補正しても 17/20 匹で遅い（<i>P</i> = 4 × 10<sup>−5</sup>）</li>
+        <li>全体の信号との相関はやや低く（0.50 対 0.52）、左右どうしも弱い（偏相関 0.15）→ それぞれ独自にゆらぐ</li>
+      </ul>
+      <p class="note caveat t16">感覚入力、領域の大きさ、受容細胞の末端の多さも寄与しうる。領域ごとのモデルとの対応は弱い（|<i>ρ</i>| ≤ 0.30）→「矛盾しない」にとどまる。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">Turner ら 2021 <i>Curr. Biol.</i> の公開データ（約 1.2 Hz の 2 光子イメージング）。ハエごとの Wilcoxon 符号順位検定（自己相関・大きさ <i>P</i> = 1 × 10<sup>−5</sup>）。詳細は<a class="xref" href="#a-turner">付録 21</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 13 SUMMARY -->
+<section class="slide main" id="s-summary">
+  <header class="hd"><p class="eyebrow">まとめと予測</p><h2>触角葉の興奮性ループという、検証できるハブの候補が見つかった</h2></header>
+  <div class="row" style="gap:36px">
+    <div class="grow stack-16">
+      <ol class="qs t18">
+        <li><span class="b">培養</span>：点火のホットスポットは日をまたいで戻り、場所の単位では<span class="b">結合の主モード</span>に従う。回路は <i>m</i> ≈ 0.99。</li>
+        <li><span class="b">ハエのモデル</span>：<span class="c-hub b">触角葉の再帰的な興奮性ループ</span>が、最も自己興奮しやすいモジュールで、自発的な駆動の主な源であり、頻繁なバーストに必要。</li>
+        <li><span class="b">本物のハエ</span>：触角葉が最もゆっくりゆらぐ（明るさを補正しても）。</li>
+      </ol>
+      <p class="note caveat t16">ハエの結果はモデルの予測。電気シナプスがない、伝達物質は仮定、文献とは緊張関係もある（次のスライド）。</p>
+    </div>
+    <div style="width:500px" class="card key">
+      <h3>検証できる予測</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li>lLN1_bc 型の細胞は、中枢で最も自発発火の多いニューロンの一つ（生体での発火率は未報告）</li>
+        <li>この細胞（または触角葉の興奮性ループ）を遺伝学的に黙らせると、触角葉・側角・キノコ体の安静時のゆらぎが減る</li>
+        <li>標準的な脱抑制を<span class="b">超えて</span>興奮性を上げたとき（脱抑制＋温度上昇など）に初めて、自発的な同期がまず触角葉に現れる</li>
+        <li><span class="b">培養（ChR2 ＋ HD-MEA）</span>：バースト間の主モードで翌日のホットスポットを予測し、予測点と対照点をパターン光刺激で比べる</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">ChR2＝光で神経を興奮させるタンパク質。培養の実験案は<a class="xref" href="#a-exp">付録 24</a>。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== 14 LIMITS -->
+<section class="slide main" id="s-limits">
+  <header class="hd"><p class="eyebrow">限界</p><h2>これはモデルの予測。確かめるべき仮定がいくつも残る</h2></header>
+  <div class="two" style="gap:28px">
+    <div class="card">
+      <h3>モデルの仮定</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li><span class="b">伝達物質は仮定</span>。lLN1_bc が「先に発火」するのは MC だけで、MC は 40 個中 21 個（lLN1_bc 7 個を含む）を文献と逆に抑制性にしていた</li>
+        <li><span class="b">電気シナプス（ギャップ結合）がない</span>。生体では局所 → 投射ニューロンの興奮は主に電気的。化学シナプス 90,491 個を除いても主モードは残るが、lLN1_bc を黙らせる効果は NM で 2.4 分の 1、MC では試行のばらつきの範囲</li>
+        <li>神経修飾・適応・段階的な伝達はなく、ノイズと抑圧は一様。このモデルの分岐比は暴走までの距離を表さない</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>文献との緊張関係と、解析の限界</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li>触角葉の脱抑制（ピクロトキシン＋CGP54626）では匂い応答は強まるが、自発的な暴走は報告されていない（Shang ら 2007; Olsen &amp; Wilson 2008）→ 本物の触角葉は暴走からかなり離れている</li>
+        <li>lLN1_bc と、生理学で調べられた興奮性局所ニューロンの対応は不確か（Seki ら 2010：使われた系統の細胞の多くは GABA 作動性）</li>
+        <li>培養とハエの対応は定性的。培養の主モードは場所の単位だけで効き、点火は電極配置とも交絡</li>
+        <li><span class="b">否定的な結果</span>：バーストは睡眠回路（ER5、背側扇状体など）に特に届かない</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">詳細は<a class="xref" href="#a-tonic">付録 14</a>（常時発火）、<a class="xref" href="#a-gap">17</a>（電気シナプス）、<a class="xref" href="#a-sleep">22</a>（睡眠回路）、<a class="xref" href="#a-lit">23</a>（文献との整合）。</span><span class="pg"></span></footer>
+</section>
+
+<!-- =========================================================== APPENDIX -->
+<section class="slide appx" id="a-toc">
+  <header class="hd"><p class="eyebrow">付録</p><h2>付録の目次</h2></header>
+  <ol class="toc" id="toc">
+    <li><span class="k">付録 2</span>培養データの詳細</li>
+    <li><span class="k">付録 3</span>バーストと点火点の定義</li>
+    <li><span class="k">付録 4</span>点火点：局所性・集中・安定性</li>
+    <li><span class="k">付録 5</span>何が点火を予測するか：場所と電極</li>
+    <li><span class="k">付録 6</span>バーストの性質：培養とモデル</li>
+    <li><span class="k">付録 7</span>発達に伴う変化</li>
+    <li><span class="k">付録 8</span>30 分の記録の中での変化</li>
+    <li><span class="k">付録 9</span>ハエのモデル：式と定数</li>
+    <li><span class="k">付録 10</span>伝達物質の仮定と、自力で続く回路</li>
+    <li><span class="k">付録 11</span>ハエ：バーストと点火の検出法</li>
+    <li><span class="k">付録 12</span>元の MC での点火の様子</li>
+    <li><span class="k">付録 13</span>閾値越えとランダムな時刻の比較</li>
+    <li><span class="k">付録 14</span>常時発火する lLN1_bc（LC・CV・NM）</li>
+    <li><span class="k">付録 15</span>黙らせる実験：そろえた対照</li>
+    <li><span class="k">付録 16</span>黙らせる実験：先行の確認実験</li>
+    <li><span class="k">付録 17</span>電気シナプスの対照</li>
+    <li><span class="k">付録 18</span>主モードの予測力の比較</li>
+    <li><span class="k">付録 19</span>主モードは左右の鏡像</li>
+    <li><span class="k">付録 20</span>分岐比はモデルでは距離の指標にならない</li>
+    <li><span class="k">付録 21</span>本物のハエ：方法と対照</li>
+    <li><span class="k">付録 22</span>否定的な結果：睡眠回路</li>
+    <li><span class="k">付録 23</span>文献との整合</li>
+    <li><span class="k">付録 24</span>培養での検証実験の案</li>
+    <li><span class="k">付録 25</span>言えること・言えないこと</li>
+    <li><span class="k">付録 26</span>用語集</li>
+    <li><span class="k">付録 27</span>参考文献（1）</li>
+    <li><span class="k">付録 28</span>参考文献（2）</li>
+    <li><span class="k">付録 29</span>クレジット</li>
+  </ol>
+  <footer class="ft"><span class="src">数値の一次資料：notes/results_summary.md。論文草稿：paper/paper_en.html。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-culture-data" data-toc="培養データの詳細">
+  <header class="hd"><p class="eyebrow">付録　培養：データ</p><h2>培養データの詳細</h2></header>
+  <table class="t18">
+    <thead><tr><th></th><th>DANDI 002020（主データ）</th><th>Wagenaar ら 2006（再現用）</th></tr></thead>
+    <tbody>
+      <tr><td class="b">試料</td><td>ラット E18 大脳皮質の分散培養</td><td>ラット大脳皮質の高密度培養</td></tr>
+      <tr><td class="b">記録</td><td>MaxOne HD-MEA（26,400 電極、17.5 µm 間隔、1 回約 1,000 電極）、ほぼ毎日 30 分</td><td>59 電極（200 µm 間隔）、3〜39 日、各約 45 分</td></tr>
+      <tr><td class="b">規模</td><td>7 培養 × 11〜30 日 = 129 セッション</td><td>30 培養、527 記録</td></tr>
+      <tr><td class="b">除外</td><td>ほぼ空の 15 セッション → 114 セッション</td><td>1 記録 → 526 記録</td></tr>
+      <tr><td class="b">バースト</td><td>30,349 回</td><td>111,329 回</td></tr>
+      <tr><td class="b">点火の解析</td><td>バースト 20 回以上の 70 セッション、28,504 回</td><td>363 記録、91,670 回</td></tr>
+      <tr><td class="b">活動電極（中央値）</td><td>426 個</td><td>56 個</td></tr>
+    </tbody>
+  </table>
+  <ul class="list t16" style="margin-top:16px">
+    <li>スパイクは電極ごとの閾値検出（スパイクソートなし）。「発火率」は電極の発火率</li>
+    <li>DANDI には培養日数（DIV）の記録がないため「最初の記録からの日数」を使い、培養内の傾向だけを解釈した</li>
+    <li>記録する約 1,000 電極の選び方はセッションごとに変わる → 2 つの地図は両方で記録した区画だけで比べる</li>
+  </ul>
+  <footer class="ft"><span class="src">DANDI 002020 v0.261004.1410（Nakamuta, Akita, Zhang, Kawahara, Takahashi, Teramae）。活動電極＝0.1 Hz 以上。ほぼ空＝スパイク 30,000 個未満（電極数と時間で換算）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-defs" data-toc="バーストと点火点の定義">
+  <header class="hd"><p class="eyebrow">付録　培養：方法</p><h2>バーストと点火点の定義（結果を見る前に固定）</h2></header>
+  <div class="two">
+    <table class="t16">
+      <thead><tr><th>段階</th><th>定義</th></tr></thead>
+      <tbody>
+        <tr><td class="nw b">集計</td><td>10 ms ビンの集団スパイク数 <i>c</i>(<i>t</i>)</td></tr>
+        <tr><td class="nw b">高い閾値</td><td>max(5 × <i>c</i> の中央値, 0.1 × 活動電極数, 5)</td></tr>
+        <tr><td class="nw b">バースト</td><td>高い閾値の半分以上が続く区間で、高い閾値を 1 回以上越えるもの。100 ms 未満の間隔は結合</td></tr>
+        <tr><td class="nw b">最低参加率</td><td>活動電極の 20% 以上が発火（未満は「小さなイベント」）</td></tr>
+        <tr><td class="nw b">点火点</td><td>最初の 20 スパイクの位置の重心</td></tr>
+        <tr><td class="nw b">点火マップ</td><td>100 µm の格子に数え、σ = 100 µm で平滑化、バースト数で割る</td></tr>
+        <tr><td class="nw b">安定性</td><td>連続する記録日の地図の Pearson 相関（両方で記録した区画）</td></tr>
+        <tr><td class="nw b">分岐比</td><td>4 ms ビン、MR 推定量、<i>k</i> = 1〜50</td></tr>
+      </tbody>
+    </table>
+    <div class="stack-12">
+      <div class="card gray">
+        <h3>データを見てから変えたこと（1 つだけ）</h3>
+        <p class="t16">4 セッションの波形確認で、59 電極では 1 電極だけのバーストが閾値を何百回も越えた（例：556 回、参加率 9%）。そこで「最低参加率 20%」を加えた。セッションをまたぐ解析の前で、ほかの値は変えていない。</p>
+      </div>
+      <div class="card gray">
+        <h3>感度解析</h3>
+        <p class="t16">閾値・<i>K</i>（10/40）・最低参加率（10%/40%）・<i>k</i> の上限（25/100）を 0.5 倍・2 倍にして確認。バースト外スパイクの割合は閾値に強く依存（0.36 / 0.53 / 0.74）。発達の傾向は変わらない。</p>
+      </div>
+      <div class="card gray">
+        <h3>結果を見た後に加えた対照（明記）</h3>
+        <p class="t16">ランダムな 20 スパイク窓の対照、記録電極密度の補正、2 秒の傾向除去をした <i>m</i>、開始時のスパイク構成、結合の主モード。</p>
+      </div>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">出典：notes/culture_results.md。統計はセッションの中央値と四分位範囲に、培養単位で符号が一致した数を併記。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-ignition" data-toc="点火点：局所性・集中・安定性">
+  <header class="hd"><p class="eyebrow">付録　培養：点火点</p><h2>点火点：局所性・集中・安定性の全数値と注意点</h2></header>
+  <table class="t16">
+    <thead><tr><th>指標</th><th class="r">観測</th><th class="r">対照</th><th>補足</th></tr></thead>
+    <tbody>
+      <tr><td>最初の 20 スパイクの広がり（ランダム 20 個との比）</td><td class="r b">0.62</td><td class="r">1</td><td>70 中 69 セッションで 1 未満、<i>P</i> = 4 × 10<sup>−13</sup></td></tr>
+      <tr><td>上位 10% の電極が最初のスパイクを出すバースト</td><td class="r b">81%</td><td class="r">48%</td><td>バーストのスパイク分布から期待される値</td></tr>
+      <tr><td>点火マップの相関（連続する記録日 対 別の培養）</td><td class="r b">0.43</td><td class="r">−0.06</td><td><i>P</i> = 9 × 10<sup>−18</sup>、7/7 培養</td></tr>
+      <tr><td>ホットスポット間の距離</td><td class="r b">0.58 mm</td><td class="r">1.75 mm</td><td>6/7 培養で近い</td></tr>
+      <tr><td>残差マップ（点火 − 活動密度）の相関</td><td class="r b">0.39</td><td class="r">0.02</td><td>7/7 培養。点火は活動の多い場所の写しではない</td></tr>
+      <tr class="hl"><td>点火点の集中度（ランダムな 20 スパイク窓と比べて）</td><td class="r b">0.56</td><td class="r">0.48</td><td>差は控えめ、5/7 培養</td></tr>
+      <tr class="hl"><td>記録した区画の重なり（Jaccard、連続 対 別培養）</td><td class="r b">0.49</td><td class="r">0.10</td><td>安定性の一部は電極配置の類似かもしれない</td></tr>
+      <tr class="hl"><td>59 電極（Wagenaar）での集中</td><td class="r" colspan="2">再現せず</td><td>重心の平均化による見かけ（ランダム窓の方が集中）</td></tr>
+    </tbody>
+  </table>
+  <p class="note caveat t16" style="margin-top:14px">点火点は 1 か所の焦点ではなく「いくつかのホットスポット」に分かれる。重心は 2 つの離れた場所の間に落ちうるので、<i>K</i> = 10・40 と最初の 20 ms の重心でも確かめた。</p>
+  <footer class="ft"><span class="src">DANDI 002020、バースト 20 回以上の 70 セッション（安定性は連続 63 組、別培養 1,674 組）。色つきの行＝結論を弱める方向の結果。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-predictors" data-toc="何が点火を予測するか：場所と電極">
+  <header class="hd"><p class="eyebrow">付録　培養：点火の予測</p><h2>何が点火を予測するか：場所の単位と電極の単位で答えが違う</h2></header>
+  <div class="row" style="gap:32px">
+    <div class="grow">
+      <p class="t16 b" style="margin-bottom:6px">場所の単位（100 µm の区画ごと、点火確率との順位相関）</p>
+      <table class="t16">
+        <thead><tr><th>予測量</th><th class="r"><i>ρ</i></th><th class="r">正の培養</th></tr></thead>
+        <tbody>
+          <tr><td>バースト間の発火率</td><td class="r">0.01</td><td class="r">3/7</td></tr>
+          <tr><td>バースト中の発火率</td><td class="r">0.16</td><td class="r">6/7</td></tr>
+          <tr><td>近くの記録電極の数（配置密度）</td><td class="r">0.40</td><td class="r">7/7</td></tr>
+          <tr><td>局所の活動密度（200 µm 以内）→ 配置密度で補正</td><td class="r">0.29 → −0.00</td><td class="r">7/7 → 3/7</td></tr>
+          <tr class="hl"><td class="b">バースト間の結合の主モード</td><td class="r b">0.25</td><td class="r b">7/7</td></tr>
+          <tr class="hl"><td class="b">　同、配置密度で補正（偏相関）</td><td class="r b">0.14</td><td class="r b">7/7</td></tr>
+        </tbody>
+      </table>
+      <p class="t16 muted" style="margin-top:6px">主モードは同じ電極で計算した発火率に 88% のセッション（56/64）で勝つ（<i>P</i> = 6 × 10<sup>−8</sup>）。偏相関の四分位 −0.03〜0.29。</p>
+    </div>
+    <div style="width:470px" class="stack-12">
+      <div class="card hub">
+        <h3>電極の単位では</h3>
+        <p class="t16">バースト間によく発火する電極ほど、最初の 20 スパイクの多くを担う（<i>ρ</i> = 0.46、7/7 培養）。主モードは電極単位では発火率に勝たない（53% のセッション）。</p>
+      </div>
+      <div class="card gray">
+        <h3>主モードの計算</h3>
+        <p class="t16">バースト間（各バーストの ±100 ms を除く）の 20 ms ごとのスパイク数を電極どうしで相関させる（30 スパイク以上の電極）。負の値・対角・50 µm 未満の組（重複検出の恐れ）は 0 にし、主固有ベクトルをとる。</p>
+      </div>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">DANDI、70 セッションの中央値（主モードは 64 セッション）。59 電極データでは場所単位の主モードの優位は再現せず。出典：notes/culture_results.md。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-bursts" data-toc="バーストの性質：培養とモデル">
+  <header class="hd"><p class="eyebrow">付録　バーストの性質</p><h2>培養とハエのモデルのバーストは、長さも「混ざり方」も違う</h2></header>
+  <table class="t18">
+    <thead><tr><th></th><th class="r">HD-MEA 培養</th><th class="r">59 電極培養</th><th class="r">ハエのモデル（<i>g</i> = 2.5）</th></tr></thead>
+    <tbody>
+      <tr><td>頻度（回/分、中央値）</td><td class="r">1.6</td><td class="r">2.4</td><td class="r">78〜236</td></tr>
+      <tr><td>長さ（中央値）</td><td class="r">390 ms</td><td class="r">150 ms</td><td class="r">18〜40 ms</td></tr>
+      <tr><td>参加率（活動電極のうち発火する割合）</td><td class="r">0.94</td><td class="r">0.47</td><td class="r">培養より小さい</td></tr>
+      <tr><td>バースト外のスパイクの割合</td><td class="r">0.53</td><td class="r">0.81</td><td class="r">0.79〜0.95</td></tr>
+      <tr><td>分岐比 <i>m</i>（全体）</td><td class="r">0.992</td><td class="r">0.986</td><td class="r">距離の指標にならない（<a class="xref" href="#a-scale">付録 20</a>）</td></tr>
+      <tr><td>分岐比 <i>m</i>（バーストを除く）</td><td class="r">0.995</td><td class="r">0.991</td><td class="r">—</td></tr>
+    </tbody>
+  </table>
+  <div class="row" style="margin-top:18px;gap:32px">
+    <p class="note caveat t16 grow">バースト外スパイクの割合は閾値に強く依存する（HD-MEA で閾値 0.5 倍・1 倍・2 倍：0.36・0.53・0.74）。59 電極では閾値を下げると小さな「バーストレット」が多数数えられる（2.4 → 16.1 回/分）。</p>
+    <p class="note t16 grow">ハエのモデルは <i>g</i> = 2.5 でもスパイクの大半がバーストの外にあり、バーストは短く鋭い。培養の「長い一斉発火」とは性質が異なる。</p>
+  </div>
+  <footer class="ft"><span class="src">モデルの範囲は伝達物質の仮定にわたる値（15 秒 × 2 シード）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-dev" data-toc="発達に伴う変化">
+  <header class="hd"><p class="eyebrow">付録　培養：発達</p><h2>育つにつれて、バーストが増え、分岐比は 1 から離れる</h2></header>
+  <img src="img/dev3.png" alt="最初の記録からの日数に対する、バースト頻度（増加）、バースト外スパイクの割合（減少）、分岐比（1 から低下）" style="width:1150px">
+  <div class="row" style="gap:32px;margin-top:10px">
+    <ul class="list t18 grow">
+      <li>バースト頻度は増える（7/7 培養、59 電極で 29/30）</li>
+      <li>バースト外のスパイクは減る（増えた培養は 0/7、0/30）</li>
+      <li>分岐比 <i>m</i> は 1 から離れる（7/7、30/30 培養）</li>
+    </ul>
+    <p class="note t16 grow">セッションの間では、バーストが多いほどバースト間の <i>m</i> は低い（<i>ρ</i> = −0.69）。「強いバースト」と「残響するバースト間活動」はトレードオフの関係にある（Zierenberg ら 2018 の考えと一致）。若い非同期の培養での <i>m</i> ≈ 1 は、遅い発火率の変動を反映している可能性がある。</p>
+  </div>
+  <footer class="ft"><span class="src">HD-MEA の 7 培養（各線＝1 培養）。横軸は「最初の記録からの日数」（培養日数は不明）。培養ごとの Spearman 相関の符号を数えた。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-drift" data-toc="30 分の記録の中での変化">
+  <header class="hd"><p class="eyebrow">付録　培養：使用後の変化</p><h2>30 分の自発活動のあと、分岐比は上がらない（疲労型）</h2></header>
+  <div class="row" style="gap:40px">
+    <div class="grow stack-16">
+      <p class="t18">問い（設計メモ ⑤）：自発活動を続けると、回路は臨界に近づくか（シナプスの増強＝睡眠の SHY 仮説型）、離れるか（疲労型）。</p>
+      <table class="t18">
+        <thead><tr><th>後半 15 分 − 前半 15 分</th><th class="r">HD-MEA（113）</th><th class="r">59 電極（526）</th></tr></thead>
+        <tbody>
+          <tr><td>全体の <i>m</i></td><td class="r">−0.0004（わずかに低下）</td><td class="r">−0.0002（わずかに低下）</td></tr>
+          <tr><td>バースト間の <i>m</i></td><td class="r">変化なし</td><td class="r b">−0.0018（<i>P</i> = 8 × 10<sup>−8</sup>）</td></tr>
+          <tr><td>バースト頻度</td><td class="r">変化なし</td><td class="r">わずかに減少</td></tr>
+        </tbody>
+      </table>
+      <p class="note t18">→ 30 分の時間スケールでは、結合の実効的な強さが積み上がる証拠はない。効果はごく小さい（59 電極でバースト間の時定数が約 25% 短くなる程度）。</p>
+    </div>
+    <div style="width:420px" class="card key">
+      <h3>自分の実験系への示唆</h3>
+      <p class="t18" style="margin-top:6px">ChR2 で光刺激する「使用」の前後で <i>m</i> を比べる実験では、自発活動だけでも <i>m</i> がわずかに下がりうる。対照として、刺激しない同じ長さの記録を同じ日に取るとよい。</p>
+      <p class="t16 muted" style="margin-top:10px">ハエの覚醒中のシナプスの増加（Bushey ら 2011）は、バーストに必要な約 2 倍よりずっと小さい。それでも自発バーストを起こしやすくするなら、まず触角葉に現れるはず。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">MR 推定量。バースト間＝各バースト ±100 ms を除いた区間。セッション単位の Wilcoxon 検定。SHY＝synaptic homeostasis hypothesis（Tononi &amp; Cirelli 2014）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-model" data-toc="ハエのモデル：式と定数">
+  <header class="hd"><p class="eyebrow">付録　ハエのモデル：方法</p><h2>モデルの式と定数、加えた 4 つの要素</h2></header>
+  <div class="two">
+    <div class="stack-16">
+      <div class="card gray">
+        <p class="eq">d<i>v</i>/d<i>t</i> = (<i>v</i><sub>0</sub> − <i>v</i> + <i>I</i>) / <i>τ</i><sub>m</sub>　　d<i>I</i>/d<i>t</i> = − <i>I</i> / <i>τ</i><sub>s</sub></p>
+        <p class="t16 muted"><i>v</i>：膜電位、<i>I</i>：シナプス入力。しきい値で発火してリセット</p>
+      </div>
+      <table class="t16">
+        <thead><tr><th>定数（Shiu ら 2024 と同一）</th><th class="r">値</th></tr></thead>
+        <tbody>
+          <tr><td>静止・リセット電位／しきい値</td><td class="r">−52 mV／−45 mV</td></tr>
+          <tr><td>膜時定数／シナプス時定数</td><td class="r">20 ms／5 ms</td></tr>
+          <tr><td>不応期／シナプス遅延</td><td class="r">2.2 ms／1.8 ms</td></tr>
+          <tr><td>シナプス 1 個の重み（<i>g</i> = 1）</td><td class="r">0.275 mV</td></tr>
+          <tr><td>時間刻み</td><td class="r">0.1 ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="stack-12">
+      <ol class="qs t18">
+        <li><span class="b">自発的な入力</span>：全ニューロンに独立なポアソン入力（しきい値を越える 1 発、0.3 Hz）</li>
+        <li><span class="b">ゲイン <i>g</i></span>：全シナプスの重みに掛ける</li>
+        <li><span class="b">短期シナプス抑圧</span>（Tsodyks–Markram）：各ニューロンの出力は資源 <i>x</i> で伝わり、1 発ごとに <i>U</i> = 0.05 の割合で減り、<i>τ</i> = 2 秒で回復</li>
+        <li><span class="b">黙らせる</span>：試行ごとに、指定したニューロンの出力シナプスを取り除く</li>
+      </ol>
+      <p class="note t16">GPU のイベント駆動実装。元の Brian 2 のコードとニューロンごとに一致（<i>r</i> ≥ 0.999）。不応期中に届いた入力を捨てる Brian 2 の動作も再現。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">出典：Shiu ら 2024 <i>Nature</i>; github.com/philshiu/Drosophila_brain_model; Tsodyks &amp; Markram 1997。本研究の論文草稿 Methods。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-signs" data-toc="伝達物質の仮定と、自力で続く回路">
+  <header class="hd"><p class="eyebrow">付録　伝達物質の仮定</p><h2>どの仮定でも、lLN1_bc は較正値より低いゲインで自力発火に入る</h2></header>
+  <div class="row" style="gap:36px">
+    <figure style="width:540px">
+      <img src="img/core_gain.png" alt="ゲインと自力で発火し続けるニューロン数。公開の符号・CV・LC はゲイン 0.5 でも数百〜千個以上、MC は 0.8 から" style="width:540px">
+      <figcaption>抑圧なし。全ニューロンを 0.5 秒駆動して止め、1〜2 秒後も 10 Hz 以上で発火し続けるニューロンの数（3 シードの平均）</figcaption>
+    </figure>
+    <div class="grow stack-12">
+      <table class="t16">
+        <thead><tr><th>仮定</th><th>40 個の「セロトニン」局所ニューロン</th><th class="r">lLN1_bc がコアに入る <i>g</i></th></tr></thead>
+        <tbody>
+          <tr><td class="c-mc b nw">MC</td><td>40 個すべて抑制性</td><td class="r">0.8</td></tr>
+          <tr><td class="c-mcl b nw">LC</td><td>文献でアセチルコリンの 21 個は興奮性、19 個は抑制性</td><td class="r">0.5 以下</td></tr>
+          <tr><td class="c-cv b nw">CV</td><td>細胞タイプの多数決に従う</td><td class="r">0.5 以下</td></tr>
+          <tr><td class="c-nm b nw">NM</td><td>CV と同じ（モノアミンの速い作用なし）</td><td class="r">0.6</td></tr>
+        </tbody>
+      </table>
+      <ul class="list t16">
+        <li>最初に自力で続く活動は小さく、シードで変わるグループ。lLN1_bc は<span class="b">どの仮定でも較正値（<i>g</i> = 1）より下</span>でコアに入る</li>
+        <li>公開の符号の暴走の原因は 40 個の「セロトニン」局所ニューロン（前回の研究で特定）。ただしその 21 個（lLN1_bc 7 個を含む）は文献ではアセチルコリン作動性 → LC で修正</li>
+        <li>符号：アセチルコリン＝興奮、GABA・グルタミン酸・ヒスタミン＝抑制、モノアミン＝興奮（Shiu らと同じ）</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">CV：細胞タイプごとに予測確信度の合計で伝達物質を決め、FlyWire に注釈された文献の伝達物質を優先（Eckstein ら 2024; Schlegel ら 2024）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-fly-methods" data-toc="ハエ：バーストと点火の検出法">
+  <header class="hd"><p class="eyebrow">付録　ハエのモデル：方法</p><h2>バーストと点火の検出法</h2></header>
+  <div class="two">
+    <div class="stack-16">
+      <div class="card gray">
+        <h3>バースト</h3>
+        <p class="t16">20 ms で平滑化した脳全体の発火率が「背景の期待値（ニューロン数 × 入力頻度）の 1.5 倍＋30 スパイク/ms」を 10 ms 以上超えた区間。点火の解析では、5 ms 平滑の発火率が 1.25 倍＋10 スパイク/ms を下回った最後の時刻を開始とした。</p>
+      </div>
+      <div class="card gray">
+        <h3>仮想 MEA</h3>
+        <p class="t16">ランダムに選んだ 1,024 個のニューロンのスパイクを、培養と同じ解析（バースト外の割合、分岐比）にかける。</p>
+      </div>
+    </div>
+    <div class="stack-16">
+      <div class="card gray">
+        <h3>点火（細胞タイプ × 半球ごと）</h3>
+        <ul class="list t16 tight">
+          <li><span class="b">開始前の余分な発火</span>：開始前 20 ms のスパイク数（全バーストの合計）を、バーストから 200 ms 以上離れた区間の発火率からの期待値と比べる（片側ポアソン検定）</li>
+          <li><span class="b">閾値を越えた時刻</span>：開始 50 ms 前から、5 ms のスパイク数が基準をポアソン標準偏差の 5 倍＋3 スパイク上回った最初の時刻</li>
+          <li><span class="b">偶然の対照</span>：同じ判定をランダムな時刻に行い、越える割合（偽陽性率）と比べる（Fisher 検定）</li>
+        </ul>
+      </div>
+      <div class="card gray">
+        <h3>試行の長さ</h3>
+        <p class="t16">点火：10 秒。バーストの統計：15 秒 × 2 シード。黙らせる予備実験：8 秒 × 2 シード × 5 ゲイン。確認実験：20 秒 × 3 シード × 2 ゲイン、対照は 5 回の抽選。</p>
+      </div>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">出典：論文草稿 Methods（Bursts and ignition; Silencing; Virtual MEA）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-mc-ignition" data-toc="元の MC での点火の様子">
+  <header class="hd"><p class="eyebrow">付録　元の最小補正（MC）での点火</p><h2>MC では、開始直前の余分な発火が左右の触角葉に集まる</h2></header>
+  <div class="row" style="gap:28px">
+    <figure style="width:560px">
+      <img src="img/brain_ignition.png" alt="脳の正面図。バースト開始直前に余分に発火したニューロンが、左右の触角葉に濃く集まる" style="width:560px">
+      <figcaption>バースト開始前 20 ms に余分に発火したニューロン（正面図、濃いほど多い、Poisson <i>P</i> &lt; 10<sup>−6</sup>）</figcaption>
+    </figure>
+    <figure class="grow">
+      <img src="img/crossing.png" alt="閾値を越えた時刻。lLN1_bc 左 44 ms 前、右 30 ms 前、lLN2X12 左 29 ms 前が最も早い" style="width:460px">
+      <figcaption>閾値を最初に越えた時刻の中央値（半分以上のバーストで越えたグループのうち早い順に 10）</figcaption>
+    </figure>
+  </div>
+  <p class="note caveat t16" style="margin-top:8px">MC、<i>g</i> = 2.5、29 バースト。lLN1_bc は左 44 ms 前（バーストの 90%）、右 30 ms 前（55%）、開始前 20 ms の発火は期待の約 3 倍。ただし MC は 40 個中 21 個（lLN1_bc 7 個を含む）を文献と逆に抑制性にした仮定で、LC・CV・NM ではこの像は出ない。</p>
+  <footer class="ft"><span class="src">論文 Fig. 2c,d（改訂前）に対応。lLN2X12＝もう一つのアセチルコリン予測の局所ニューロン。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-crossing" data-toc="閾値越えとランダムな時刻の比較">
+  <header class="hd"><p class="eyebrow">付録　点火の強さの検定</p><h2>MC での「開始前の閾値越え」は、偶然の 1.7〜2.7 倍にとどまる</h2></header>
+  <div class="row" style="gap:36px">
+    <figure style="width:640px">
+      <img src="img/crossing_null_all.png" alt="6 条件での、開始前に閾値を越えた割合とランダムな時刻での割合。多くの条件で上回るが、差は中程度" style="width:640px">
+      <figcaption>棒＝バースト開始前に越えた割合（薄い色＝<i>P</i> ≥ 0.05）、黒線＝ランダムな時刻での割合。上の数字＝バースト数</figcaption>
+    </figure>
+    <div class="grow stack-16">
+      <ul class="list t18">
+        <li>基準条件：lLN1_bc 左 69% 対 28%（<i>P</i> = 1 × 10<sup>−5</sup>）、右 38% 対 18%（<i>P</i> = 0.01）</li>
+        <li>6 条件中 5 条件で、触角葉のアセチルコリン性局所ニューロンのどれかが有意</li>
+        <li>越える確率は偽陽性率（10〜37%）の 1.7〜2.7 倍</li>
+        <li>LC・CV・NM では lLN1_bc は常時発火しており、この判定は意味をもたない（越える割合 0%）</li>
+      </ul>
+      <p class="note t18">結論：MC でも「引き金」としての役割は中程度。役割は伝達物質の仮定に依存する。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">条件：基準（入力 0.3 Hz、<i>U</i> = 0.05、回復 2 秒）、入力 0.5 倍・2 倍、抑圧を強く（<i>U</i> = 0.1、回復 1 秒）、別のシード 2 つ。Fisher の正確検定。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-tonic" data-toc="常時発火する lLN1_bc（LC・CV・NM）">
+  <header class="hd"><p class="eyebrow">付録　仮定による違い</p><h2>LC・CV・NM では lLN1_bc は先に発火せず、常時発火して脳を駆動する</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:500px">
+      <img src="img/lln_rates.png" alt="lLN1_bc の自発発火率。g = 1 で MC 3.2 Hz、LC 26、CV 31、NM 24 Hz。脳の中央値は 0.2 Hz" style="width:500px">
+      <figcaption>lLN1_bc の自発発火率（30 個の平均）と脳全体の中央値</figcaption>
+    </figure>
+    <div class="grow stack-12">
+      <ul class="list t18">
+        <li><i>g</i> = 1 でも脳で最もよく自発発火する細胞の一つ：<span class="c-mc b">MC 3.2</span>、<span class="c-mcl b">LC 26</span>、<span class="c-cv b">CV 31</span>、<span class="c-nm b">NM 24 Hz</span>（脳の中央値 0.2 Hz、上位 0.15% 以内）</li>
+        <li>LC・CV・NM では <i>g</i> = 2〜2.5 で 100〜136 Hz（111 個全体で 37〜60 Hz）の常時発火。バーストは視覚系（視細胞末端・ラミナ・メダラ）と中心複合体から始まる</li>
+      </ul>
+      <div class="two" style="gap:12px">
+        <div class="card gray"><p class="t16 b">LC（<i>g</i> = 2.5、48 回）</p><p class="t16">R1–6 左・右、Mi4 左、TmY5a 右、L3 右</p></div>
+        <div class="card gray"><p class="t16 b">CV（<i>g</i> = 2、15 回）</p><p class="t16">lLN2P_c 右、T2a 右、Tm3 右、Mi4 右、EL 左</p></div>
+      </div>
+      <div class="card gray"><p class="t16"><span class="b">NM（<i>g</i> = 2.5、21 回）</span>　BM_InOm 左、T2 右、Pm03 右、KCg-m 左、L5 左</p></div>
+      <p class="note t16">違うのは、バーストの合間に回復するか（MC）、すでに常時発火に入って脳を駆動しているか（LC・CV・NM）。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">カードは閾値を早く越えた順のグループ。R1–6＝光受容細胞、T2・Tm3・Mi4・L3・L5・TmY5a＝視葉の細胞、EL＝中心複合体の細胞。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-silence-table" data-toc="黙らせる実験：そろえた対照">
+  <header class="hd"><p class="eyebrow">付録　黙らせる実験</p><h2>黙らせる実験の全数値：4 つの仮定とそろえた対照</h2></header>
+  <table class="t16">
+    <thead><tr><th>仮定・ゲイン</th><th class="r">無処置（回/分）</th><th class="r">局所 111 個</th><th class="r">lLN1_bc 30 個</th><th class="r">そろえた 111 個（3 回）</th><th class="r">駆動最大 111 個</th><th class="r">平均発火率（111 個）</th></tr></thead>
+    <tbody>
+      <tr><td class="c-mc b nw">MC　<i>g</i> = 2.0</td><td class="r">18.3</td><td class="r b c-hub">0.28</td><td class="r">0.28</td><td class="r">0.72（0.50〜0.89）</td><td class="r">0.11</td><td class="r">−6%</td></tr>
+      <tr><td class="c-mc b nw">MC　<i>g</i> = 2.5</td><td class="r">106.6</td><td class="r b c-hub">0.47</td><td class="r">0.65</td><td class="r">0.67（0.61〜0.70）</td><td class="r">0.12</td><td class="r">−9%</td></tr>
+      <tr><td class="c-mcl b nw">LC　<i>g</i> = 2.0</td><td class="r">24.4</td><td class="r b c-hub">0.29</td><td class="r">0.88</td><td class="r">0.62（0.42〜0.83）</td><td class="r">0.17</td><td class="r">−25%</td></tr>
+      <tr><td class="c-mcl b nw">LC　<i>g</i> = 2.5</td><td class="r">176.6</td><td class="r b c-hub">0.37</td><td class="r">0.61</td><td class="r">0.68（0.60〜0.76）</td><td class="r">0.18</td><td class="r">−25%</td></tr>
+      <tr><td class="c-cv b nw">CV　<i>g</i> = 1.75</td><td class="r">13.2</td><td class="r b c-hub">0.31</td><td class="r">0.85</td><td class="r">0.46（0.31〜0.62）</td><td class="r">0.31</td><td class="r">−22%</td></tr>
+      <tr><td class="c-cv b nw">CV　<i>g</i> = 2.0</td><td class="r">39.6</td><td class="r b c-hub">0.41</td><td class="r">0.87</td><td class="r">0.61（0.51〜0.77）</td><td class="r">0.03</td><td class="r">−23%</td></tr>
+      <tr><td class="c-nm b nw">NM　<i>g</i> = 2.25</td><td class="r">22.3</td><td class="r b c-hub">0.32</td><td class="r">0.05</td><td class="r">0.50（0.45〜0.55）</td><td class="r">0.05</td><td class="r">−21%</td></tr>
+      <tr><td class="c-nm b nw">NM　<i>g</i> = 2.5</td><td class="r">64.0</td><td class="r b c-hub">0.25</td><td class="r">0.25</td><td class="r">0.55（0.54〜0.57）</td><td class="r">0.11</td><td class="r">−21%</td></tr>
+    </tbody>
+  </table>
+  <ul class="list t16" style="margin-top:12px">
+    <li>局所 111 個：0.25〜0.47（8 条件すべて）。そろえた対照（平均 0.60、0.31〜0.89）の全抽選より低いのは 8 条件中 7（CV <i>g</i> = 1.75 は同値）。平均発火率の低下 6〜25%（そろえた対照 3〜5%）</li>
+    <li>lLN1_bc だけ：0.05〜0.88 とばらつく（そろえた対照の全抽選より低いのは 8 条件中 5）。駆動最大 111 個：0.03〜0.31（LC・CV・NM では大半が触角葉の投射ニューロン、MC では中枢・視覚系・触角葉の混合）</li>
+  </ul>
+  <footer class="ft"><span class="src">値は無処置に対するバーストの比（20 秒 × 3 シード）。そろえた＝出力シナプス数をそろえた局所ニューロン以外の興奮性ニューロン。駆動最大＝出力シナプス × 発火率が最大の 111 個（局所ニューロン以外）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-silence-early" data-toc="黙らせる実験：先行の確認実験">
+  <header class="hd"><p class="eyebrow">付録　黙らせる実験</p><h2>先行の確認実験（MC・CV・NM）：ランダムと他の局所ニューロンの対照</h2></header>
+  <table class="t16">
+    <thead><tr><th>仮定・ゲイン</th><th class="r">無処置</th><th class="r">局所 111 個</th><th class="r">lLN1_bc 30 個</th><th class="r">ランダム 30 個</th><th class="r">ランダム 111 個</th><th class="r">他の局所 111 個</th></tr></thead>
+    <tbody>
+      <tr><td class="c-mc b nw">MC　<i>g</i> = 2.0</td><td class="r">19.3</td><td class="r b c-hub">5.1</td><td class="r">6.1</td><td class="r">18.7</td><td class="r">18.7</td><td class="r">25.0</td></tr>
+      <tr><td class="c-mc b nw">MC　<i>g</i> = 2.5</td><td class="r">110.7</td><td class="r b c-hub">47.7</td><td class="r">70.1</td><td class="c" colspan="3">104〜106</td></tr>
+      <tr><td class="c-nm b nw">NM　<i>g</i> = 2.25</td><td class="r">22.3</td><td class="r b c-hub">5.1</td><td class="r">7.1</td><td class="c muted" colspan="3" rowspan="4" style="vertical-align:middle">対照 15 組はどれも無処置の 0.74〜1.74 倍<br>（3 仮定 × 2 ゲインの全 6 条件）</td></tr>
+      <tr><td class="c-nm b nw">NM　<i>g</i> = 2.5</td><td class="r">66.0</td><td class="r b c-hub">11.2</td><td class="r">30.5</td></tr>
+      <tr><td class="c-cv b nw">CV　<i>g</i> = 1.75</td><td class="r">9.1</td><td class="r b c-hub">1.0</td><td class="r">10.2</td></tr>
+      <tr><td class="c-cv b nw">CV　<i>g</i> = 2.0</td><td class="r">34.5</td><td class="r b c-hub">11.2</td><td class="r">36.5</td></tr>
+    </tbody>
+  </table>
+  <div class="two" style="margin-top:14px;gap:28px">
+    <ul class="list t16">
+      <li>単位は回/分（20 秒 × 3 シード、対照は 5 回の抽選の平均）</li>
+      <li>ケニヨン細胞全部（5,177 個）を黙らせても、最大ゲインで 0.75〜1.12 倍（予備実験）</li>
+    </ul>
+    <ul class="list t16">
+      <li>予備実験（8 秒 × 2 シード）：NM <i>g</i> = 2.5 で無処置 129 → lLN1_bc 39、ランダム 30 個 121〜152、ケニヨン細胞全部 144</li>
+      <li>ランダムな対照は出力シナプス数が少ないため不十分 → そろえた対照（前のスライド）を追加</li>
+    </ul>
+  </div>
+  <footer class="ft"><span class="src">111 個＝CV でアセチルコリン性と判定される触角葉の局所ニューロン。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-gap" data-toc="電気シナプスの対照">
+  <header class="hd"><p class="eyebrow">付録　電気シナプスの対照</p><h2>投射ニューロンへの化学シナプスを除いても、ハブは構造として残る</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:470px">
+      <img src="img/eln_pn.png" alt="化学シナプスを除いた配線でのバースト頻度。NM では lLN1_bc を黙らせると 38.8 から 16.3 に減るが、MC では 104 から 92" style="width:470px">
+      <figcaption><i>g</i> = 2.5、アセチルコリン性局所ニューロン → 投射ニューロンの化学シナプス 90,491 個を除いた配線</figcaption>
+    </figure>
+    <div class="grow stack-16">
+      <p class="t18">背景：生体では、この局所ニューロンから投射ニューロンへの興奮は主に<span class="b">電気シナプス（ギャップ結合）</span>（Yaksi &amp; Wilson 2010）。配線図には化学シナプスしかない。</p>
+      <table class="t16">
+        <thead><tr><th>除いた後</th><th class="r">MC</th><th class="r">NM</th></tr></thead>
+        <tbody>
+          <tr><td>ペロンモードに占めるアセチルコリン性局所ニューロン</td><td class="r">21%</td><td class="r">56%</td></tr>
+          <tr><td>最初の自力で続くコアに占める局所ニューロン</td><td class="r">34%（<i>g</i> = 1.2）</td><td class="r">91%（<i>g</i> = 0.8）</td></tr>
+          <tr><td>lLN1_bc を黙らせたときのバースト（回/分）</td><td class="r">104 → 92（ばらつきの範囲）</td><td class="r b">38.8 → 16.3</td></tr>
+        </tbody>
+      </table>
+      <p class="note t16">lLN1_bc はペロンモードの最上位のまま（局所ニューロンどうしのループで成り立つ）。ただし因果的な重みは仮定に依存する。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">ランダム 30 個を黙らせた対照：NM 36.7 回/分。論文 Extended Data Fig. 3 に対応。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-rule" data-toc="主モードの予測力の比較">
+  <header class="hd"><p class="eyebrow">付録　主モードの予測力</p><h2>ハエでは、主モードはハブを見つけるが、順位づけは発火率並み</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:600px">
+      <img src="img/predict_compare.png" alt="点火との順位相関。培養では活動の主モードが発火率に勝つ。ハエでは配線の主モードと発火率が同程度、活動の主モードは低い" style="width:600px">
+      <figcaption>培養：64 セッションの中央値と四分位範囲（場所の単位）。ハエ：MC の 6 条件（点）と中央値（棒）</figcaption>
+    </figure>
+    <div class="grow stack-16">
+      <ul class="list t18">
+        <li><span class="b">培養</span>（場所の単位）：活動から求めた主モードが発火率に勝つ（0.25 対 ≈ 0）</li>
+        <li><span class="b">ハエ・配線の主モード</span>：全細胞タイプでの予測力は発火率とほぼ同じ（MC の 6 条件で <i>ρ</i> 0.12〜0.32 対 0.11〜0.29、CV 0.25 対 0.34、NM −0.08 対 −0.07）。ペロン重みは興奮性入力の多さと相関（<i>ρ</i> = 0.61〜0.64）</li>
+        <li><span class="b">ハエ・活動の主モード</span>（培養と同じ方法）：両者より悪い（−0.07〜0.16）。常時発火する中心複合体の細胞を拾ってしまう</li>
+      </ul>
+      <p class="note t18">培養とハエを結ぶのは同じ法則ではなく、定性的な類似。配線から読むとハブは見つかるが、脳の残りを発火率より良く並べるわけではない。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">ハエ：細胞タイプ × 半球のグループごとに、ニューロンあたりのペロン重み・バースト間の発火率・活動の主モードと、点火の強さの Spearman 相関。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-modes" data-toc="主モードは左右の鏡像">
+  <header class="hd"><p class="eyebrow">付録　左右の 2 つのモード</p><h2>上位 2 つのモードは左右の鏡像：左の嗅覚ループと右の嗅覚ループ</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:620px">
+      <img src="img/two_modes.png" alt="4 つの仮定それぞれで、第 1 モードは左に約 8 割、第 2 モードは右に約 8 割の重みをもつ" style="width:620px">
+      <figcaption>括弧内＝第 1 モードに対する固有値の比</figcaption>
+    </figure>
+    <div class="grow stack-16">
+      <ul class="list t18">
+        <li>第 1 モードは重みの 77〜84% が左、第 2 モードは 78〜85% が右（固有値の差 6〜18%）</li>
+        <li>どちらも局所ニューロン 28〜35%（アセチルコリン性 15〜19%、lLN1_bc 8〜13%）、投射ニューロン 15〜19%、ケニヨン細胞 17〜19%</li>
+        <li>符号つき行列の主モードも LC・CV・NM では局所ニューロン中心（37〜39%）。MC では視葉の振動モード</li>
+        <li>点火（MC）と黙らせる効果は左右両方で出る</li>
+      </ul>
+      <p class="note caveat t18">ほぼ独立な 2 つのループのどちらが「第 1」になるかは、わずかな左右差で決まる。この左右差は再構成の非対称性かもしれない（前回の研究：右半球で予測が崩れる原因が配線図の左右差だった）。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">興奮性の配線行列の固有値の大きい順に 2 つの実固有ベクトル。前回の研究：fly_connectome_robustness（鏡像テスト）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-scale" data-toc="分岐比はモデルでは距離の指標にならない">
+  <header class="hd"><p class="eyebrow">付録　共通の物差し</p><h2>このモデルでは、分岐比は暴走までの距離を表さない</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:540px">
+      <img src="img/common_scale.png" alt="分岐比とバースト外スパイクの割合。培養は広く分布し、モデルは g = 1 で m が最も高く、バーストが出るほど下がる" style="width:540px">
+    </figure>
+    <div class="grow stack-16">
+      <ul class="list t18">
+        <li>培養のセッションは、バースト外の割合が 0〜1 に広がり、<i>m</i> の多くは 0.97〜1.00</li>
+        <li>モデルの仮想 MEA（ランダムな 1,024 個、MC）の <i>m</i> は<span class="b">較正値で最も高く（0.995）</span>、バーストが出るほど下がる（<i>g</i> = 2.5 で 0.952）</li>
+        <li>モデルの <i>m</i> は、ゆっくりした常時発火のゆらぎを拾ってしまう</li>
+      </ul>
+      <p class="note t18">そのため、ハエのモデルの「暴走までの距離」は<span class="b">バーストが始まるゲイン</span>で測った（頻繁なバーストまで約 2 倍）。培養の <i>m</i> ≈ 0.99 と同じ数字で比べることはしない。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">培養：HD-MEA の各セッション（全体の <i>m</i>）。モデル：仮想 MEA、各ゲイン 2 シードの平均。同じ推定量（MR、4 ms ビン）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-turner" data-toc="本物のハエ：方法と対照">
+  <header class="hd"><p class="eyebrow">付録　本物のハエ</p><h2>安静時イメージングの方法と、1 匹ごとの比較</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:520px">
+      <img src="img/turner_perfly.png" alt="1 匹ごとの触角葉と他領域の比。自己相関とゆらぎの大きさはほぼ全匹で 1 より大きく、全体との相関は 1 前後" style="width:520px">
+      <figcaption>点＝1 匹（赤＝触角葉の方が高い）、横線＝中央値</figcaption>
+    </figure>
+    <div class="grow stack-12">
+      <p class="t16">Turner ら 2021：nSyb-GAL4 &gt; GCaMP6s、20 匹、約 1.2 Hz の体積 2 光子イメージング、刺激なし約 28 分、Ito アトラスの 74 領域。Δ<i>F</i>/<i>F</i> は 60 秒窓の 8 パーセンタイルを基準。</p>
+      <table class="t16">
+        <thead><tr><th>触角葉 対 他領域（中央値）</th><th class="r">値</th><th class="r">匹</th></tr></thead>
+        <tbody>
+          <tr><td>ラグ 1 の自己相関</td><td class="r">0.85 対 0.58</td><td class="r">18/20</td></tr>
+          <tr><td>同、平均蛍光量（信号雑音比）で補正</td><td class="r">触角葉が遅い</td><td class="r">17/20</td></tr>
+          <tr><td>ゆらぎの大きさ（Δ<i>F</i>/<i>F</i> の SD）</td><td class="r">0.048 対 0.029</td><td class="r">19/20</td></tr>
+          <tr><td>脳全体の信号との相関</td><td class="r">0.50 対 0.52</td><td class="r">5/20</td></tr>
+        </tbody>
+      </table>
+      <ul class="list t16">
+        <li>補正後の <i>P</i> = 4 × 10<sup>−5</sup>。左右の触角葉の偏相関（全体の信号を除く）0.15（32 領域の中で中位）</li>
+        <li>モデルとの領域ごとの対応は弱い（|<i>ρ</i>| ≤ 0.30、73 領域）。感覚入力・領域の大きさ・受容細胞の末端の多さも寄与しうる。時間分解能は約 0.8 秒</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">補正：各ハエで自己相関を log（平均蛍光量）に回帰し、残差を比較。ハエごとの Wilcoxon 符号順位検定。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-sleep" data-toc="否定的な結果：睡眠回路">
+  <header class="hd"><p class="eyebrow">付録　否定的な結果</p><h2>自発バーストは、睡眠回路に特に届くわけではない</h2></header>
+  <div class="row" style="gap:40px">
+    <figure style="width:600px">
+      <img src="img/sleep.png" alt="睡眠・時計回路のバースト時の動員度を、ランダムな細胞タイプ中のパーセンタイルで表示。仮定ごとにばらつき、一貫して高いものはない" style="width:600px">
+      <figcaption>0.5＝ランダムな中枢の細胞タイプ（同数、500 回）と同程度</figcaption>
+    </figure>
+    <div class="grow stack-16">
+      <p class="t18">培養の同期バーストは「睡眠に似た状態」にたとえられる（Hinard ら 2012）。そこで、ハエのモデルのバーストが睡眠を制御する回路を特に強く巻き込むかを調べた。</p>
+      <ul class="list t18">
+        <li>対象：ER5 環状ニューロン（睡眠圧に応じた徐波）、背側扇状体 FB6・FB7、ヘリコン細胞 ExR1、時計ニューロン DN1・l-LNv、PPL1、キノコ体出力ニューロン</li>
+        <li>結果：<span class="b">仮定をまたいで一貫して多いものはない</span></li>
+      </ul>
+      <p class="note t18">ハエのモデルでは、自発的な点火から睡眠の恒常性回路への直接の経路は見えない。</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">バースト中の活動のピーク ÷ 基線を、同数のランダムな中枢の細胞タイプ 500 組と比べたパーセンタイル（中央値）。Raccuglia ら 2019; Donlea ら 2018; Hasenhuetl ら 2026。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-lit" data-toc="文献との整合">
+  <header class="hd"><p class="eyebrow">付録　文献との整合</p><h2>予測は既知の生理と合うか：支持する点と、緊張関係にある点</h2></header>
+  <div class="two" style="gap:28px">
+    <div class="card">
+      <h3 class="c-ok">支持する点</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li>アセチルコリン性の局所ニューロンは触角葉あたり約 15 個で、糸球体をまたいで興奮を広げる（Shang ら 2007; Olsen ら 2007）</li>
+        <li>互いに、また投射ニューロンと相互の興奮性結合をもつ（Huang ら 2010）</li>
+        <li>類推：哺乳類では一次嗅覚皮質（梨状皮質の area tempestas）が最もけいれんを起こしやすい（Piredda &amp; Gale 1985; Löscher &amp; Ebert 1996; Galovic ら 2019）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="c-cv">緊張関係にある点</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li>触角葉を脱抑制（ピクロトキシン＋CGP54626）すると匂い応答は強まるが、自発的な暴走は報告されていない（Shang ら 2007; Olsen &amp; Wilson 2008）→ 本物の触角葉は暴走からかなり離れている</li>
+        <li>lLN1_bc と、生理学で調べられた興奮性局所ニューロンの対応は不確か。krasavietz 系統の局所ニューロンの多くは GABA 作動性（Seki ら 2010）</li>
+        <li>投射ニューロンへの興奮は主に電気的結合（Yaksi &amp; Wilson 2010）。生体のこの細胞は常に自発的な抑制を受け、安静時の投射ニューロンの活動は主に受容細胞由来（Kazama &amp; Wilson 2009）</li>
+        <li>→ 予測は「標準的な脱抑制を超えて興奮性が上がったとき」に関するもの。モデルも較正値の約 2 倍で初めて頻繁にバーストする</li>
+      </ul>
+    </div>
+  </div>
+  <p class="t16 muted" style="margin-top:14px">先行研究との違い：Li ら 2026（発火率モデルで、暴走を止める抑制性ハブ）、Pospisil ら 2024（線形モデルの固有モード）、Huang ら 2019（光顕の配線図で短期抑圧が安定化）。「どこから始まるか」は扱われていない。</p>
+  <footer class="ft"><span class="src">出典：notes/literature.md、論文草稿 Discussion。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-exp" data-toc="培養での検証実験の案">
+  <header class="hd"><p class="eyebrow">付録　検証実験の案</p><h2>自分の培養系（ChR2 ＋ HD-MEA）で「主モード → 点火」を確かめる</h2></header>
+  <div class="steps" style="grid-template-columns: 1fr 28px 1fr 28px 1fr;">
+    <div class="step">
+      <span class="n">1</span>
+      <h3>1 日目：予測</h3>
+      <p class="t16">自発活動を記録し、バースト間の数分の活動から結合の主モードを計算。主モードの重みが大きい区画を「予測点」、重みは小さいが発火率は同程度の区画を「対照点」に選ぶ</p>
+    </div>
+    <div class="chev">▶</div>
+    <div class="step">
+      <span class="n">2</span>
+      <h3>2 日目：自発の点火</h3>
+      <p class="t16">刺激前に自発活動を記録し、翌日のホットスポットが予測点と一致するかを見る（観察だけの検証）</p>
+    </div>
+    <div class="chev">▶</div>
+    <div class="step hubs">
+      <span class="n">3</span>
+      <h3>2 日目：光で点火</h3>
+      <p class="t16">予測点と対照点を交互にパターン光刺激し、バーストを起こす確率と潜時を比べる（因果の検証）</p>
+    </div>
+  </div>
+  <div class="two" style="margin-top:24px;gap:28px">
+    <ul class="list t16">
+      <li>予測：予測点の方が、弱い光でバーストを起こしやすく、潜時が短い</li>
+      <li>対照：発火率をそろえる（場所の単位では発火率が予測しないことの直接の検証）。刺激しない同じ長さの記録で <i>m</i> の自然な変化も測る（<a class="xref" href="#a-drift">付録 8</a>）</li>
+    </ul>
+    <ul class="list t16">
+      <li>注意：主モードの効果は中程度（<i>ρ</i> = 0.25）で、場所の単位に限られる。区画の大きさと試行数は、公開データの効果量から事前に決める</li>
+      <li>記録電極の配置を 2 日間そろえる（公開データでは配置の違いが交絡）</li>
+    </ul>
+  </div>
+  <footer class="ft"><span class="src">論文草稿の予測 (4) を具体化した案。数値の目標値はまだ決めていない。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-say" data-toc="言えること・言えないこと">
+  <header class="hd"><p class="eyebrow">付録　限界と注意点</p><h2>この研究で言えること、言えないこと</h2></header>
+  <div class="two">
+    <div class="card">
+      <h3>言えること</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li>HD-MEA の培養では、点火のホットスポットは日をまたいで戻り、場所の単位ではバースト間の結合の主モードが発火率より点火と対応する（中程度の効果）</li>
+        <li>培養は <i>m</i> ≈ 0.99 で、発達とともに 1 から離れ、30 分の使用で上がらない</li>
+        <li>ハエの全脳モデルは較正値ではほぼバーストせず、頻繁なバーストには約 2 倍のゲインが要る</li>
+        <li>どの仮定でも、興奮性配線の主モードは左右の触角葉ループに集まり、lLN1_bc は脳で最もよく自発発火する細胞の一つ</li>
+        <li>4 つの仮定すべてで、アセチルコリン性局所ニューロン 111 個を黙らせるとバーストが 0.25〜0.47 倍になり、出力シナプス数をそろえた対照より強い</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>言えないこと・残る課題</h3>
+      <ul class="list t16" style="margin-top:6px">
+        <li>生体のハエでこの細胞が自発活動のハブであること（モデルの予測にとどまる）</li>
+        <li>ハブが lLN1_bc という 1 つの細胞タイプであること（駆動の大きい投射ニューロンを黙らせても強く減る → ハブはループ全体）</li>
+        <li>lLN1_bc が「先に発火」すること（文献と矛盾する MC だけ）</li>
+        <li>本物のハエの触角葉のゆらぎが、この細胞によるのか、感覚入力や領域の大きさによるのか</li>
+        <li>電気シナプスを入れたときの因果的な重み</li>
+        <li>培養とハエに共通の「法則」があること（対応は定性的）</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">本研究は 1 日で行った計算研究。すべて公開データに基づく。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-glossary" data-toc="用語集">
+  <header class="hd"><p class="eyebrow">付録　用語集</p><h2>用語の説明</h2></header>
+  <div class="two" style="gap:36px">
+    <dl class="gloss">
+      <dt>ネットワークバースト</dt><dd>多くのニューロンが数十〜数百 ms 一斉に発火する現象</dd>
+      <dt>点火点・ホットスポット</dt><dd>バーストが始まる場所。繰り返し点火する場所がホットスポット</dd>
+      <dt>HD-MEA</dt><dd>高密度微小電極アレイ。MaxOne は 26,400 電極</dd>
+      <dt>分岐比 <i>m</i></dt><dd>1 スパイクが次に生むスパイク数の平均。1 が臨界</dd>
+      <dt>臨界</dt><dd>活動が消えも暴走もしない境目</dd>
+      <dt>機能的結合</dt><dd>電極（ニューロン）どうしの活動の相関</dd>
+      <dt>結合の主モード</dt><dd>機能的結合の行列の主固有ベクトル。協調したゆらぎが集まるパターン</dd>
+      <dt>ペロン固有ベクトル</dt><dd>興奮性の配線行列の主固有ベクトル。興奮を強めると最初に育つパターン</dd>
+      <dt>ChR2</dt><dd>チャネルロドプシン 2。光で神経を興奮させる</dd>
+    </dl>
+    <dl class="gloss">
+      <dt>コネクトーム・FlyWire</dt><dd>脳の全配線図。FlyWire はハエ成虫の全脳（v783）</dd>
+      <dt>LIF モデル</dt><dd>漏れ積分発火モデル。膜電位がしきい値を越えると発火</dd>
+      <dt>ゲイン <i>g</i></dt><dd>全シナプスの強さの倍率。<i>g</i> = 1 が行動で較正した値</dd>
+      <dt>短期シナプス抑圧</dt><dd>続けて使うと一時的に伝わりにくくなる性質</dd>
+      <dt>触角葉</dt><dd>匂いの情報を最初に処理する脳領域（哺乳類の嗅球に相当）</dd>
+      <dt>局所・投射ニューロン</dt><dd>触角葉の中だけで結合する細胞／高次の中枢へ送る細胞</dd>
+      <dt>lLN1_bc</dt><dd>アセチルコリン作動性の触角葉局所ニューロンの細胞タイプ（左 14・右 16 個）</dd>
+      <dt>ケニヨン細胞</dt><dd>学習の中枢キノコ体の主要な細胞（約 5,000 個）</dd>
+      <dt>ラグ 1 の自己相関</dt><dd>隣り合う時点の信号の相関。高いほどゆっくり変わる</dd>
+    </dl>
+  </div>
+  <footer class="ft"><span class="src">MC・LC・CV・NM＝伝達物質の 4 つの仮定（最小補正・文献整合の最小補正・細胞タイプ多数決・モノアミンの速い作用なし）。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-refs1" data-toc="参考文献（1）">
+  <header class="hd"><p class="eyebrow">付録　参考文献</p><h2>参考文献（1）培養・臨界・データ</h2></header>
+  <ol class="refs">
+    <li>Nakamuta, A. <i>et al.</i> High-density MEA recordings of spontaneous activity in developing rat cortical cultures. DANDI Archive https://doi.org/10.48324/dandi.002020/0.261004.1410 (2026).</li>
+    <li>Nakamuta, A. <i>et al.</i> Self-organization of high-dimensional geometry of neural activity in culture. Preprint at bioRxiv https://doi.org/10.1101/2025.01.14.630383 (2025).</li>
+    <li>Wagenaar, D. A., Pine, J. &amp; Potter, S. M. An extremely rich repertoire of bursting patterns during the development of cortical cultures. <i>BMC Neurosci.</i> <b>7</b>, 11 (2006).</li>
+    <li>Müller, J. <i>et al.</i> High-resolution CMOS MEA platform to study neurons at subcellular, cellular, and network levels. <i>Lab Chip</i> <b>15</b>, 2767–2780 (2015).</li>
+    <li>Eytan, D. &amp; Marom, S. Dynamics and effective topology underlying synchronization in networks of cortical neurons. <i>J. Neurosci.</i> <b>26</b>, 8465–8476 (2006).</li>
+    <li>Eckmann, J.-P. <i>et al.</i> Leader neurons in population bursts of 2D living neural networks. <i>New J. Phys.</i> <b>10</b>, 015011 (2008).</li>
+    <li>Orlandi, J. G. <i>et al.</i> Noise focusing and the emergence of coherent activity in neuronal cultures. <i>Nat. Phys.</i> <b>9</b>, 582–590 (2013).</li>
+    <li>Lonardoni, D. <i>et al.</i> Recurrently connected and localized neuronal communities initiate coordinated spontaneous activity in neuronal networks. <i>PLoS Comput. Biol.</i> <b>13</b>, e1005672 (2017).</li>
+    <li>Okujeni, S., Kandler, S. &amp; Egert, U. Mesoscale architecture shapes initiation and richness of spontaneous network activity. <i>J. Neurosci.</i> <b>37</b>, 3972–3987 (2017).</li>
+    <li>Beggs, J. M. &amp; Plenz, D. Neuronal avalanches in neocortical circuits. <i>J. Neurosci.</i> <b>23</b>, 11167–11177 (2003).</li>
+    <li>Pasquale, V. <i>et al.</i> Self-organization and neuronal avalanches in networks of dissociated cortical neurons. <i>Neuroscience</i> <b>153</b>, 1354–1369 (2008).</li>
+    <li>Wilting, J. &amp; Priesemann, V. Inferring collective dynamical states from widely unobserved systems. <i>Nat. Commun.</i> <b>9</b>, 2325 (2018).</li>
+    <li>Zierenberg, J., Wilting, J. &amp; Priesemann, V. Homeostatic plasticity and external input shape neural network dynamics. <i>Phys. Rev. X</i> <b>8</b>, 031018 (2018).</li>
+    <li>Hinard, V. <i>et al.</i> Key electrophysiological, molecular, and metabolic signatures of sleep and wakefulness revealed in primary cortical cultures. <i>J. Neurosci.</i> <b>32</b>, 12506–12517 (2012).</li>
+  </ol>
+  <footer class="ft"><span class="src">論文草稿 paper/paper_en.html の文献リストから抜粋。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-refs2" data-toc="参考文献（2）">
+  <header class="hd"><p class="eyebrow">付録　参考文献</p><h2>参考文献（2）モデル・ハエ・嗅覚・睡眠</h2></header>
+  <ol class="refs" start="15">
+    <li>Tsodyks, M. V. &amp; Markram, H. The neural code between neocortical pyramidal neurons depends on neurotransmitter release probability. <i>Proc. Natl Acad. Sci. USA</i> <b>94</b>, 719–723 (1997).</li>
+    <li>Dorkenwald, S. <i>et al.</i> Neuronal wiring diagram of an adult brain. <i>Nature</i> <b>634</b>, 124–138 (2024).</li>
+    <li>Schlegel, P. <i>et al.</i> Whole-brain annotation and multi-connectome cell typing of <i>Drosophila</i>. <i>Nature</i> <b>634</b>, 139–152 (2024).</li>
+    <li>Shiu, P. K. <i>et al.</i> A <i>Drosophila</i> computational brain model reveals sensorimotor processing. <i>Nature</i> <b>634</b>, 210–219 (2024).</li>
+    <li>Eckstein, N. <i>et al.</i> Neurotransmitter classification from electron microscopy images at synaptic sites in <i>Drosophila melanogaster</i>. <i>Cell</i> <b>187</b>, 2574–2594 (2024).</li>
+    <li>Pospisil, D. A. <i>et al.</i> The fly connectome reveals a path to the effectome. <i>Nature</i> <b>634</b>, 201–209 (2024).</li>
+    <li>Li, Q., Ping, W., Zhang, K. &amp; Wang, C. Connectome-constrained modeling identifies neurons and synapses that sustain spontaneous activity in <i>Drosophila</i>. Preprint at bioRxiv (2026).</li>
+    <li>Turner, M. H., Mann, K. &amp; Clandinin, T. R. The connectome predicts resting-state functional connectivity across the <i>Drosophila</i> brain. <i>Curr. Biol.</i> <b>31</b>, 2386–2394 (2021).</li>
+    <li>Shang, Y. <i>et al.</i> Excitatory local circuits and their implications for olfactory processing in the fly antennal lobe. <i>Cell</i> <b>128</b>, 601–612 (2007).</li>
+    <li>Huang, J. <i>et al.</i> Functional connectivity and selective odor responses of excitatory local interneurons in <i>Drosophila</i> antennal lobe. <i>Neuron</i> <b>67</b>, 1021–1033 (2010).</li>
+    <li>Seki, Y. <i>et al.</i> Physiological and morphological characterization of local interneurons in the <i>Drosophila</i> antennal lobe. <i>J. Neurophysiol.</i> <b>104</b>, 1007–1019 (2010).</li>
+    <li>Yaksi, E. &amp; Wilson, R. I. Electrical coupling between olfactory glomeruli. <i>Neuron</i> <b>67</b>, 1034–1047 (2010).</li>
+    <li>Olsen, S. R. &amp; Wilson, R. I. Lateral presynaptic inhibition mediates gain control in an olfactory circuit. <i>Nature</i> <b>452</b>, 956–960 (2008).</li>
+    <li>Kazama, H. &amp; Wilson, R. I. Origins of correlated activity in an olfactory circuit. <i>Nat. Neurosci.</i> <b>12</b>, 1136–1144 (2009).</li>
+    <li>Piredda, S. &amp; Gale, K. A crucial epileptogenic site in the deep prepiriform cortex. <i>Nature</i> <b>317</b>, 623–625 (1985).</li>
+    <li>Raccuglia, D. <i>et al.</i> Network-specific synchronization of electrical slow-wave oscillations regulates sleep drive in <i>Drosophila</i>. <i>Curr. Biol.</i> <b>29</b>, 3611–3621 (2019).</li>
+    <li>Bushey, D., Tononi, G. &amp; Cirelli, C. Sleep and synaptic homeostasis: structural evidence in <i>Drosophila</i>. <i>Science</i> <b>332</b>, 1576–1581 (2011).</li>
+    <li>Tononi, G. &amp; Cirelli, C. Sleep and the price of plasticity. <i>Neuron</i> <b>81</b>, 12–34 (2014).</li>
+  </ol>
+  <footer class="ft"><span class="src">ほかに Olsen ら 2007; Löscher &amp; Ebert 1996; Galovic ら 2019; Donlea ら 2018; Hasenhuetl ら 2026; Stimberg ら 2019（Brian 2）。全リストは論文草稿を参照。</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide appx" id="a-credits" data-toc="クレジット">
+  <header class="hd"><p class="eyebrow">付録　クレジット</p><h2>データ・コード・デザインの出典とライセンス</h2></header>
+  <div class="two">
+    <ul class="list t18">
+      <li>培養データ：DANDI 002020（Nakamuta ら）、Wagenaar, Pine &amp; Potter 2006（Potter 研究室の公開データ）</li>
+      <li>配線図と注釈：FlyWire Consortium（v783、Dorkenwald ら 2024; Schlegel ら 2024）</li>
+      <li>全脳モデル：Shiu ら 2024（Brian 2 版を検証に使用）</li>
+      <li>安静時イメージング：Turner, Mann &amp; Clandinin 2021</li>
+      <li>コード・中間結果・図の作成スクリプト：GitHub リポジトリ fly_culture_spontaneous</li>
+      <li>解析・シミュレーション・草稿の作成には AI システム（Claude, Anthropic）の支援を受けた。内容の責任は著者にある</li>
+    </ul>
+    <div class="card gray">
+      <h3>スライドのデザイン</h3>
+      <p class="t18">デジタル庁デザインシステムのデザイントークン（色・タイポグラフィ・角丸）を使用。</p>
+      <p class="t16 muted" style="margin-top:8px">MIT License, Copyright (c) 2023 デジタル庁<br>ライセンス全文：slides/dads/LICENSE</p>
+      <p class="t16 muted" style="margin-top:8px">フォント：Noto Sans CJK JP（SIL Open Font License）</p>
+      <p class="t16 muted" style="margin-top:8px">図：slides/make_charts.py で results/ から作成</p>
+    </div>
+  </div>
+  <footer class="ft"><span class="src">本スライドはデジタル庁の公式資料ではありません。</span><span class="pg"></span></footer>
+</section>
+
+</body>
+</html>
