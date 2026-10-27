@@ -2,8 +2,8 @@
 
 Two back ends, both local (the text is not sent to any web service):
 
-    python tts.py voicevox [style id]   # VOICEVOX ENGINE running at 127.0.0.1:50021
-                                        # default: 青山龍星 (low male voice), style ノーマル
+    python tts.py voicevox              # VOICEVOX ENGINE running at 127.0.0.1:50021,
+                                        # 青山龍星 (low male voice); style per line from its tone
     .venv-tts/bin/python tts.py kokoro [voice]   # Kokoro-82M (Apache-2.0, pip install kokoro "misaki[ja]")
                                                  # default: jm_kumo (male)
 
@@ -11,6 +11,9 @@ Writes one 24-kHz mono WAV per line (leading/trailing silence trimmed) and lines
 (back end, credit line for the video, durations, and for VOICEVOX the kana reading of
 every line, to check pronunciations). The narration text spells numbers and some terms
 in kana because both voices read digit strings and a few kanji words wrongly.
+Each line has a tone (compose.py): for VOICEVOX it picks the speaker's style, speed,
+intonation range and pause length (TONES); Kokoro has one style and ignores it. Every
+clip is brought to the same loudness so that quiet styles (囁き) are not lost.
 """
 from __future__ import annotations
 
@@ -31,8 +34,16 @@ SR = 24000
 KOKORO_SPEED = 1.2
 VOICEVOX = "http://127.0.0.1:50021"
 VV_SPEAKER = "青山龍星"
-VV_PARAMS = dict(speedScale=1.05, pitchScale=0.0, intonationScale=1.1, volumeScale=1.0,
-                 prePhonemeLength=0.05, postPhonemeLength=0.05)
+VV_PARAMS = dict(pitchScale=0.0, volumeScale=1.0, prePhonemeLength=0.05, postPhonemeLength=0.05)
+TONES = {  # tone: (style, speedScale, intonationScale, pauseLengthScale)
+    "normal": ("ノーマル", 1.05, 1.35, 1.0),
+    "drama": ("ノーマル", 0.95, 1.55, 1.4),      # questions and turning points: slower, wider pitch range, longer pauses
+    "hot": ("熱血", 1.05, 1.4, 1.0),
+    "calm": ("しっとり", 1.0, 1.25, 1.2),        # caveats
+    "joy": ("喜び", 1.05, 1.4, 1.0),
+    "whisper": ("囁き", 0.95, 1.2, 1.2),
+}
+TARGET_RMS = 0.08                               # loudness of the voiced parts of every clip
 
 
 def trim(a, margin=0.04):
@@ -41,6 +52,14 @@ def trim(a, margin=0.04):
         return a
     m = int(margin * SR)
     return a[max(0, loud[0] - m): loud[-1] + m]
+
+
+def level(a):
+    fr = a[: len(a) // 480 * 480].reshape(-1, 480)
+    rms = np.sqrt((fr ** 2).mean(1))
+    voiced = rms[rms > 0.1 * rms.max()]
+    a = a * (TARGET_RMS / np.sqrt((voiced ** 2).mean()))
+    return a * min(1.0, 0.98 / np.abs(a).max())
 
 
 def write_wav(path, a):
@@ -60,21 +79,20 @@ def vv(path, params=None, body=None):
 
 
 def voicevox_backend(args):
-    speakers = json.loads(vv("/speakers"))
-    if args:
-        sid = int(args[0])
-        name = next(s["name"] for s in speakers for st in s["styles"] if st["id"] == sid)
-    else:
-        sp = next(s for s in speakers if s["name"] == VV_SPEAKER)
-        name, sid = sp["name"], next(st["id"] for st in sp["styles"] if st["name"] == "ノーマル")
+    sp = next(s for s in json.loads(vv("/speakers")) if s["name"] == VV_SPEAKER)
+    style = {st["name"]: st["id"] for st in sp["styles"]}
 
-    def say(text):
+    def say(text, tone):
+        name, speed, inton, pause = TONES[tone]
+        sid = style[name]
         q = json.loads(vv("/audio_query", dict(text=text, speaker=sid)))
-        q.update(VV_PARAMS, outputSamplingRate=SR, outputStereo=False)
+        q.update(VV_PARAMS, speedScale=speed, intonationScale=inton, outputSamplingRate=SR, outputStereo=False)
+        if "pauseLengthScale" in q:
+            q["pauseLengthScale"] = pause
         with wave.open(BytesIO(vv("/synthesis", dict(speaker=sid), q))) as f:
             a = np.frombuffer(f.readframes(f.getnframes()), np.int16).astype(np.float32) / 32768
-        return a, q.get("kana", "")
-    return say, dict(backend="voicevox", voice=f"{name} (style {sid})", credit=f"VOICEVOX:{name}")
+        return a, f"[{name}] " + q.get("kana", "")
+    return say, dict(backend="voicevox", voice=sp["name"], credit=f"VOICEVOX:{sp['name']}")
 
 
 def kokoro_backend(args):
@@ -83,7 +101,7 @@ def kokoro_backend(args):
     pipe = KPipeline(lang_code="j", repo_id="hexgrad/Kokoro-82M")
     gap = np.zeros(int(0.12 * SR), np.float32)
 
-    def say(text):
+    def say(text, tone):
         parts, phon = [], []
         for _, ps, audio in pipe(text, voice=voice, speed=KOKORO_SPEED):
             parts += [np.asarray(audio, np.float32), gap]
@@ -100,10 +118,10 @@ def main():
     lines = json.loads(SCRIPT.read_text(encoding="utf-8"))
     done = []
     for x in lines:
-        a, reading = say(x["text"])
-        a = trim(a)
+        a, reading = say(x["text"], x["tone"])
+        a = level(trim(a))
         write_wav(OUT / f"{x['id']}.wav", a)
-        done.append(dict(id=x["id"], text=x["text"], dur=round(len(a) / SR, 3), reading=reading))
+        done.append(dict(id=x["id"], text=x["text"], tone=x["tone"], dur=round(len(a) / SR, 3), reading=reading))
         print(f"{x['id']:<12} {len(a) / SR:5.1f} s  {reading if meta['backend'] == 'voicevox' else ''}", flush=True)
     (OUT / "lines.json").write_text(json.dumps(dict(meta, sr=SR, lines=done), ensure_ascii=False, indent=1),
                                     encoding="utf-8")
