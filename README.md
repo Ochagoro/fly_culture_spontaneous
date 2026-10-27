@@ -31,7 +31,7 @@
 | ① 論文（日本語版） | [paper/paper_ja.pdf](paper/paper_ja.pdf) |
 | ② 発表資料（10 分＋Appendix、デジタル庁デザインシステム準拠） | [slides/slides.pdf](slides/slides.pdf)、発表原稿と想定問答 [slides/script.md](slides/script.md) |
 | ③ 予備知識なしで読める解説 | [explainer/explainer.pdf](explainer/explainer.pdf)（元: [explainer/explainer.html](explainer/explainer.html)） |
-| ④ 研究動画（日本語字幕＋日本語ナレーション、5 分 40 秒。音声は VOICEVOX:青山龍星。場面ごとに熱血・しっとり・囁きなどのスタイルと抑揚を指定） | [video/fly_culture_ignition_ja.mp4](video/fly_culture_ignition_ja.mp4)、ナレーション原稿 [video/narration_ja.md](video/narration_ja.md) |
+| ④ 研究動画（日本語字幕＋日本語ナレーション、6 分 11 秒。音声は VOICEVOX:青山龍星。場面ごとに熱血・しっとり・囁きなどのスタイルと抑揚を指定し、「。」「、」ではっきり間を取る） | [video/fly_culture_ignition_ja.mp4](video/fly_culture_ignition_ja.mp4)、ナレーション原稿 [video/narration_ja.md](video/narration_ja.md) |
 | 図（Nature 形式、PDF/SVG/PNG） | [figures/](figures/) |
 | 数値のまとめ・文献メモ | [notes/results_summary.md](notes/results_summary.md)、[notes/culture_results.md](notes/culture_results.md)、[notes/literature.md](notes/literature.md) |
 

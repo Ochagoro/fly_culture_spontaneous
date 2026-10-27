@@ -14,10 +14,13 @@ in kana because both voices read digit strings and a few kanji words wrongly.
 Each line has a tone (compose.py): for VOICEVOX it picks the speaker's style, speed,
 intonation range and pause length (TONES); Kokoro has one style and ignores it. Every
 clip is brought to the same loudness so that quiet styles (囁き) are not lost.
+Lines are synthesised sentence by sentence and joined with a clear silence (SENT_GAP):
+VOICEVOX otherwise pauses at 。 no longer than at 、 and the narration runs on.
 """
 from __future__ import annotations
 
 import json
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -35,14 +38,15 @@ KOKORO_SPEED = 1.2
 VOICEVOX = "http://127.0.0.1:50021"
 VV_SPEAKER = "青山龍星"
 VV_PARAMS = dict(pitchScale=0.0, volumeScale=1.0, prePhonemeLength=0.05, postPhonemeLength=0.05)
-TONES = {  # tone: (style, speedScale, intonationScale, pauseLengthScale)
-    "normal": ("ノーマル", 1.05, 1.35, 1.0),
-    "drama": ("ノーマル", 0.95, 1.55, 1.4),      # questions and turning points: slower, wider pitch range, longer pauses
-    "hot": ("熱血", 1.05, 1.4, 1.0),
-    "calm": ("しっとり", 1.0, 1.25, 1.2),        # caveats
-    "joy": ("喜び", 1.05, 1.4, 1.0),
-    "whisper": ("囁き", 0.95, 1.2, 1.2),
+TONES = {  # tone: (style, speedScale, intonationScale, pauseLengthScale at 、)
+    "normal": ("ノーマル", 1.05, 1.35, 1.3),
+    "drama": ("ノーマル", 0.95, 1.55, 1.6),      # questions and turning points: slower, wider pitch range, longer pauses
+    "hot": ("熱血", 1.05, 1.4, 1.2),
+    "calm": ("しっとり", 1.0, 1.25, 1.4),        # caveats
+    "joy": ("喜び", 1.05, 1.4, 1.3),
+    "whisper": ("囁き", 0.95, 1.2, 1.4),
 }
+SENT_GAP = {"normal": 0.6, "drama": 0.85, "hot": 0.5, "calm": 0.7, "joy": 0.55, "whisper": 0.7}  # s after 。！？
 TARGET_RMS = 0.08                               # loudness of the voiced parts of every clip
 
 
@@ -52,6 +56,10 @@ def trim(a, margin=0.04):
         return a
     m = int(margin * SR)
     return a[max(0, loud[0] - m): loud[-1] + m]
+
+
+def sentences(text):
+    return [x.strip() for x in re.split(r"(?<=[。！？])", text) if x.strip()]
 
 
 def level(a):
@@ -118,8 +126,12 @@ def main():
     lines = json.loads(SCRIPT.read_text(encoding="utf-8"))
     done = []
     for x in lines:
-        a, reading = say(x["text"], x["tone"])
-        a = level(trim(a))
+        parts, reads = [], []
+        for sent in sentences(x["text"]):
+            a, r = say(sent, x["tone"])
+            parts += [trim(a), np.zeros(int(SENT_GAP[x["tone"]] * SR), np.float32)]
+            reads.append(r)
+        a, reading = level(np.concatenate(parts[:-1])), " / ".join(reads)
         write_wav(OUT / f"{x['id']}.wav", a)
         done.append(dict(id=x["id"], text=x["text"], tone=x["tone"], dur=round(len(a) / SR, 3), reading=reading))
         print(f"{x['id']:<12} {len(a) / SR:5.1f} s  {reading if meta['backend'] == 'voicevox' else ''}", flush=True)
