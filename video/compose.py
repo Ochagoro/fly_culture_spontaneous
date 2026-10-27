@@ -1,19 +1,26 @@
 """Compose the research video "自発的な『点火』はどこから始まるか — 培養神経とハエの脳".
 
-1280x720, 30 fps, Japanese captions drawn with PIL, H.264 via imageio-ffmpeg.
+1280x720, 30 fps, Japanese captions drawn with PIL, H.264 via imageio-ffmpeg,
+Japanese narration (AAC) synthesised by tts.py.
 Everything is rebuilt from the project data (results/...); nothing is cached.
 
-    python compose.py            # render video/fly_culture_ignition_ja.mp4
-    python compose.py --check    # write one check frame per segment to video/build/
+    python compose.py --narration   # write the narration script video/narration_ja.json (+ .md)
+    python tts.py voicevox          # synthesise it (or: .venv-tts/bin/python tts.py kokoro)
+    python compose.py               # render video/fly_culture_ignition_ja.mp4 (segments stretched to the voice)
+    python compose.py --check       # write one check frame per segment to video/build/
 
 Colour code: culture = blue, fly = orange, ignition = yellow/red.
 """
 from __future__ import annotations
 
+import json
+import subprocess
 import sys
+import wave
 from pathlib import Path
 
 import imageio.v2 as imageio
+import imageio_ffmpeg
 import numpy as np
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
@@ -48,6 +55,9 @@ SILENCE_TRACES = ROOT / "results/fly/video/silence_traces.npz"
 SILENCE_CONFIRM = ROOT / "results/fly/silencing_confirm.csv"
 TURNER_REGIONS = ROOT / "results/fly/turner_region_summary.csv"
 TURNER_AL = ROOT / "results/fly/turner_AL_vs_others.csv"
+NARR_JSON = HERE / "narration_ja.json"
+NARR_DIR = BUILD / "narration"                 # tts.py output: one WAV per line + lines.json
+LEAD, GAP, TAIL = 0.2, 0.25, 0.7               # s: voice start after its cue, pause before the next cue, segment end
 
 
 # ------------------------------------------------------------------ drawing
@@ -122,17 +132,54 @@ def polyline(d, xs, ys, col, width=2):
         d.line(pts, fill=col, width=width, joint="curve")
 
 
+def ja_num(n):
+    """Integer (< 10,000) in kanji for the narration: the voices read digit strings wrongly."""
+    dg = "〇一二三四五六七八九"
+    if n == 0:
+        return "ゼロ"
+    s = ""
+    for v, u in ((1000, "千"), (100, "百"), (10, "十")):
+        q, n = divmod(n, v)
+        if q:
+            s += ("" if q == 1 else dg[q]) + u
+    return s + (dg[n] if n else "")
+
+
 # --------------------------------------------------------------- segments
 class Seg:
     """A segment = number of frames + a function rendering frame i (PIL image).
-    check: time (s) or fraction (<1) of the frame written by --check; extra: more check times (s)."""
+    check: time (s) or fraction (<1) of the frame written by --check; extra: more check times (s).
+    narr: narration lines (segment time s, text[, hold]) spoken from that time on (see retime)."""
 
-    def __init__(self, name, sec, fn, fade=8, check=0.6, extra=()):
+    def __init__(self, name, sec, fn, fade=8, check=0.6, extra=(), narr=()):
         self.name, self.n, self.fn, self.fade, self.check = name, int(round(sec * FPS)), fn, fade, check
         self.extra = extra
+        self.narr = [tuple(x) + ("end",) * (3 - len(x)) for x in narr]
+        self.src_n, self.map, self.voice = self.n, None, []
+        self._last = (None, None)
+
+    def retime(self, durs):
+        """Stretch the segment so that every narration line (durs: seconds) ends before the next cue.
+        Where the voice outlasts the original interval, the last frame before the next cue is held
+        (hold='start': the cue frame is held first, then the interval plays). self.voice = voice
+        start times (s) in the stretched segment."""
+        self.voice = []
+        if not self.narr:
+            return
+        cues = [int(round(t * FPS)) for t, _, _ in self.narr]
+        out = list(range(cues[0]))
+        for k, ((_, _, hold), a, b) in enumerate(zip(self.narr, cues, cues[1:] + [self.src_n])):
+            need = int(np.ceil((LEAD + durs[k] + (TAIL if k == len(cues) - 1 else GAP)) * FPS))
+            src, pad = list(range(a, b)), max(0, need - (b - a))
+            self.voice.append(len(out) / FPS + LEAD)
+            out += [a] * pad + src if hold == "start" else src + [b - 1] * pad
+        self.map, self.n = out, len(out)
 
     def frame(self, i):
-        arr = np.asarray(self.fn(i, i / FPS)).astype(np.float32)
+        j = self.map[i] if self.map is not None else i
+        if self._last[0] != j:                       # held frames are rendered once
+            self._last = (j, np.asarray(self.fn(j, j / FPS)).astype(np.float32))
+        arr = self._last[1]
         a = min(1.0, (i + 1) / self.fade, (self.n - i) / self.fade) if self.fade else 1.0
         if a < 1:
             arr = arr * a + np.array(BG, np.float32) * (1 - a)
@@ -292,7 +339,9 @@ def seg_title():
         if t > 1.6:
             text(d, (W // 2, 560), "2 つの神経ネットワークに、同じ問題を出してみました", 30, True, INK, anchor="mm")
         return im
-    return Seg("title", 5.0, fn, check=3.5)
+    narr = [(0.0, "自発的な点火は、どこから始まるのか。培養した神経細胞とハエの脳、"
+                  "ふたつの神経ネットワークに同じ問題を出してみました。")]
+    return Seg("title", 5.0, fn, check=3.5, narr=narr)
 
 
 # ====================================================================== 2 intro
@@ -340,11 +389,15 @@ def seg_intro():
                     text(d, (x0 + 165, 550), q, 22, True, YELLOW, anchor="mm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("intro", 10.0, fn, check=8.5)
+    narr = [(0.0, "神経細胞は、外からなにも入力がなくても勝手に発火します。自発活動です。"),
+            (3.4, "お皿で育てた神経細胞では、ときどきネットワーク全体がいっせいに発火します。これがバーストです。"),
+            (6.8, "その火は、どこで点くのでしょうか。なにがその場所を決め、"
+                  "暴走までは、あとどれくらいなのでしょうか。")]
+    return Seg("intro", 10.0, fn, check=8.5, narr=narr)
 
 
 # ================================================================ round cards
-def seg_round(num, who, col, question, sec=3.0):
+def seg_round(num, who, col, question, sec=3.0, said=""):
     def fn(i, t):
         im, d = blank()
         p = smoothstep(t / 0.5)
@@ -353,7 +406,7 @@ def seg_round(num, who, col, question, sec=3.0):
         if t > 0.6:
             text(d, (W // 2, 430), question, 32, True, INK2, anchor="mm")
         return im
-    return Seg(f"round{num}", sec, fn, check=1.5)
+    return Seg(f"round{num}", sec, fn, check=1.5, narr=[(0.0, said)] if said else ())
 
 
 # ============================================================ 3a chip animation
@@ -416,7 +469,13 @@ def seg_chip():
         text(d, (X0, Y0 + cv.h + 20), "1 点 = 1 つの電極（活動している 797 個）", 20, False, INK2, anchor="lm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("chip", sec, fn, check=2.6, extra=(5.2, 6.2, 8.9, 10.6))
+    narr = [(0.0, "電極チップの上で育てた、ラットの神経細胞です。"
+                  "光る点は、その場所での発火を表します。"),
+            (starts[1], "まず、この一か所が強く光ります。点火です。"),
+            (starts[3], "そこから火は、まわりへ燃え広がります。"),
+            (starts[5], "そして、しばらく静かになります。"),
+            (starts[6], "ところが次のバーストも、まったく同じ場所から点火しました。")]
+    return Seg("chip", sec, fn, check=2.6, extra=(5.2, 6.2, 8.9, 10.6), narr=narr)
 
 
 # ============================================================== 3b day maps
@@ -471,7 +530,10 @@ def seg_maps():
                  22, True, INK, anchor="mm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("maps", 10.5, fn, check=6.0)
+    narr = [(0.0, "同じ培養を何日も記録して、点火した場所を地図にしてみます。"),
+            (3.6, "すると、同じホットスポットが日をまたいで何度も現れました。七つの培養すべてで同じ傾向です。"),
+            (7.2, "別の場所になる日もありますが、また戻ってきます。")]
+    return Seg("maps", 10.5, fn, check=6.0, narr=narr)
 
 
 # ======================================================= 3c predictor + m gauge
@@ -530,7 +592,11 @@ def seg_predict():
             text(d, (955, 500), "1 を超えると、発火がねずみ算式に増える", 20, False, INK2, anchor="mm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("predict", 10.0, fn, check=8.5)
+    narr = [(0.0, "点火の場所を言い当てたのは、なにか。それは、よく発火する場所ではありませんでした。"),
+            (3.0, "手がかりは、バーストの合間にありました。いっしょに発火しやすい細胞のまとまり、"
+                  "その最も強いパターンが、点火の場所をある程度予測していたのです。"),
+            (6.6, "そしてこのネットワークは、暴走のほんの一歩手前にいました。分岐比はおよそ、れいてんきゅうきゅうです。")]
+    return Seg("predict", 10.0, fn, check=8.5, narr=narr)
 
 
 # ========================================================== 4a fly model setup
@@ -550,7 +616,10 @@ def seg_fly_setup():
         im.paste(Image.fromarray(cv.frame(f.intensity(T, tau=10.0))), (X0, Y0))
         caption(d, cap_at(t, caps))
         return im
-    return Seg("fly_setup", 6.4, fn, check=4.5)
+    narr = [(0.0, "ハエの脳の全配線図をもとに、およそ十四万個のニューロンからなる脳を、"
+                  "まるごとコンピューターの中で動かします。"),
+            (3.2, "条件は培養と同じ。弱いランダムなノイズと、使うと疲れるシナプス。入力はそれだけです。")]
+    return Seg("fly_setup", 6.4, fn, check=4.5, narr=narr)
 
 
 # ====================================================== 4b gain comparison
@@ -588,12 +657,14 @@ def seg_gain():
             text(d, (1220, y0 + 92), "バースト", 18, False, INK2, anchor="rm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("gain", 9.0, fn, check=8.0)
+    narr = [(0.0, "シナプスがふつうの強さだと、ハエの脳はバーストを起こしません。"),
+            (4.4, "ところがシナプスを二倍に強めると、バーストが起こり始め、強めるほど増えていきます。")]
+    return Seg("gain", 9.0, fn, check=8.0, narr=narr)
 
 
 # ================================================= 4c slow motion of a burst
 def seg_slowmo(burst_ms, rel0, rel1, freeze_rel, caps, name, freeze_sec=3.5, ms_per_s=30.0, badge_note="",
-               note=None, tail=0.8):
+               note=None, tail=0.8, narr=None):
     f = fly()
     cv = brain_canvas(860, 400)
     X0, Y0 = 30, 104
@@ -652,7 +723,7 @@ def seg_slowmo(burst_ms, rel0, rel1, freeze_rel, caps, name, freeze_sec=3.5, ms_
         text(d, (TX0 + 4 + (TX1 - TX0 - 8) * (0 - rel0) / (rel1 - rel0), 536), "開始", 16, True, RED, anchor="mm")
         caption(d, cap_at(t, caps(play1, freeze_sec)), note=note(play1, t) if note else None)
         return im
-    return Seg(name, sec, fn, check=None), (play1 + 1.0) / sec
+    return Seg(name, sec, fn, check=None, narr=narr(play1, freeze_sec) if narr else ()), (play1 + 1.0) / sec
 
 
 def seg_slow1():
@@ -660,7 +731,11 @@ def seg_slow1():
                            (p1 - 1.2, "最初に光るのは、触角葉（においの中枢）"),
                            (p1 + 0.3, "左右の触角葉にいる、ごく少数の細胞が\n先に発火していました"),
                            (p1 + fz + 0.2, "そこから脳全体へ燃え広がります")]
-    seg, chk = seg_slowmo(5587, -95, 40, -18, caps, "slowmo1")
+    narr = lambda p1, fz: [(0.0, "バースト直前の、れいてんいち秒間を、ゆっくり再生してみましょう。", "start"),
+                           (p1 - 1.2, "最初に光るのは、においの中枢、しょっかくようです。"),
+                           (p1 + 0.3, "左右のしょっかくようにいる、ごく少数の細胞が、脳全体より先に発火していました。"),
+                           (p1 + fz + 0.2, "そこから火は、脳全体へ燃え広がります。")]
+    seg, chk = seg_slowmo(5587, -95, 40, -18, caps, "slowmo1", narr=narr)
     seg.check = chk
     return seg
 
@@ -672,7 +747,12 @@ def seg_slow2():
     note_txt = ("※伝達物質の仮定の 1 つ（最小補正）での結果。文献と矛盾しない他の 3 つの仮定では、\n"
                 "この細胞は常に発火し続けて脳を駆動し、バーストは視覚系から始まります")
     note = lambda p1, t: note_txt if t >= p1 - 0.6 else None
-    seg, chk = seg_slowmo(7012, -80, 30, -40, caps, "slowmo2", freeze_sec=2.0, note=note, tail=3.0)
+    narr = lambda p1, fz: [(0.0, "別のバーストでも見てみましょう。", "start"),
+                           (p1 - 0.6, "やはり、しょっかくようの同じ細胞たちから点火しています。"),
+                           (p1 + fz + 0.2, "ただし、これは神経伝達物質の仮定のひとつでの結果です。"
+                                           "文献と矛盾しないほかの三つの仮定では、この細胞たちは常に発火して脳を駆動し、"
+                                           "バーストは視覚系から始まります。")]
+    seg, chk = seg_slowmo(7012, -80, 30, -40, caps, "slowmo2", freeze_sec=2.0, note=note, tail=3.0, narr=narr)
     seg.check = chk
     return seg
 
@@ -716,7 +796,10 @@ def seg_lead():
             text(d, (955, 510), "脳の 0.02%（30 / 138,639 個）", 24, True, INK, anchor="mm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("lead", 8.5, fn, check=7.5)
+    narr = [(0.0, "二十九回のバーストで、この細胞たちは脳全体より、三十から四十五ミリ秒早く発火が高まっていました。"),
+            (4.2, "さらに、配線図だけから計算した最も強い興奮性のループ、先頭モードも、"
+                  "この細胞たちを含む、しょっかくようのループに集中していました。")]
+    return Seg("lead", 8.5, fn, check=7.5, narr=narr)
 
 
 # ============================================================ 5 silencing
@@ -760,6 +843,20 @@ def seg_silence():
     caps += [(t_tr, "くり返し確かめると：30 個（脳の 0.02%）を黙らせると\nバーストは約 3 分の 1 に（結合 2 倍のとき）"),
              (t_tr + 5.0, "ランダムな 30 個を黙らせても、ほとんど減りません"),
              (t_conf, "")]
+    narr = []
+    if traces is not None:
+        a, b, c = (len(x) for x in tr_on)
+        narr += [(0.0, "点火役の三十個だけを、発火できないようにしてみます。"),
+                 (4.0, f"この例では、バーストは{ja_num(a)}回から{ja_num(b)}回に。"
+                       f"ランダムな三十個では{ja_num(c)}回でしたが、これは一回だけの例です。")]
+    narr += [(t_tr, "くり返し確かめると、脳のわずか、れいてんれいにパーセント、三十個を黙らせるだけで、"
+                    "バーストはおよそ三分の一になりました。シナプスを二倍にしたときです。"),
+             (t_tr + 5.0, "ランダムな三十個を黙らせても、ほとんど減りません。"),
+             (t_conf, "四通りの伝達物質の仮定でも確かめました。しょっかくようのアセチルコリン性局所ニューロン、"
+                      "百十一個を黙らせると、バーストは、れいてんにーご倍から、れいてんよんなな倍に減り、"
+                      "シナプス数をそろえた別の細胞より強く効きました。ただし、同じループの投射ニューロンなど、"
+                      "最も強く駆動する細胞を黙らせると、さらに減ります。鍵は一種類の細胞ではなく、"
+                      "しょっかくようの興奮性ループ全体だと考えられます。")]
 
     def draw_traces(d, t):
         lab = ["そのまま", "lLN1_bc 30 個を\n黙らせる", "ランダムな 30 個\nを黙らせる"]
@@ -822,7 +919,8 @@ def seg_silence():
                 d.line([gx - 10, base_y, gx + 470, base_y], fill=GREY, width=2)
         caption(d, cap_at(t, caps))
         return im
-    return Seg("silence", sec, fn, check=t_tr + 8.5, extra=((6.5,) if traces is not None else ()) + (t_conf + 6.0,))
+    return Seg("silence", sec, fn, check=t_tr + 8.5, extra=((6.5,) if traces is not None else ()) + (t_conf + 6.0,),
+               narr=narr)
 
 
 # ============================================================ 6 real flies
@@ -882,7 +980,15 @@ def seg_real():
             text(d, (1035, 175), f"{n_hi} / {n_fl} 匹", 30, True, ORANGE, anchor="mm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("real", 15.6, fn, check=10.5, extra=(14.5,))
+    rank = {s: int(reg.index[reg.region == f"AL_{s}"][0]) + 1 for s in "RL"}
+    place = lambda r: "いちばん" if r == 1 else f"{ja_num(r)}番目"
+    narr = [(0.0, "本物のハエ二十匹の、なにもしていないときの脳活動です。カルシウムイメージングで記録されました。"),
+            (3.8, f"七十四の脳領域のうち、しょっかくようのゆらぎは最もゆっくりな部類でした。"
+                  f"右は{place(rank['R'])}、左は{place(rank['L'])}です。"),
+            (8.0, f"{ja_num(n_fl)}匹中{ja_num(n_hi)}匹で、しょっかくようは、ほかの領域よりゆっくりゆらいでいました。"),
+            (11.6, "強い自己増幅ループがあると、活動はゆっくりゆらぎます。"
+                   "モデルの予測と合う手がかりですが、まだ証明ではありません。")]
+    return Seg("real", 15.6, fn, check=10.5, extra=(14.5,), narr=narr)
 
 
 # ================================================================ 7 summary
@@ -895,7 +1001,9 @@ def seg_verdict():
         if t > 0.8:
             text(d, (W // 2, 440), "培養神経も、ハエの脳も、同じルールで点火していました", 32, True, INK, anchor="mm")
         return im
-    return Seg("verdict", 4.0, fn, check=2.5)
+    narr = [(0.0, "判定は、引き分け。培養神経でもハエの脳のモデルでも、よく発火する場所ではなく、"
+                  "強く結びついたループが、自発活動のかなめでした。")]
+    return Seg("verdict", 4.0, fn, check=2.5, narr=narr)
 
 
 def seg_summary():
@@ -936,25 +1044,114 @@ def seg_summary():
                  18, False, INK2, anchor="mm")
         caption(d, cap_at(t, caps))
         return im
-    return Seg("summary", 12.0, fn, fade=12, check=9.0)
+    narr = [(0.0, "まとめです。"),
+            (0.8, "培養神経のバーストは、いちばんよく発火する場所ではなく、"
+                  "ネットワークで最も強く結びついたまとまりから点火していました。"),
+            (6.0, "ハエの脳では、そのかなめは、しょっかくようの興奮性ループだと予測されます。"
+                  "本物のハエでこの細胞たちを黙らせ、自発バーストが減るか。それを確かめるのが次の一歩です。")]
+    return Seg("summary", 12.0, fn, fade=12, check=9.0, narr=narr)
+
+
+def seg_credits(voice):
+    rows = [("培養神経", "DANDI 002020（Nakamuta ら, CC-BY-4.0）、Wagenaar, Pine & Potter 2006"),
+            ("ハエの脳", "FlyWire v783、Shiu ら 2024 のモデル、Turner, Mann & Clandinin 2021"),
+            ("ナレーション", voice)]
+
+    def fn(i, t):
+        im, d = blank()
+        text(d, (W // 2, 220), "使ったデータと音声", 32, True, INK2, anchor="mm")
+        for k, (a, b) in enumerate(rows):
+            if b:
+                text(d, (330, 320 + 64 * k), a, 24, True, YELLOW, anchor="rm")
+                text(d, (360, 320 + 64 * k), b, 24, False, INK, anchor="lm")
+        return im
+    return Seg("credits", 4.0, fn, fade=12, check=2.0)
 
 
 # ===================================================================== main
-def segments():
+def segments(voice=""):
     return [seg_title(), seg_intro(),
-            seg_round(1, "培養神経", BLUE, "Q. バーストは、チップのどこから点火する？"),
+            seg_round(1, "培養神経", BLUE, "Q. バーストは、チップのどこから点火する？",
+                      said="ラウンドワン、培養神経。バーストは、電極チップのどこから点火するのか。"),
             seg_chip(), seg_maps(), seg_predict(),
-            seg_round(2, "ハエの脳", ORANGE, "Q. 同じ条件のハエの脳では、どこから点火する？"),
+            seg_round(2, "ハエの脳", ORANGE, "Q. 同じ条件のハエの脳では、どこから点火する？",
+                      said="ラウンドツー、ハエの脳。同じ条件のハエの脳では、どこから点火するのか。"),
             seg_fly_setup(), seg_gain(), seg_slow1(), seg_slow2(), seg_lead(),
-            seg_round(3, "黙らせてみる", YELLOW, "Q. 点火役を消したら、バーストは減る？", 2.5),
+            seg_round(3, "黙らせてみる", YELLOW, "Q. 点火役を消したら、バーストは減る？", 2.5,
+                      said="ラウンドスリー。点火役を黙らせたら、バーストは減るのか。"),
             seg_silence(),
-            seg_round(4, "本物のハエ", ORANGE, "Q. 本物のハエの触角葉にも、その気配はある？", 2.5),
-            seg_real(), seg_verdict(), seg_summary()]
+            seg_round(4, "本物のハエ", ORANGE, "Q. 本物のハエの触角葉にも、その気配はある？", 2.5,
+                      said="ラウンドフォー。本物のハエのしょっかくようにも、その気配はあるのか。"),
+            seg_real(), seg_verdict(), seg_summary(), seg_credits(voice)]
+
+
+def narration_lines(segs):
+    return [dict(id=f"{s.name}_{k:02d}", seg=s.name, t=round(float(t), 3), hold=h, text=x)
+            for s in segs for k, (t, x, h) in enumerate(s.narr)]
+
+
+def write_narration(segs):
+    lines = narration_lines(segs)
+    NARR_JSON.write_text(json.dumps(lines, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    md = ["# 研究動画のナレーション原稿", "",
+          "`compose.py --narration` が書き出す読み上げ原稿（数字と一部の用語は、読み上げを正しくするためにかなで書いています）。", ""]
+    for s in segs:
+        if s.narr:
+            md += [f"## {s.name}", ""] + [f"- {x}" for _, x, _ in s.narr] + [""]
+    NARR_JSON.with_suffix(".md").write_text("\n".join(md), encoding="utf-8")
+    print("wrote", NARR_JSON, len(lines), "lines")
+
+
+def read_wav(path):
+    with wave.open(str(path)) as f:
+        sr = f.getframerate()
+        a = np.frombuffer(f.readframes(f.getnframes()), np.int16).astype(np.float32) / 32768
+    return a, sr
+
+
+def write_wav(path, a, sr):
+    with wave.open(str(path), "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(sr)
+        f.writeframes((np.clip(a, -1, 1) * 32767).astype(np.int16).tobytes())
+
+
+def load_voice(segs):
+    """The synthesised lines (tts.py); stops if the narration text changed after synthesis."""
+    meta = json.loads((NARR_DIR / "lines.json").read_text(encoding="utf-8"))
+    done = {x["id"]: x["text"] for x in meta["lines"]}
+    clips = {}
+    for x in narration_lines(segs):
+        if done.get(x["id"]) != x["text"]:
+            sys.exit(f"narration line {x['id']} changed: run compose.py --narration and tts.py again")
+        clips[x["id"]], sr = read_wav(NARR_DIR / f"{x['id']}.wav")
+        assert sr == meta["sr"], x["id"]
+    return clips, meta["sr"]
+
+
+def narration_track(segs, clips, sr):
+    """One mono track: every line placed at its voice start in the stretched timeline, peak -1 dBFS."""
+    n = int(round(sum(s.n for s in segs) / FPS * sr))
+    track = np.zeros(n + 10 * sr, np.float32)
+    t0 = 0.0
+    for s in segs:
+        for k, tv in enumerate(s.voice):
+            a = clips[f"{s.name}_{k:02d}"]
+            i0 = int(round((t0 + tv) * sr))
+            track[i0: i0 + len(a)] += a
+        t0 += s.n / FPS
+    return track[:n] * (0.89 / max(float(np.abs(track).max()), 1e-6))
 
 
 def main():
     BUILD.mkdir(exist_ok=True)
-    segs = segments()
+    if "--narration" in sys.argv:
+        write_narration(segments())
+        return
+    voiced = (NARR_DIR / "lines.json").exists() and "--check" not in sys.argv and "--silent" not in sys.argv
+    meta = json.loads((NARR_DIR / "lines.json").read_text(encoding="utf-8")) if voiced else {}
+    segs = segments(meta.get("credit", ""))
     if "--check" in sys.argv:
         only = [a for a in sys.argv[1:] if not a.startswith("--")]
         for k, s in enumerate(segs):
@@ -967,17 +1164,28 @@ def main():
             print(k, s.name, f"{s.n / FPS:.1f} s")
         print("total", sum(s.n for s in segs) / FPS, "s")
         return
+    if voiced:
+        clips, sr = load_voice(segs)
+        for s in segs:
+            s.retime([len(clips[f"{s.name}_{k:02d}"]) / sr for k in range(len(s.narr))])
     out = HERE / "fly_culture_ignition_ja.mp4"
-    w = imageio.get_writer(out, fps=FPS, codec="libx264", quality=8, macro_block_size=8,
+    silent = BUILD / "video_silent.mp4" if voiced else out
+    w = imageio.get_writer(silent, fps=FPS, codec="libx264", quality=8, macro_block_size=8,
                            pixelformat="yuv420p", ffmpeg_params=["-preset", "medium"])
     n = 0
     for s in segs:
         for i in range(s.n):
             w.append_data(s.frame(i))
             n += 1
-        print(s.name, f"{s.n / FPS:.1f} s", flush=True)
+        print(s.name, f"{s.src_n / FPS:.1f} -> {s.n / FPS:.1f} s", flush=True)
     w.close()
-    print("wrote", out, n / FPS, "s")
+    if voiced:
+        wav = BUILD / "narration_track.wav"
+        write_wav(wav, narration_track(segs, clips, sr), sr)
+        subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-loglevel", "error", "-i", str(silent), "-i", str(wav),
+                        "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
+                        "-shortest", "-movflags", "+faststart", str(out)], check=True)
+    print("wrote", out, n / FPS, "s", f"(narration: {meta['credit']})" if voiced else "(no narration)")
 
 
 if __name__ == "__main__":

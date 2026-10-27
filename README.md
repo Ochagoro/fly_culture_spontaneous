@@ -31,7 +31,7 @@
 | ① 論文（日本語版） | [paper/paper_ja.pdf](paper/paper_ja.pdf) |
 | ② 発表資料（10 分＋Appendix、デジタル庁デザインシステム準拠） | [slides/slides.pdf](slides/slides.pdf)、発表原稿と想定問答 [slides/script.md](slides/script.md) |
 | ③ 予備知識なしで読める解説 | [explainer/explainer.pdf](explainer/explainer.pdf)（元: [explainer/explainer.html](explainer/explainer.html)） |
-| ④ 研究動画（日本語字幕、約 2.5 分） | [video/fly_culture_ignition_ja.mp4](video/fly_culture_ignition_ja.mp4) |
+| ④ 研究動画（日本語字幕＋日本語ナレーション、5 分 19 秒。音声は Kokoro-82M の男性ボイス jm_kumo） | [video/fly_culture_ignition_ja.mp4](video/fly_culture_ignition_ja.mp4)、ナレーション原稿 [video/narration_ja.md](video/narration_ja.md) |
 | 図（Nature 形式、PDF/SVG/PNG） | [figures/](figures/) |
 | 数値のまとめ・文献メモ | [notes/results_summary.md](notes/results_summary.md)、[notes/culture_results.md](notes/culture_results.md)、[notes/literature.md](notes/literature.md) |
 
@@ -92,7 +92,7 @@ uv sync
 cd src/fly && ../../.venv/bin/python regions.py && ../../.venv/bin/python structure.py && ../../.venv/bin/python ladder.py && for v in fixAL typevote nomod; do ../../.venv/bin/python bursts.py $v 1.0 1.25 1.5 1.75 2.0 2.5; done
 ```
 
-その後、`bursts.py fixALlit …`、`ladder.py fixALlit`、`record_video.py`（例: `record_video.py fixAL 2.5`）、`record_robust.py`、`ignition.py`、`functional_eig.py`、`silence.py`、`silence_confirm.py`、`silence_matched.py`、`eln_pn_control.py`、`review_checks.py`、`analyze_bursts.py`、`turner_metrics.py`、`turner_homolog.py` を実行し、培養は `src/culture/run_sessions.py` → `summarize.py` → `extra_controls.py` → `c3_eigen.py`、図は `src/figures.py fig1 fig2 fig3 fig4 ed1 ed2 ed3 ed4` です。GPU（CUDA）が必要です。RTX 5070 Ti で全体 約 2 時間です。PDF は `src/topdf.sh 入力.html 出力.pdf`（Google Chrome のヘッドレス印刷）で作ります。
+その後、`bursts.py fixALlit …`、`ladder.py fixALlit`、`record_video.py`（例: `record_video.py fixAL 2.5`）、`record_robust.py`、`ignition.py`、`functional_eig.py`、`silence.py`、`silence_confirm.py`、`silence_matched.py`、`eln_pn_control.py`、`review_checks.py`、`analyze_bursts.py`、`turner_metrics.py`、`turner_homolog.py` を実行し、培養は `src/culture/run_sessions.py` → `summarize.py` → `extra_controls.py` → `c3_eigen.py`、図は `src/figures.py fig1 fig2 fig3 fig4 ed1 ed2 ed3 ed4` です。動画は `video/compose.py --narration`（原稿の書き出し）→ `video/tts.py`（音声合成。VOICEVOX ENGINE を 127.0.0.1:50021 で起動して `tts.py voicevox`、または別の環境 `.venv-tts` に `kokoro`、`misaki[ja]` を入れ `python -m unidic download` のあと `tts.py kokoro`）→ `video/compose.py`（声の長さに合わせて場面を延ばし、音声を AAC で多重化）です。GPU（CUDA）が必要です。RTX 5070 Ti で全体 約 2 時間です。PDF は `src/topdf.sh 入力.html 出力.pdf`（Google Chrome のヘッドレス印刷）で作ります。
 
 ## 使ったデータとコード
 
